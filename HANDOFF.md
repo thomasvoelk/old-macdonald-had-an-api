@@ -219,3 +219,11 @@ Drafted Lessons 09–11 in `curriculum/phase-3-changing-the-farm/` against `ment
 - Open: the shear reference is NOT built in `mentor/reference/`. Not checked on phone width. Thomas has not reviewed Lesson 12.
 
 **Next:** build the shear (London) reference in `mentor/reference/` test-first (`ShearingService`, controller test with `@MockitoBean`, touches `Shepherd` and `Farm`), and note facts in `research/spring-boot-4-findings.md`; Lesson 12 review feedback first if Thomas has any.
+
+## Status after building the shear (London) reference (2026-11-06)
+- Thomas had no Lesson 12 review feedback at session start; nothing changed in the lessons.
+- Built in `mentor/reference/` test-first (173 tests green): `ShearingControllerTest` (`@WebMvcTest(ShearingController.class)`, `@MockitoBean ShearingService`; 200 + `fleeceLengthCm` 0, `verify`, unknown pen/alpaca -> 404), `ShearingController` (`POST /pens/{penName}/alpacas/{alpacaName}/shear`, 200 with `AlpacaResponse`), `ShearingServiceTest` (plain JUnit: fleece 0, log entry, 404 cases, nothing logged on failure), `ShearingService(Farm)` with a `Shepherd` per pen ("Paul Heyman") and `logOf(penName)`, and `ShearingWithRealServiceTest` (mock replaced by the real service via `@Import`). Domain untouched. Details and observed red states in `research/spring-boot-4-findings.md`.
+- Choices for Lesson 14: separate `ShearingController` (so existing `PenController` tests need no mock); service discovered from the controller test (compile error `cannot find symbol` is the first red); a space in a name needs the URI-template form in `MockMvcTester`.
+- Not verified: Mockito `argLine`/self-attach warnings were ignored as before. Lesson 13 (London vs. Chicago, no code) and Lesson 14 are not drafted. Index rows for 13-14 are still "planned".
+
+**Next:** draft Lesson 13 (London vs. Chicago explanation, no code, Side Quest mention) and Lesson 14 (shear, outside-in) in `curriculum/phase-3-changing-the-farm/` against this reference; show Thomas both before moving on.
