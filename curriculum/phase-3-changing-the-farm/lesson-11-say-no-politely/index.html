@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 11: Say No Politely · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 11 say no politely</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-11-say-no-politely">Lesson 11: Say No Politely</h1>
+
+<h2 id="story">Story</h2>
+<p>Fiona's first week with the form. She typed a weight of minus five, left the name empty, and once chose a colour that is not on the list. Your notes from Lesson 10 say what happened: a <code>500</code>, a new alpaca without a name, a <code>500</code> again. Ilona is not happy. "When a field is wrong I want to mark <em>that</em> field in red, and I want to know about <em>all</em> wrong fields at once. Not one error per tap."</p>
+<p>Hasi reads the same notes: "A <code>500</code> means <em>we</em> broke. Here the <em>client</em> sent something wrong. That is a different status, and a different promise."</p>
+
+<div class="concept-corner">
+<h2 id="four-hundred-four-oh-four-four-oh-nine">🚜 Barn Briefing: 400, 404 or 409?</h2>
+<p>Three answers say "no", and they say it for different reasons. Ask one question: <strong>would this very request be fine on another day, with the farm in another state?</strong></p>
+<table>
+<thead><tr><th>Status</th><th>The request...</th><th>Example from the farm</th></tr></thead>
+<tbody>
+<tr><td><code>400</code></td><td>is wrong in itself. It would <em>never</em> work</td><td>empty name, weight <code>-5</code>, colour <code>PURPLE</code>, broken JSON</td></tr>
+<tr><td><code>404</code></td><td>points at something that is not there</td><td>pen <code>Nowhere</code>, alpaca <code>Nobody</code></td></tr>
+<tr><td><code>409</code></td><td>is fine, but the farm's current state does not allow it. Another day it could work</td><td>name already taken, pen full</td></tr>
+</tbody>
+</table>
+<p>A <code>500</code> is a different story: nobody expected it, and the client cannot fix it. Your goal for this lesson is that bad input never reaches that point.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: bean-validation</h2>
+<p>You describe what a valid request looks like with annotations on the components of the request record, such as <code>@NotBlank</code>, <code>@Positive</code>, <code>@Min</code> and <code>@Max</code>. Putting <code>@Valid</code> in front of the <code>@RequestBody</code> parameter makes Spring check them <em>before</em> your method runs; if something is wrong, your method never starts and Spring throws a <code>MethodArgumentNotValidException</code> that lists every violation. Your advice from Lesson 08 turns that into the answer. The annotations come with their own starter (<code>spring-boot-starter-validation</code>), and are called Jakarta Bean Validation. Official docs: <a href="https://docs.spring.io/spring-boot/reference/io/validation.html">Validation in Spring Boot</a> and <a href="https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html">Java Bean Validation</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Make bad input answer <code>400</code>, as a problem body that names every wrong field.</p>
+<ul>
+<li>A body with a blank name, a negative weight and a fleece length of 11 answers <code>400</code>, <code>application/problem+json</code>, and a top-level member <code>errors</code> with one entry per wrong field, for example <code>{"detail":"The request body is invalid.","instance":"/pens/Cell/alpacas","status":400,"title":"Bad Request","errors":{"weight":"must be greater than 0","fleeceLengthCm":"must be less than or equal to 10","name":"must not be blank"}}</code> (the order of the entries inside <code>errors</code> may differ on your machine)</li>
+<li>A missing field is an error too: no <code>fleeceLengthCm</code> gives <code>"fleeceLengthCm": "must not be null"</code></li>
+<li>An unknown colour answers <code>400</code> with the <code>detail</code> <code>Unknown fleece color: PURPLE</code></li>
+<li>A body that is not JSON at all answers <code>400</code>, also as problem+json</li>
+<li>Creating a pen with a blank name answers <code>400</code> too</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Declare validity rules on a request record and switch them on with <code>@Valid</code></li>
+<li>Collect all violations into one answer</li>
+<li>Know why request records use boxed types (<code>Double</code>, <code>Integer</code>)</li>
+<li>Tell <code>400</code>, <code>404</code> and <code>409</code> apart</li>
+<li>Understand that a rule can exist twice (at the door and in the domain), and why</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Add the starter.</strong> In your <code>pom.xml</code> add <code>spring-boot-starter-validation</code> (group <code>org.springframework.boot</code>, no version: the parent knows it) and reload Maven. It brings the annotations and the library that checks them; Spring finds that library by itself.</li>
+<li><strong>Start red: all errors at once.</strong> Test: post to Cell with <code>{"name": " ", "weight": -5, "fleeceLengthCm": 11, "fleeceColor": "BLACK"}</code>. Expect <code>400</code>, the content type <code>APPLICATION_PROBLEM_JSON</code> and <code>$.errors.length()</code> equal to <code>3</code>. It is red: you get <code>201</code> or an exception, depending on which part of your code looks at the body first.</li>
+<li><strong>Describe the rules.</strong> On the components of <code>CreateAlpacaRequest</code>: <code>@NotBlank</code> for the name and the colour, <code>@Positive</code> for the weight, <code>@Min(0)</code> and <code>@Max(10)</code> for the fleece length. Then put <code>@Valid</code> in front of the <code>@RequestBody</code> parameter. Run the test: now the exception is a <code>MethodArgumentNotValidException</code>, and nobody answers it yet.</li>
+<li><strong>A missing field.</strong> Write the test: leave out <code>fleeceLengthCm</code> and expect <code>$.errors.fleeceLengthCm</code> to be <code>must not be null</code>. Red, and not for the reason you think: with <code>int fleeceLengthCm</code> the record cannot hold "missing". Jackson fills a missing <code>int</code> with <code>0</code>, and nobody ever knows that the client forgot it. Change the numeric components to the boxed types <code>Double</code> and <code>Integer</code> (they can be <code>null</code>) and add <code>@NotNull</code>. The domain wants plain numbers, so <code>toAlpaca()</code> unboxes them. Why is that safe now?</li>
+<li><strong>Answer the exception.</strong> In <code>ApiExceptionHandler</code> add a handler for <code>MethodArgumentNotValidException</code>. It returns a <code>ProblemDetail</code> with status <code>400</code> and the <code>detail</code> "The request body is invalid.". The violations come from <code>e.getBindingResult().getFieldErrors()</code>: each has <code>getField()</code> and <code>getDefaultMessage()</code>. Collect them into a <code>Map&lt;String, String&gt;</code> and attach it with <code>problem.setProperty("errors", map)</code>; <code>ProblemDetail</code> writes it as a top-level member.</li>
+<li><strong>The other 400s, one test each.</strong> (a) The colour <code>PURPLE</code>: the exception comes from your <code>FleeceColors.parse</code> and from the domain (<code>IllegalArgumentException</code>, <code>FleeceColorNotFoundException</code>). Handle both as <code>400</code> and let <code>detail</code> carry the message. (b) A body like <code>{ this is not json</code> never reaches your method: Spring throws <code>HttpMessageNotReadableException</code>. Give it a handler with a fixed message such as "The request body is not valid JSON." (do not pass on the exception text, it may mention internals). (c) <code>CreatePenRequest</code>: add <code>@NotBlank</code> and <code>@Valid</code> there too and test a blank pen name.</li>
+<li><strong>Look at the table.</strong> Go through Lessons 09 and 10 and write, for every test of yours that expects an error, the status and the reason, using the question from the Barn Briefing. Does any test have the wrong status? Put the list in <code>docs/api-notes.md</code>. Then send the three bad requests from the experiment in Lesson 10 against the running app and compare with your notes from back then.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> Blank name, weight <code>-5</code> and fleece length 11 together: <code>400</code>, problem+json, <code>errors</code> has three entries</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Each entry in <code>errors</code> is keyed by the JSON member (<code>name</code>, <code>weight</code>, <code>fleeceLengthCm</code>)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A missing <code>fleeceLengthCm</code> gives <code>must not be null</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> A fleece length of 0 and of 10 are accepted</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Colour <code>PURPLE</code>: <code>400</code>, <code>detail</code> is <code>Unknown fleece color: PURPLE</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> A body that is not JSON: <code>400</code>, problem+json</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A blank pen name: <code>400</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The tests from Lessons 09 and 10 are still green (valid requests still get <code>201</code>)</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Two pieces have to work together: something that <em>declares</em> what valid means, and something that <em>checks</em> it. Which of them is an annotation on the record, and which is an annotation on the controller parameter? And who finally answers when the check fails?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>Imports come from <code>jakarta.validation.constraints.*</code> and <code>jakarta.validation.Valid</code>. A record with annotations looks like <code>record CreatePenRequest(@NotBlank String name) {}</code>. For several rules on one component, just put them next to each other: <code>@NotNull @Min(0) @Max(10) Integer fleeceLengthCm</code>.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>@ExceptionHandler(MethodArgumentNotValidException.class) ProblemDetail invalidBody(MethodArgumentNotValidException e) { Map&lt;String, String&gt; errors = new LinkedHashMap&lt;&gt;(); e.getBindingResult().getFieldErrors().forEach(error -&gt; errors.put(error.getField(), error.getDefaultMessage())); ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request body is invalid."); problem.setProperty("errors", errors); return problem; }</code>. The controller parameter: <code>@Valid @RequestBody CreateAlpacaRequest request</code>. The test: <code>.bodyJson().extractingPath("$.errors.length()").isEqualTo(3)</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> None of the three experiment requests from Lesson 10 returns <code>500</code> or <code>201</code> any more</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The status table is in <code>docs/api-notes.md</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>The limit "fleece length at most 10" now exists twice: as <code>@Max(10)</code> in the request record and as a check in the <code>Alpaca</code> constructor. Why keep both? What happens to a client that only breaks the domain rule? And how many places do you touch if Fiona's vet says 12 is fine?</li>
+<li>The handler for <code>IllegalArgumentException</code> answers <code>400</code> for <em>any</em> such exception from the domain. A bug in your own code that throws one by accident now also looks like the client's fault. What could you do about it?</li>
+<li>The message <code>must be greater than 0</code> is English and written by a library. Who should decide the wording that Fiona sees: the API or Ilona's screen?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 11: Say No Politely and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-10-a-new-alpaca/index.html">Lesson 10: A New Alpaca</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 12 (coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#four-hundred-four-oh-four-four-oh-nine">🚜 400, 404 or 409?</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 10: A New Alpaca · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 10 a new alpaca</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-10-a-new-alpaca">Lesson 10: A New Alpaca</h1>
+
+<h2 id="story">Story</h2>
+<p>A new arrival: Fiona has bought an alpaca called <strong>Triple H</strong>, 85.5 kg, 3 cm of black fleece, and she wants him in the empty pen, Cell. Ilona's form has four fields: name, weight, fleece length and fleece colour. "I send them all in one go," she says. "The pen is in the address, the alpaca is in the body."</p>
+<p>This is the same kind of endpoint as in Lesson 09, with more data and more ways to go wrong. The new thing to learn is not a Spring annotation but how the answer's <code>Location</code> header has to be written.</p>
+
+<div class="concept-corner">
+<h2 id="spaces-in-addresses">🚜 Barn Briefing: spaces in addresses</h2>
+<p>An address on the web cannot contain a space. When a client wants the path <code>/pens/Cell/alpacas/Triple H</code>, it writes the space as <code>%20</code>: <code>/pens/Cell/alpacas/Triple%20H</code>. (It is called percent-encoding. Browsers, <code>curl</code> and your <code>MockMvcTester</code> do it for you.) When the request arrives, Spring undoes it before it gives you the <code>@PathVariable</code>, so inside your method the name is <code>Triple H</code> again. Until now this did not matter, because every name had one word.</p>
+<p>But in a <code>Location</code> header <em>you</em> are the one who writes the address. Java's <code>URI.create("/pens/Cell/alpacas/Triple H")</code> refuses it and throws an exception. Spring has a helper that builds an address from a pattern and encodes the parts:</p>
+<pre><code class="language-java">UriComponentsBuilder.fromPath("/pens/{penName}/alpacas/{alpacaName}")
+        .buildAndExpand(penName, alpacaName)
+        .encode()
+        .toUri()</code></pre>
+<p>The braces here work like the ones in a controller pattern (Lesson 06): a placeholder, filled with the values you pass. <code>.encode()</code> turns the space into <code>%20</code>. More: <a href="https://developer.mozilla.org/en-US/docs/Glossary/Percent-encoding">percent-encoding on MDN</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-uri-building.html">UriComponentsBuilder</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build <code>POST /pens/{penName}/alpacas</code>. The client sends:</p>
+<pre><code class="language-json">{"name": "Triple H", "weight": 85.5, "fleeceLengthCm": 3, "fleeceColor": "BLACK"}</code></pre>
+<ul>
+<li>success: <code>201</code>, header <code>Location: /pens/Cell/alpacas/Triple%20H</code>, body in the shape of <code>AlpacaResponse</code> (Lesson 06)</li>
+<li>unknown pen: <code>404</code> (you will find that this needs no new code)</li>
+<li>an alpaca with that name already in the pen (ignoring case): <code>409</code>, with <code>detail</code> <code>There is already an alpaca named Lita in pen Ring</code></li>
+<li>a pen that already holds 30 alpacas: <code>409</code> (this needs no new code either)</li>
+</ul>
+<p>Not yet: bad input. What happens with a fleece length of 11 or the colour <code>PURPLE</code> is an experiment at the end of this lesson. Lesson 11 fixes it.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Combine <code>@PathVariable</code> and <code>@RequestBody</code> in one method</li>
+<li>Map a request record to a domain object (and a text to an enum)</li>
+<li>Build a <code>Location</code> header that survives spaces</li>
+<li>See an earlier investment pay off: <code>404</code> and <code>409</code> come for free</li>
+<li>Know which rule you can check in the controller and which belongs in the domain</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Start red.</strong> Write the test for the happy path in <code>PenChangesTest</code> with the body above (as a text block) and the pen <code>Cell</code>. Assert <code>201</code> and a member of the body, then ask <code>GET /pens/Cell/alpacas</code> and check that the list has one entry. Use <code>Triple H</code> from the start: the two-word name is the point of this lesson. The <code>Location</code> assertion comes in step 3, so you can watch it fail first.</li>
+<li><strong>Request record and mapping.</strong> Create <code>CreateAlpacaRequest(String name, double weight, int fleeceLengthCm, String fleeceColor)</code>. Look at the last component: the JSON carries the colour as <em>text</em>, because JSON has no enums; your domain wants a <code>FleeceColor</code>. Give the record a method <code>toAlpaca()</code> that does the mapping, like <code>AlpacaResponse.from</code> does in the other direction. Turning <code>"BLACK"</code> into <code>FleeceColor.BLACK</code> is a small job of its own: <code>FleeceColor.valueOf(text)</code> works, but it is case-sensitive. Put a tiny helper <code>FleeceColors.parse(String)</code> next to the record (package-private class in <code>alpacas.web</code>) that ignores case and throws an <code>IllegalArgumentException</code> with the message <code>Unknown fleece color: PURPLE</code> for anything else.</li>
+<li><strong>The controller method.</strong> <code>@PostMapping("/pens/{penName}/alpacas")</code>, a <code>@PathVariable</code> for the pen and a <code>@RequestBody</code> for the request. Find the pen (<code>farm.findPen</code>), add the alpaca to its herd, return <code>ResponseEntity.created(...)</code> with an <code>AlpacaResponse</code>. First build the <code>Location</code> the naive way, <code>URI.create("/pens/" + penName + "/alpacas/" + name)</code>, and add the <code>Location</code> assertion to your test. Run it: red, and the reason is the space. Then replace it with the <code>UriComponentsBuilder</code> from the Barn Briefing. Green.</li>
+<li><strong>Look: two tests you do not have to make green.</strong> Write the test for an unknown pen (<code>/pens/Nowhere/alpacas</code> expects <code>404</code>) and the test for a full pen (post 30 alpacas into Cell in a loop with generated names such as <code>"Extra " + i</code>; the 31st expects <code>409</code>). Both are green at once. Find out why: which lesson wrote the code, and where? Note it in <code>docs/api-notes.md</code>. (Cell is empty, so 30 posts fill it; your <code>PenChangesTest</code> throws the farm away after each test, so Ring and Cell are back for the next one.)</li>
+<li><strong>The name is taken.</strong> Write the test: post <code>Lita</code> into Ring, expect <code>409</code> and a <code>detail</code> with the message above. Red. Check before you add: <code>pen.getHerd().findByName(name)</code> returns an <code>Optional</code> (Lesson 07), so <code>isPresent()</code> tells you. Throw a new web-level exception <code>AlpacaAlreadyExistsException</code> (the sibling of <code>AlpacaNotFoundException</code>, message as above) and map it in <code>ApiExceptionHandler</code>. Careful: the handler for <code>IllegalStateException</code> from Lesson 09 already answers <code>409</code>; put both exception types into one <code>@ExceptionHandler({...})</code> or write a second method, whichever reads better to you.</li>
+<li><strong>Experiment (do not fix it yet).</strong> Start the application and send, with your <code>docs/requests.http</code>, a fleece length of <code>11</code>, then the colour <code>PURPLE</code>, then a weight of <code>-5</code>. What status do you get for each, and what does the client see? Write it into <code>docs/api-notes.md</code>. The reference solution answers like this:
+<pre><code class="language-text">fleeceLengthCm 11      HTTP/1.1 500   (the domain throws IllegalArgumentException, nobody handles it)
+fleeceColor PURPLE     HTTP/1.1 500   (same exception type, from your helper)
+weight -5              HTTP/1.1 201   (nobody checks it, the alpaca simply exists)</code></pre>
+That is three different kinds of bad, and none is answered well. Lesson 11 sorts them out.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> Posting Triple H into Cell answers <code>201</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>Location</code> is <code>/pens/Cell/alpacas/Triple%20H</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The body has the name, weight, <code>fleeceLengthCm</code> and <code>fleeceColor</code> <code>BLACK</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Cell/alpacas</code> lists exactly one alpaca afterwards</label></li>
+<li class="task-list-item"><label><input type="checkbox"> An unknown pen answers <code>404</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> Posting <code>Lita</code> into Ring answers <code>409</code>, with the message in <code>detail</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The 31st alpaca in one pen answers <code>409</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>CreateAlpacaRequest</code> and <code>AlpacaResponse</code> are the only alpaca types in the controller signature (no <code>Alpaca</code>)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The tests of Lesson 09 are still green</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The happy-path test keeps failing on the <code>Location</code> header and you do not see why? Run it and read the exception: what does <code>URI.create</code> complain about? And for the duplicate: which method of <code>Herd</code> tells you whether a name is already there without throwing?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The request record maps itself: <code>Alpaca toAlpaca() { return new Alpaca(name, weight, fleeceLengthCm, FleeceColors.parse(fleeceColor)); }</code>. The helper loops over <code>FleeceColor.values()</code> and compares <code>color.name().equalsIgnoreCase(text)</code>. A <code>private static URI location(...)</code> method in the controller keeps the builder out of the way.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The controller: <code>Pen pen = farm.findPen(penName); if (pen.getHerd().findByName(request.name()).isPresent()) { throw new AlpacaAlreadyExistsException(request.name(), penName); } Alpaca alpaca = request.toAlpaca(); pen.getHerd().addAlpaca(alpaca); return ResponseEntity.created(location(pen.getName(), alpaca.getName())).body(AlpacaResponse.from(alpaca));</code>. The advice: <code>@ExceptionHandler({AlpacaAlreadyExistsException.class, IllegalStateException.class}) ProblemDetail conflict(RuntimeException e) { return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage()); }</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You posted Triple H against the running app and saw the encoded <code>Location</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The experiment results are in <code>docs/api-notes.md</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>The name rule is checked in the controller, because <code>Herd.addAlpaca</code> is used by many of your older tests that reuse names. Try putting the rule into <code>Herd</code> instead: how many of your existing tests turn red? What does that tell you about where a rule can go?</li>
+<li>Two clients post "Lita" into Ring at exactly the same moment. Both checks say "not there yet". What would happen? (A database in Phase 4 will have an answer.)</li>
+<li>Why does the response record call it <code>fleeceLengthCm</code> while the domain says <code>fleeceLength</code>, and the request record agrees with the response? What would Ilona say if the two differed?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 10: A New Alpaca and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-09-a-new-pen/index.html">Lesson 09: A New Pen</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-11-say-no-politely/index.html">Lesson 11: Say No Politely</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spaces-in-addresses">🚜 Spaces in addresses</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 09: A New Pen · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 09 a new pen</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-09-a-new-pen">Lesson 09: A New Pen</h1>
+
+<h2 id="story">Story</h2>
+<p>Fiona is standing in front of the barn with her iPad. "I have bought a small stable behind the house, and I want a pen for it. Can I add it myself, right here, without calling you?" Ilona has already drawn the screen: one text field, one button. "I send the name to the server," she says. "What do I get back?"</p>
+<p><strong>Phase 3 is about changing.</strong> Until now every request only looked at the farm. From here on a request <em>changes</em> it, and that brings new questions: what does the client send, what does it get back, and what if the change is not allowed?</p>
+
+<div class="concept-corner">
+<h2 id="four-verbs">🚜 Barn Briefing: four verbs and their answers</h2>
+<p>In Lesson 03 a request was a <strong>method</strong> plus a <strong>path</strong>. So far the method was always <code>GET</code>. HTTP has a few more, and each has a job. A request that changes something usually carries a <strong>body</strong> too, just as a response does: the data for the change, here JSON.</p>
+<table>
+<thead><tr><th>Method</th><th>Means</th><th>Used in</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td>give me this, change nothing</td><td>Phase 2</td></tr>
+<tr><td><code>POST</code></td><td>create a new thing; the server decides where it lives</td><td>Lessons 09, 10</td></tr>
+<tr><td><code>PUT</code></td><td>replace the thing at this path</td><td>Lesson 12</td></tr>
+<tr><td><code>DELETE</code></td><td>remove the thing at this path</td><td>Lesson 12</td></tr>
+</tbody>
+</table>
+<p>The answer has a status code, and for changes the code says more than <code>200</code>. These are the ones this phase uses:</p>
+<table>
+<thead><tr><th>Status</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>201 Created</code></td><td>done, and there is a new thing now. The <code>Location</code> header (a header is a labelled extra, see Lesson 03) says where it lives</td></tr>
+<tr><td><code>204 No Content</code></td><td>done, and there is nothing to send back</td></tr>
+<tr><td><code>400 Bad Request</code></td><td>the request itself is wrong</td></tr>
+<tr><td><code>404 Not Found</code></td><td>the thing you addressed does not exist</td></tr>
+<tr><td><code>409 Conflict</code></td><td>the request is fine, but the farm is in a state where it cannot be done</td></tr>
+</tbody>
+</table>
+<p>All of them are listed in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status">MDN status code reference</a>. This lesson uses <code>201</code> and <code>409</code>; the others follow.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: request-body</h2>
+<p>A method annotated with <code>@PostMapping</code> answers <code>POST</code> requests, the way <code>@GetMapping</code> answers <code>GET</code>. A parameter annotated with <code>@RequestBody</code> receives the body of the request: Jackson (Lesson 05) reads the JSON and builds an object from it, here a record. To choose the status and the headers yourself you return a <code>ResponseEntity</code> instead of the plain object. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html">@RequestBody</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responseentity.html">ResponseEntity</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build <code>POST /pens</code>. The client sends the name of the new pen:</p>
+<pre><code class="language-json">{"name": "Stable"}</code></pre>
+<p>The farm then has a third pen, and the answer is:</p>
+<ul>
+<li><code>201</code> with the header <code>Location: /pens/Stable</code></li>
+<li>a body in the same shape as one entry of <code>GET /pens</code>: <code>{"name":"Stable","alpacas":0}</code></li>
+</ul>
+<p>A pen name can only be used once, ignoring upper and lower case. Posting <code>ring</code> while <code>Ring</code> exists answers <code>409</code> with a problem body whose <code>detail</code> says so.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Write a <code>POST</code> endpoint that reads a JSON body into a request record</li>
+<li>Answer <code>201</code> with a <code>Location</code> header</li>
+<li>Test a request with a body in <code>MockMvcTester</code></li>
+<li>Understand that tests share one farm, and what to do about it</li>
+<li>Find the right place for a new rule (domain) and the right place for its HTTP meaning (advice)</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Start red.</strong> Add a new test class <code>PenChangesTest</code> in <code>alpacas.web</code> (same annotations as your <code>PenControllerTest</code>) and write the test for <code>201</code>. The request in <code>MockMvcTester</code> needs two things beside the path: the header that says the body is JSON, and the body itself.
+<pre><code class="language-java">mvc.post().uri("/pens")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+                {"name": "Stable"}""")</code></pre>
+This is your fake browser sending a <code>POST</code>. Add the assertions: status <code>201</code>, the <code>Location</code> header, and the member <code>alpacas</code> in the body.</li>
+<li><strong>Make it green.</strong> Three things are new. First, a record <code>CreatePenRequest</code> with the one component <code>name</code>: it is the contract for what the client sends, the counterpart of your response records (Lesson 04, same rule: no domain object in the controller signature). Second, a method with <code>@PostMapping("/pens")</code> whose parameter is annotated with <code>@RequestBody</code>. Third, it returns a <code>ResponseEntity</code>, built with <code>ResponseEntity.created(location).body(...)</code>, where <code>location</code> is a <code>URI</code>. Map the request to a domain <code>Pen</code> with an empty <code>Herd</code>, add it to the farm and answer with the same <code>PenSummaryResponse</code> that <code>GET /pens</code> uses.</li>
+<li><strong>Tests share one farm.</strong> Let the first test also check, after the post, that <code>GET /pens</code> has three entries. Then add a second test that creates "Stable" and checks the same (call it <code>aNewPenAppearsInTheList</code>). Run the class. Each test passes alone, and together the one that runs second is red: the farm has four pens, not three. Why? Your <code>Farm</code> is a bean (Lesson 02), and a bean is created <em>once</em>; Spring keeps the application context between the tests of a class, and every request, in a test or a real one, reaches the very same <code>Farm</code> object. The first test left "Stable" in it. Tell Spring to throw the context away after each test method and build a fresh farm:
+<pre><code class="language-java">@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)</code></pre>
+on <code>PenChangesTest</code>. It makes the class slower, which is why your reading tests stay in their own class without it. (The same sharing is true of the running application: all clients change one farm, and two requests at the same moment could trip over each other. A database in Phase 4 takes this job over.)</li>
+<li><strong>The name can be used only once.</strong> Write the test: post <code>{"name": "ring"}</code> and expect <code>409</code> and <code>application/problem+json</code>. It stays red, because your domain happily adds a second "Ring". Rules about the farm belong in the domain, so go one level down and write a <code>FarmTest</code> first: adding two pens whose names differ only in case throws an <code>IllegalStateException</code>. Make that green in <code>Farm.addPen</code>, commit, and go back to the controller test.</li>
+<li><strong>Who says 409?</strong> The domain knows nothing about HTTP; it throws <code>IllegalStateException</code>. The controller test is still red, because nobody translates that exception. You know the place from Lesson 08: add a handler for it to <code>ApiExceptionHandler</code> that answers <code>409</code> with a <code>ProblemDetail</code>. The test turns green without touching the controller.</li>
+<li><strong>Try it for real.</strong> Typing JSON into <code>curl</code> on Windows is a quoting nightmare. IntelliJ can send requests from a plain file: create <code>docs/requests.http</code> with
+<pre><code class="language-text">POST http://localhost:8080/pens
+Content-Type: application/json
+
+{"name": "Stable"}</code></pre>
+and click the green arrow next to it while the app is running. Send it twice. Compare with the output below, which was captured from a running reference solution with <code>curl -si</code>:
+<pre><code class="language-text">HTTP/1.1 201
+Location: /pens/Stable
+Content-Type: application/json
+
+{"name":"Stable","alpacas":0}
+
+HTTP/1.1 409
+Content-Type: application/problem+json
+
+{"detail":"There is already a pen named Stable","instance":"/pens","status":409,"title":"Conflict"}</code></pre>
+The farm lives in memory, so a restart brings back Ring and Cell only. Write a sentence in <code>docs/api-notes.md</code>: why does Ilona's screen care about the <code>Location</code> header?</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>POST /pens</code> with <code>{"name": "Stable"}</code> answers <code>201</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The <code>Location</code> header is <code>/pens/Stable</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The body is <code>{"name":"Stable","alpacas":0}</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The farm has three pens afterwards (<code>GET /pens</code> lists "Stable")</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Posting <code>ring</code> answers <code>409</code> with <code>application/problem+json</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>FarmTest</code>: two pens with names that differ only in case throw <code>IllegalStateException</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The controller method has no domain type in its signature</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The reading tests from Phase 2 are still green</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Think about which class does what. The request record is the contract for the incoming JSON, the controller turns it into a domain object, the domain enforces the rule "one name per pen", and the advice decides what an exception means for the client. Where would the check for the duplicate name <em>not</em> belong?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>For the controller you need three annotations: <code>@PostMapping("/pens")</code> on the method, <code>@RequestBody</code> in front of the parameter, and in the return type a <code>ResponseEntity&lt;PenSummaryResponse&gt;</code>. <code>ResponseEntity.created(uri)</code> sets the status <code>201</code> and the <code>Location</code> header; <code>.body(...)</code> adds the body. For the 409, <code>@ExceptionHandler(IllegalStateException.class)</code> in the advice, and <code>HttpStatus.CONFLICT</code>.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>record CreatePenRequest(String name) {}</code>. In the controller: <code>Pen pen = new Pen(request.name(), new Herd()); farm.addPen(pen); return ResponseEntity.created(URI.create("/pens/" + pen.getName())).body(new PenSummaryResponse(pen.getName(), pen.totalAlpacas()));</code>. In <code>Farm.addPen</code>: loop over the existing pens and throw <code>new IllegalStateException("There is already a pen named " + pen.getName())</code> if <code>equalsIgnoreCase</code> matches. The handler: <code>ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage())</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass, in any order</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You saw <code>201</code> and <code>409</code> in a real call</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/requests.http</code> and the note in <code>docs/api-notes.md</code> are committed</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>The advice now turns <em>every</em> <code>IllegalStateException</code> into a <code>409</code>. Is that always right? Think of a bug somewhere in the domain that throws one by accident.</li>
+<li>The name goes into the URL: <code>/pens/Stable</code>. What happens to the <code>Location</code> header for a pen called <code>Big Barn</code>? (Lesson 10 shows it.)</li>
+<li>Nothing stops the client from sending <code>{"name": ""}</code> or no body at all. What would you expect the API to answer? What does it answer now? (Lesson 11.)</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 09: A New Pen and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../../phase-2-reading-the-farm/lesson-08-one-place-for-bad-news/index.html">Lesson 08: One Place for Bad News</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-10-a-new-alpaca/index.html">Lesson 10: A New Alpaca</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#four-verbs">🚜 Four verbs</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

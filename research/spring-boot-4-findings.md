@@ -291,3 +291,7 @@ All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
 - Local `@ExceptionHandler` + `@ResponseStatus(NOT_FOUND)` method in a controller: status 404, empty body, no problem+json. An unhandled `PenNotFoundException` at runtime: `500` with Boot's default error JSON (`timestamp,status,error,path`).
 - `ProblemDetail` JSON: `{"detail","instance","status","title"}` (`type` omitted when `about:blank`); `setProperty("errors", map)` adds a top-level `errors` member.
 - Domain: a uniqueness rule for alpaca names in `Herd.addAlpaca` broke 5 of her existing tests (they reuse names); name uniqueness is therefore checked in the controller (`AlpacaAlreadyExistsException`, 409). Pen names are unique in `Farm.addPen` (`IllegalStateException`, test-first).
+
+## Verified while drafting Phase 3 lessons (2026-11-06)
+- Without validation and the 400 handlers (scratch copy), `POST /pens/Cell/alpacas`: fleece length 11 -> 500, colour PURPLE -> 500, weight -5 -> 201, missing `int` component via boxed `Integer` -> 500 (NPE on unboxing), broken JSON -> 400 (Spring default). With the reference: errors map `{"weight":..,"fleeceLengthCm":"must be less than or equal to 10","name":"must not be blank"}` (entry order not stable), missing field "must not be null", lowercase colour accepted, 400 problem bodies include `instance`.
+- Two `@WebMvcTest` methods that both create the pen "Stable" without `@DirtiesContext`: the second fails (409 once the duplicate rule exists; wrong count before).
