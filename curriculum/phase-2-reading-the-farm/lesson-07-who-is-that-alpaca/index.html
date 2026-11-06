@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 07: Who Is That Alpaca? · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 2 reading the farm / lesson 07 who is that alpaca?</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-07-who-is-that-alpaca">Lesson 07: Who Is That Alpaca?</h1>
+
+<h2 id="story">Story</h2>
+<p>Ilona's detail screen shows one alpaca: tap "Lita" in the Ring list. She needs <code>GET /pens/Ring/alpacas/Lita</code>. "And if there is no such alpaca," she adds, "tell me! I can't show an empty page and call it a day."</p>
+<p>Your <code>Herd.findByName</code> has a problem: when there is no such alpaca, it returns <code>null</code>. Everyone who forgets to check for <code>null</code> gets a <code>NullPointerException</code>, and a method signature does not warn them. Java Lesson 22 has the cure. The domain may change for the sake of the web code, but test-first.</p>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: exceptions</h2>
+<p>When a controller method throws an exception that nobody catches, Spring answers with <code>500 Internal Server Error</code>: "the server is broken". But "no alpaca by that name" is not the server's fault; it is the <em>request</em> that asked for something that is not there, which is <code>404 Not Found</code>. A method inside the controller, marked <code>@ExceptionHandler</code>, can catch an exception type and decide the answer. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-exceptionhandler.html">@ExceptionHandler</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build <code>GET /pens/{penName}/alpacas/{alpacaName}</code>: <code>200</code> with the <code>AlpacaResponse</code> of that alpaca; <code>404</code> when the pen exists but has no alpaca by that name.</p>
+<p>To get there, change <code>Herd.findByName</code> to return <code>Optional&lt;Alpaca&gt;</code>.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Change a domain method <em>test-first</em> because an adapter pushes back</li>
+<li>Turn an <code>Optional</code> into either a response or an exception</li>
+<li>Write a path with two variables</li>
+<li>Answer a request with <code>404</code> using an <code>@ExceptionHandler</code> method</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Domain first.</strong> In <code>HerdTest</code>, change the existing <code>findByName</code> tests: a found alpaca is <code>Optional.of(alpaca)</code> (or check <code>isPresent()</code>), an unknown name is <code>Optional.empty()</code>. They fail to compile or fail: red. Change <code>Herd.findByName</code> to return <code>Optional&lt;Alpaca&gt;</code>, and let IntelliJ show you every caller that breaks. Fix them, run <code>mvn test</code>, commit as <code>refactor:</code> or <code>feat:</code> as you see fit.</li>
+<li><strong>Test first: found.</strong> In <code>PenControllerTest</code>: <code>GET /pens/Ring/alpacas/lita</code> answers <code>200</code> and <code>$.name</code> is <code>Lita</code> (with the spelling the farm has: the lookup ignores case, the answer is the farm's own data). Make it pass with <code>@GetMapping("/pens/{penName}/alpacas/{alpacaName}")</code>, two <code>@PathVariable</code> parameters, <code>findPen</code> and then <code>findByName</code>.</li>
+<li><strong>An exception that means "not found".</strong> Look at what <code>Optional</code> offers when it is empty: <code>orElseThrow(...)</code> takes a supplier of an exception. The farm already throws <code>PenNotFoundException</code> for unknown pens; for the alpaca, create <code>AlpacaNotFoundException</code> in <code>alpacas.web</code> (a <code>RuntimeException</code> with a message such as <code>No alpaca named Nobody in pen Ring</code>). Why in the web package and not in the domain? Because today the domain never needs this exception: the <em>request</em> was wrong, not the farm. Write the sentence in <code>docs/api-notes.md</code> and be ready to disagree with it in Phase 4.</li>
+<li><strong>Test first: not found.</strong> <code>GET /pens/Ring/alpacas/Nobody</code> answers <code>404</code>. Run it: red, because the exception ends as <code>500</code> (or as a thrown exception in the test). Make it green with an <code>@ExceptionHandler</code> method <em>inside the controller</em>: the method gets the annotation <code>@ExceptionHandler(AlpacaNotFoundException.class)</code> plus <code>@ResponseStatus(HttpStatus.NOT_FOUND)</code>, and may be empty. Commit.</li>
+<li><strong>Check the neighbours.</strong> Write the test that you expect to pass: <code>GET /pens/Nowhere/alpacas/Lita</code> answers <code>404</code>, too. Run it. It does <em>not</em> pass, and that is the topic of the next lesson. Keep the test red (write it down in the notes and commit it as a <code>test:</code> only if your mentor wants you to; otherwise do not commit it yet).</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>findByName</code> returns an <code>Optional</code>; its tests were adapted <em>before</em> the code</label></li>
+<li class="task-list-item"><label><input type="checkbox"> No caller of <code>findByName</code> forgets the empty case</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Ring/alpacas/lita</code> answers <code>200</code> with the right alpaca</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Ring/alpacas/Nobody</code> answers <code>404</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> There is a test for the unknown pen with <code>404</code>, and you know why it fails</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The controller method returns an <code>AlpacaResponse</code>, not an <code>Optional</code> and not an <code>Alpaca</code></label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The domain test comes first. What does the test for an unknown name look like with <code>Optional</code>? Think of <code>assertTrue(optional.isEmpty())</code> or AssertJ's <code>assertThat(optional).isEmpty()</code>.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>In the controller you can chain: <code>pen.getHerd().findByName(alpacaName).map(AlpacaResponse::from).orElseThrow(() -&gt; new AlpacaNotFoundException(alpacaName, penName))</code>. Read it out loud: "find, then map, otherwise throw".</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>@ExceptionHandler(AlpacaNotFoundException.class) @ResponseStatus(HttpStatus.NOT_FOUND) void alpacaNotFound() {}</code> is a method of <code>PenController</code>. <code>HttpStatus</code> is <code>org.springframework.http.HttpStatus</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass except the one deliberately red unknown-pen test (or it is not committed yet)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The domain tests were changed before the domain code</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-notes.md</code> has your reasoning about where <code>AlpacaNotFoundException</code> lives</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Why is it better for <code>findByName</code> to return an <code>Optional</code> than <code>null</code> for <em>every</em> future caller, not only for this controller?</li>
+<li>Your <code>@ExceptionHandler</code> lives in <code>PenController</code>. What happens when you later write a second controller that also looks up alpacas?</li>
+<li>The unknown-pen test is red. Where in the code path does that exception come from, and who throws it?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 07: Who Is That Alpaca? and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-06-the-alpacas-of-a-pen/index.html">Lesson 06: The Alpacas of a Pen</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-08-one-place-for-bad-news/index.html">Lesson 08: One Place for Bad News</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 2.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 06: The Alpacas of a Pen · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 2 reading the farm / lesson 06 the alpacas of a pen</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-06-the-alpacas-of-a-pen">Lesson 06: The Alpacas of a Pen</h1>
+
+<h2 id="story">Story</h2>
+<p>Ilona taps the row "Ring" on her overview and needs the animals in it: name, weight, fleece length and fleece colour. And Fiona has one more wish: "Every morning I want to know which alpacas are ready to shear, in the whole farm, without opening every pen."</p>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: path-variables</h2>
+<p>A path can have a <strong>variable part</strong>. You write it in curly braces, <code>/pens/{penName}/alpacas</code>, and Spring hands the actual text (<code>Ring</code>) to a method parameter marked <code>@PathVariable</code>. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/pathvariable.html">@PathVariable</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Two endpoints, both returning an <code>AlpacaResponse</code> per alpaca:</p>
+<ul>
+<li><code>GET /pens/{penName}/alpacas</code>: the alpacas in that pen. <code>GET /pens/Ring/alpacas</code> answers <code>[{"name":"Lita","weight":70.0,"fleeceLengthCm":4,"fleeceColor":"WHITE"}, …]</code></li>
+<li><code>GET /alpacas/ready-to-shear</code>: the alpacas in the whole farm that are ready to shear, as the same kind of entries</li>
+</ul>
+<p>Look closely at the field name <code>fleeceLengthCm</code>: the domain calls it <code>fleeceLength</code>. The contract is allowed to differ from the model.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Read a part of the URL with <code>@PathVariable</code></li>
+<li>Write a response record with a mapping method and reuse it in two endpoints</li>
+<li>Decide field names for the JSON on purpose, independent of the domain names</li>
+<li>Notice what happens when the pen does not exist (and why you will fix it later)</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Test first: the pen.</strong> Add a test to <code>PenControllerTest</code>: <code>GET /pens/Ring/alpacas</code> answers <code>200</code>, the first entry has name <code>Lita</code> and <code>fleeceLengthCm</code> <code>4</code>, the second has fleece colour <code>BROWN</code>. Fleece colour is a <code>FleeceColor</code> in the domain but a plain string in the JSON; a record can hold a string of <code>fleeceColor.name()</code>.</li>
+<li><strong>Response record with a mapping.</strong> Create <code>AlpacaResponse</code> in <code>alpacas.web</code>. Put the copying in a <code>static AlpacaResponse from(Alpaca alpaca)</code> method inside the record, so the controller can write <code>.map(AlpacaResponse::from)</code> (a <em>method reference</em>). Reading a domain object is fine in the web package; handing one out is not.</li>
+<li><strong>Make it pass.</strong> The controller method has the parameter <code>@PathVariable String penName</code>. <code>farm.findPen(penName)</code> gives you the pen and <code>getHerd().getAlpacas()</code> its alpacas. Commit.</li>
+<li><strong>Names are case-insensitive</strong> because her <code>findPen</code> compares with <code>equalsIgnoreCase</code>. Write a test that <code>/pens/ring/alpacas</code> also works, so the behaviour is a decision and not an accident.</li>
+<li><strong>Ready to shear.</strong> Test first: <code>GET /alpacas/ready-to-shear</code> answers <code>200</code> with exactly one entry, <code>Batista</code> (10 cm of fleece). <code>farm.allAlpacasReadyToShear()</code> does the work; the mapping is the same.</li>
+<li><strong>Look at the console</strong> while the tests run. Your <code>println</code>s in <code>Alpaca</code> are still speaking. Write down in <code>docs/api-notes.md</code> why they are not a problem <em>for the JSON</em> any more but still a problem.</li>
+<li><strong>Break it on purpose.</strong> Start the application and open <code>http://localhost:8080/pens/Nowhere/alpacas</code>. Write down the status. Can Ilona's screen show anything useful to Fiona with that answer? Leave it for now. It is the subject of Lessons 07 and 08.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Ring/alpacas</code> answers <code>200</code> with two entries, <code>Lita</code> first</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Each entry has <code>name</code>, <code>weight</code>, <code>fleeceLengthCm</code> and <code>fleeceColor</code> (a string such as <code>"WHITE"</code>) and nothing else</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The JSON field is <code>fleeceLengthCm</code>, not <code>fleeceLength</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/ring/alpacas</code> (lower case) also works</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Cell/alpacas</code> answers <code>200</code> and <code>[]</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /alpacas/ready-to-shear</code> answers one entry, <code>Batista</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No controller signature contains <code>Alpaca</code>, <code>Pen</code>, <code>Herd</code> or <code>Farm</code> as a parameter type or return type (the controller's own <code>Farm</code> <em>field</em> is fine)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Calling an unknown pen by hand ends in <code>500</code>. You noticed, and you did not fix it yet</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>What is different between this path and <code>/pens</code>? The part that changes per request must be a placeholder in the path and a parameter in the method. Check the spelling: they must match.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The record needs four components. <code>fleeceColor</code> is the domain's enum; for the JSON you want its text. Where would you put code that translates one into the other: in the domain, in the controller, or in the record? Lesson 04 gives you a hint.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>record AlpacaResponse(String name, double weight, int fleeceLengthCm, String fleeceColor) { static AlpacaResponse from(Alpaca a) { return new AlpacaResponse(a.getName(), a.getWeight(), a.getFleeceLength(), a.getFleeceColor().name()); } }</code>. Controller: <code>@GetMapping("/pens/{penName}/alpacas") List&lt;AlpacaResponse&gt; getAlpacasOfPen(@PathVariable String penName) { return farm.findPen(penName).getHerd().getAlpacas().stream().map(AlpacaResponse::from).toList(); }</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Both endpoints reuse the same <code>AlpacaResponse</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-notes.md</code> has your notes on the <code>println</code>s and on the unknown pen</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>A client asks for <code>/pens/Ring/alpacas</code>. What does Ilona's screen receive for a pen that does not exist, and what <em>should</em> it receive?</li>
+<li>The response has no <code>readyToShear</code> field, although the domain has <code>isReadyToShear()</code>. If Ilona wants it, who decides: the domain, the record or Ilona?</li>
+<li>The mapping lives inside the record. What would be the argument for putting it in a separate class? Against?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 06: The Alpacas of a Pen and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-05-the-pens/index.html">Lesson 05: The Pens</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-07-who-is-that-alpaca/index.html">Lesson 07: Who Is That Alpaca?</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 2.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -279,3 +279,15 @@ All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
 - Reference now has `AlpacasApplication` in package `alpacas` (top package) and its smoke test in `alpacas`; `@WebMvcTest(FarmController.class)` + `@Import(FarmConfig.class)` in `alpacas.web` still find it (search upwards). 145 tests green.
 - Component scanning from `alpacas`: a `@Configuration` class in `alpacas.web` is found; the same class moved to a package outside `alpacas` (e.g. `config`) is not found, `@SpringBootTest` + `@Autowired Farm` then fails with `NoSuchBeanDefinitionException: No qualifying bean of type 'alpacas.Farm' available`. Moving it within `alpacas` passes.
 - Sample data renamed: Lita, Batista, pens Ring and Cell (all tests adjusted; path matching stays case-insensitive: `/pens/ring/alpacas` works).
+
+## Verified while building the Phase 3 reference (2026-11-06)
+- `spring-boot-starter-validation` added; `jakarta.validation.constraints.*` (`@NotBlank`, `@NotNull`, `@Positive`, `@Min`, `@Max`) with `@Valid @RequestBody` works in `@WebMvcTest`. Invalid body -> `MethodArgumentNotValidException`; `getBindingResult().getFieldErrors()` gives field + `getDefaultMessage()` (e.g. "must not be blank", "must be greater than 0", "must not be null").
+- Use boxed types (`Double`, `Integer`) plus `@NotNull` in request records: a missing `int` silently becomes 0.
+- Broken JSON -> `HttpMessageNotReadableException` (own handler returns problem+json 400; without one the default error body is used).
+- Own `@RestControllerAdvice` handlers for `IllegalArgumentException` (400) and `IllegalStateException` (409) work; `PenNotFoundException` extends `RuntimeException` so no clash.
+- `ResponseEntity.created(URI)`: `URI.create("/pens/x/alpacas/Triple H")` THROWS (space) -> 400 via the IAE handler. Use `UriComponentsBuilder.fromPath("/pens/{p}/alpacas/{a}").buildAndExpand(..).encode().toUri()` -> `Location: /pens/Cell/alpacas/Triple%20H`. Good URL-encoding case.
+- `@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)` needed on tests that mutate the shared `Farm` bean (context is cached across test methods).
+- `mvc.post().uri(..).contentType(MediaType.APPLICATION_JSON).content(json)`, `.put()`, `.delete()`, `.hasHeader("Location", ..)`, `.hasStatus(201)` work in `MockMvcTester`.
+- Local `@ExceptionHandler` + `@ResponseStatus(NOT_FOUND)` method in a controller: status 404, empty body, no problem+json. An unhandled `PenNotFoundException` at runtime: `500` with Boot's default error JSON (`timestamp,status,error,path`).
+- `ProblemDetail` JSON: `{"detail","instance","status","title"}` (`type` omitted when `about:blank`); `setProperty("errors", map)` adds a top-level `errors` member.
+- Domain: a uniqueness rule for alpaca names in `Herd.addAlpaca` broke 5 of her existing tests (they reuse names); name uniqueness is therefore checked in the controller (`AlpacaAlreadyExistsException`, 409). Pen names are unique in `Farm.addPen` (`IllegalStateException`, test-first).

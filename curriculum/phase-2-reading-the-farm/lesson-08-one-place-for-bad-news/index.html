@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 08: One Place for Bad News · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 2 reading the farm / lesson 08 one place for bad news</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-08-one-place-for-bad-news">Lesson 08: One Place for Bad News</h1>
+
+<h2 id="story">Story</h2>
+<p>Hasi reviews your <code>PenController</code>: "That <code>@ExceptionHandler</code> in the controller only helps this one controller. And the unknown pen still ends in a <code>500</code>. Every controller you write from now on will repeat it. Fix it once, for the whole application."</p>
+<p>Ilona agrees, for her own reasons: "When something goes wrong, my screen should show the reason. Can the error always look the same, with a message I can display?"</p>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: central-error-handling</h2>
+<p>A class annotated with <code>@RestControllerAdvice</code> collects <code>@ExceptionHandler</code> methods for <em>all</em> controllers: one place that turns exceptions into answers. For the answer itself Spring has <code>ProblemDetail</code>, a small object that follows a standard error format (RFC 9457). It is sent as <code>application/problem+json</code> and has the fields <code>status</code>, <code>title</code> and <code>detail</code>, so every error in your API looks alike. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html">Controller Advice</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html">Error Responses</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Create <code>ApiExceptionHandler</code>, a <code>@RestControllerAdvice</code> in <code>alpacas.web</code>, and move the handling there. Afterwards:</p>
+<ul>
+<li>an unknown pen <em>and</em> an unknown alpaca both answer <code>404</code> with <code>Content-Type: application/problem+json</code></li>
+<li>the body carries the exception's message in <code>detail</code>, for example <code>{"detail":"No alpaca named Nobody in pen Ring","status":404,"title":"Not Found","instance":"/pens/Ring/alpacas/Nobody"}</code></li>
+<li>the handler inside <code>PenController</code> is gone</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Collect exception handling in one <code>@RestControllerAdvice</code></li>
+<li>Return a <code>ProblemDetail</code> so all errors have the same shape</li>
+<li>Use a red test from the last lesson as the starting point</li>
+<li>Know where an exception from the <em>domain</em> turns into an HTTP status</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Start red.</strong> The unknown-pen test from Lesson 07 is your first red. Add a second assertion to it and to the unknown-alpaca test: the content type is <code>MediaType.APPLICATION_PROBLEM_JSON</code> and <code>$.detail</code> contains the exception's message (<code>The Pen you are looking for Nowhere does not exist</code>, and <code>No alpaca named Nobody in pen Ring</code>).</li>
+<li><strong>Create the advice.</strong> A class <code>ApiExceptionHandler</code> with <code>@RestControllerAdvice</code> and one method per exception type. A handler method may return a <code>ProblemDetail</code>; you build one with <code>ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage())</code>. Spring Boot finds the class by itself, as it found your controllers: it lives in <code>alpacas.web</code>. In a <code>@WebMvcTest</code> the advice is part of the slice.</li>
+<li><strong>One test at a time.</strong> Handle <code>PenNotFoundException</code> first (the red from Lesson 07 turns green), commit, then <code>AlpacaNotFoundException</code>; then delete the handler from <code>PenController</code>. The tests must stay green.</li>
+<li><strong>See it with your own eyes.</strong> Start the application and call both errors with <code>curl -i</code>. Compare with the <code>500</code> body from Lesson 06 that you saw earlier.</li>
+<li><strong>Where does the translation happen?</strong> <code>PenNotFoundException</code> comes from your domain, which knows nothing about HTTP. Only the advice knows it means <code>404</code>. Write two sentences in <code>docs/api-notes.md</code> about why that is a good place, and what would be bad about putting <code>@ResponseStatus</code> on the domain exception.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> An unknown pen answers <code>404</code> with <code>Content-Type: application/problem+json</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> An unknown alpaca answers <code>404</code> with the same content type</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>detail</code> contains the message of the exception</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>status</code> in the body is <code>404</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>PenController</code> contains no <code>@ExceptionHandler</code> any more</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>PenNotFoundException</code> in the domain is unchanged and has no Spring import</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The two "found" tests are still green</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Which class decides which exception means which status now? Is it a controller? Look for an annotation that applies to the <em>whole</em> application, not only to one class.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The advice has one method per exception type, with <code>@ExceptionHandler(SomeException.class)</code> and the exception as parameter. The body is a <code>ProblemDetail</code>; <code>ProblemDetail.forStatusAndDetail(status, message)</code> creates one.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>@RestControllerAdvice class ApiExceptionHandler { @ExceptionHandler(PenNotFoundException.class) ProblemDetail penNotFound(PenNotFoundException e) { return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage()); } }</code> and the same for <code>AlpacaNotFoundException</code>. In the test: <code>.hasContentType(MediaType.APPLICATION_PROBLEM_JSON).bodyJson().extractingPath("$.detail").isEqualTo("…")</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The advice is the only place with <code>@ExceptionHandler</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> You have seen both errors in a real <code>curl -i</code> call</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="phase-2-demo">Phase 2 demo</h2>
+<p>Show your mentor:</p>
+<ul>
+<li>Start the app and call, in the browser or with <code>curl -i</code>: <code>/farm</code>, <code>/pens</code>, <code>/pens/Ring/alpacas</code>, <code>/pens/Ring/alpacas/Lita</code>, <code>/alpacas/ready-to-shear</code></li>
+<li>Call an unknown pen and an unknown alpaca and show the two error bodies</li>
+<li>Walk through <code>PenController</code> and <code>ApiExceptionHandler</code>: where does a <code>PenNotFoundException</code> end up?</li>
+<li>Show that no domain type appears in any controller signature</li>
+<li>Answer the Reflect questions below</li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Fiona wants a third kind of "not found" (a pen with that name exists, but not in this farm's region, say). How many files do you touch?</li>
+<li>The message in <code>detail</code> comes straight from the exception. What if a message ever contains something the client should not see (a file path, an SQL error)?</li>
+<li>Phase 2 only reads. What do you expect to be different about errors when a client <em>sends</em> data?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 08: One Place for Bad News and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-07-who-is-that-alpaca/index.html">Lesson 07: Who Is That Alpaca?</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 09 (Phase 3, coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 2.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#phase-2-demo">Phase 2 demo</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -148,3 +148,17 @@ Review session on Lessons 01–04. **The Phase 3 reference (POST/PUT/DELETE, val
 - Thomas's review of Phase 1 is finished unless he sends more notes.
 
 **Next:** unchanged from the section above: extend `mentor/reference/` through Phase 3 (POST/PUT/DELETE, validation, exceptions to 400/409), then draft Phase 2 lessons (05–08) in the new format (short idea box only where Spring teaches something new, explanations inside the steps, wrestler names, Ilona/Hasi, no Chicago/London labels).
+
+## Status after the Phase 3 reference and Phase 2 lesson draft (2026-11-06)
+**Reference (`mentor/reference/`, 164 tests green, git-ignored):**
+- Domain, test-first: `Herd.removeByName` (boolean), `Herd.replace(Alpaca)` (boolean, swaps by name), `Farm.addPen` rejects duplicate names (`IllegalStateException`). A name-uniqueness rule inside `Herd.addAlpaca` was tried and dropped: it breaks 5 of her existing tests that reuse names.
+- Web: `PenController` gained `POST /pens` (201 + Location), `POST /pens/{pen}/alpacas` (201 + Location, 409 on duplicate name), `PUT /pens/{pen}/alpacas/{name}` (full replace, 404 if missing), `DELETE .../{name}` (204). Records `CreatePenRequest`, `CreateAlpacaRequest`, `UpdateAlpacaRequest` (bean validation, boxed types, fleece colour as String parsed by `FleeceColors.parse`), `AlpacaAlreadyExistsException`. `ApiExceptionHandler` maps `IllegalArgumentException`/`FleeceColorNotFoundException` -> 400, `IllegalStateException`/`AlpacaAlreadyExistsException` -> 409, `MethodArgumentNotValidException` -> 400 with `errors` map, `HttpMessageNotReadableException` -> 400. Tests in `PenChangesTest` (`@DirtiesContext` after each method).
+- Facts in `research/spring-boot-4-findings.md` (Location header with a space throws, DirtiesContext, problem JSON shape, etc.).
+- Not built: architecture test for controller signatures (still undesigned), the London shear lesson reference, PATCH, `GET /pens/{penName}`.
+
+**Phase 2 lessons drafted** in `curriculum/phase-2-reading-the-farm/`: 05 The Pens (`GET /pens`, list of records), 06 The Alpacas of a Pen (`@PathVariable`, `AlpacaResponse.from`, `/alpacas/ready-to-shear`, `fleeceLengthCm` rename, unknown pen shows 500 on purpose), 07 Who Is That Alpaca? (`findByName` -> `Optional` test-first, `AlpacaNotFoundException`, local `@ExceptionHandler`+`@ResponseStatus`; unknown-pen test left red), 08 One Place for Bad News (`@RestControllerAdvice`, `ProblemDetail`, Phase 2 demo). Spring Sprout boxes are one paragraph each (lists, path variables, exceptions, central error handling); explanations sit in the steps. Cast: Ilona asks, Hasi reviews (Lesson 08), wrestler names. Chicago/London unused. Index Phase 2 rows link the four lessons; Lesson 04 nav points to Lesson 05. The 500/404/problem+json behaviours and the local-handler path were verified against the reference (scratch copy for the local handler).
+- Generated with a throwaway script; the HTML is the source from now on. Not yet checked on phone width; not yet reviewed by Thomas.
+
+**Open:** Thomas reviews Lessons 05–08 (do not write Phase 3 lessons before that). Phase 3 needs: reminder that the farm bean is shared between requests (and not thread-safe), `@DirtiesContext` explanation, a two-word name (`Triple H`) as URL-encoding case, 400 vs 409 vs 404 table, optional controller-signature architecture test.
+
+**Next:** incorporate Thomas's feedback on the Phase 2 draft (Lessons 05–08); then draft the Phase 3 lessons (09–13) against the reference, starting with POST/PUT/DELETE and validation.
