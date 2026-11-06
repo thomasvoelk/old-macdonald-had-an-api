@@ -21,26 +21,19 @@
 <h1 id="lesson-01-planting-spring">Lesson 01: Planting Spring</h1>
 
 <h2 id="story">Story</h2>
-<p>Your farm works. It is tested, tidy and correct, but it can only talk to a test class. The neighbour's son has built a phone app that wants to ask Fiona's farm questions, and the only language the app speaks is HTTP. "First," says Fiona, "the farm needs to <em>answer the phone</em>." Time to turn your Java project into a Spring Boot application.</p>
+<p>Your farm works. It is tested, tidy and correct, but it can only talk to a test class. Fiona, your customer, wants more: she wants to check her alpacas from the laptop at her desk, from the iPad in the barn and from her phone out in the pasture, without anyone starting a Java program. A frontend developer on your team will build those screens. "But every screen needs the same thing," says Fiona. "The farm has to <em>answer the phone</em>." The language all those devices speak is HTTP. Time to turn your Java project into a Spring Boot application.</p>
 
 <div class="spring-corner">
-<h2 id="spring-corner">🌱 Spring Corner: what Spring Boot actually does for you</h2>
-<p><strong>Spring Boot</strong> is a bundle of decisions. You say "I want a web application", and it brings a web server (Tomcat), a JSON library (Jackson) and sensible settings, all wired together. You get this through your <code>pom.xml</code> in three pieces:</p>
-<ul>
-<li>the <strong>parent</strong> <code>spring-boot-starter-parent</code> fixes the versions of hundreds of libraries so that they fit together (that is why most dependencies below have no <code>&lt;version&gt;</code>)</li>
-<li>a <strong>starter</strong> is a dependency that pulls in a whole group of libraries: <code>spring-boot-starter-webmvc</code> for "web application with Tomcat and JSON"</li>
-<li>a <strong>test starter</strong> does the same for tests: <code>spring-boot-starter-webmvc-test</code> brings JUnit, AssertJ, Mockito and Spring's test tools</li>
-</ul>
-<p>The entry point is one class annotated with <code>@SpringBootApplication</code>. Its <code>main</code> method calls <code>SpringApplication.run(...)</code>, which starts the web server and creates the <strong>application context</strong>: a container that finds, creates and wires the objects ("beans") of your application. Lesson 02 is about beans.</p>
-<p>The annotation also switches on <strong>component scanning</strong>: Spring looks for its own annotations in the package of that class <em>and everything below it</em>, and nowhere else. Remember that when you choose where the class goes.</p>
-<p>This course uses <strong>Spring Boot 4.1</strong>. Boot 4 renamed several things compared to older tutorials (starter names, test packages, <code>@MockBean</code> is gone), so if a search result looks different from this course, it is probably about Boot 3. Official docs: <a href="https://docs.spring.io/spring-boot/index.html">Spring Boot reference</a>, <a href="https://docs.spring.io/spring-boot/system-requirements.html">system requirements</a>.</p>
+<h2 id="spring-sprout">🌱 Spring Sprout: what Spring Boot is</h2>
+<p><strong>Spring Boot</strong> is like a meal kit. Instead of shopping for every ingredient yourself and hoping they go together, you order one box that already holds everything for the dish. You say "I want a web application", and Spring Boot brings a web server and the other pieces needed, already matched to each other. You order the box in your <code>pom.xml</code>. Today you do three things: order the box, write one small class that starts everything, and write a test that checks it starts. Each step below explains the new words right where you need them.</p>
+<p><small>Spring Boot 4 renamed several things compared to older tutorials. If a search result looks different from this lesson, it is probably about an older version. Official docs: <a href="https://docs.spring.io/spring-boot/index.html">Spring Boot reference</a>, <a href="https://docs.spring.io/spring-boot/system-requirements.html">system requirements</a>.</small></p>
 </div>
 
 <h2 id="your-task">Your Task</h2>
 <p>Make your project a Spring Boot application <strong>without breaking a single existing test</strong>, then start it.</p>
 <ul>
-<li>Change your <code>pom.xml</code>: Spring Boot parent <code>4.1.2</code>, <code>java.version</code> 25, the two starters above, and the Spring Boot Maven plugin</li>
-<li>Create the application class in a new package <code>alpacas.web</code> (the delivery mechanism lives there; the domain stays in <code>alpacas</code>)</li>
+<li>Change your <code>pom.xml</code>: Spring Boot parent <code>4.1.2</code>, <code>java.version</code> 25, two starters, and the Spring Boot Maven plugin (step 2 explains them)</li>
+<li>Create the application class <code>AlpacasApplication</code> in your top package <code>alpacas</code>, next to the domain classes. step 6 explains why there</li>
 <li>Write a <strong>smoke test</strong>: a test that only checks that the whole application starts</li>
 <li>Start the application and look at it from outside</li>
 </ul>
@@ -56,7 +49,8 @@
 <h2 id="getting-started">Getting Started</h2>
 <ol>
 <li>Run <code>mvn test</code> first and note how many tests you have. That number must be the same at the end of this lesson, plus one.</li>
-<li>Edit <code>pom.xml</code>. The parent and the Java version:
+<li><strong>Order the box: edit <code>pom.xml</code>.</strong>
+<p>First, the <strong>parent</strong>. It is the shopping list: it fixes the version of every library so that they all fit together. That is why most dependencies below have no <code>&lt;version&gt;</code>. You also set the Java version here.</p>
 <pre><code class="language-xml">&lt;parent&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
@@ -66,8 +60,7 @@
 &lt;properties&gt;
     &lt;java.version&gt;25&lt;/java.version&gt;
 &lt;/properties&gt;</code></pre>
-</li>
-<li>The dependencies and the plugin:
+<p>Second, the dependencies. A <strong>starter</strong> is one dependency that pulls in a whole group of libraries. <code>spring-boot-starter-webmvc</code> means "everything for a web application". <code>spring-boot-starter-webmvc-test</code> is the same for tests and brings JUnit and AssertJ along. The <strong>Maven plugin</strong> lets you start the application with <code>mvn spring-boot:run</code> later.</p>
 <pre><code class="language-xml">&lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -87,56 +80,56 @@
             &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
         &lt;/plugin&gt;
     &lt;/plugins&gt;
-&lt;/build&gt;</code></pre>
-</li>
+&lt;/build&gt;</code></pre></li>
 <li>Your <code>pom.xml</code> already has JUnit and AssertJ entries from the Java course, and perhaps a <code>maven-compiler-plugin</code> or <code>maven.compiler.*</code> properties. The test starter already brings JUnit and AssertJ <em>in versions that fit together</em>, and the parent sets the compiler level from <code>java.version</code>. Remove your old versions of these and run <code>mvn test</code> again. All old tests should still pass.</li>
 <li>Commit: <code>chore: turn project into a Spring Boot app</code>.</li>
-<li>Now test first. Write the smoke test in <code>src/test/java/alpacas/web/</code>. It fails because there is no application class yet.</li>
-<li>Create the application class in <code>src/main/java/alpacas/web/</code> and make the test pass.</li>
-<li>Run the application (IntelliJ's green arrow next to <code>main</code>, or <code>mvn spring-boot:run</code>). In a second terminal run <code>curl -i http://localhost:8080/</code> (on Windows PowerShell, write <code>curl.exe</code>; the <code>-i</code> makes curl print the response's status line and headers). That is your first real HTTP request. Read what came back: the status line, the headers, the body. (A browser works too, but it hides the status line.) Stop the app with Ctrl+C.</li>
+<li><strong>Test first: a smoke test.</strong>
+<p>A <strong>smoke test</strong> is a test that does not check any behaviour. It only checks that the whole thing <em>starts</em>. The name comes from electronics: you switch a new device on, and if no smoke comes out, it passes the first check. For Spring you write it with the annotation <code>@SpringBootTest</code>, which starts your whole application for the test. It needs no assertion: if the application can't start, the test fails by itself.</p>
+<p>Now write it: in <code>src/test/java/alpacas/</code>, create a test class with <code>@SpringBootTest</code> and one empty test method. It fails, because there is no application to start yet.</p></li>
+<li><strong>Write the application class.</strong>
+<p>Spring Boot needs one class that starts everything: a class annotated with <code>@SpringBootApplication</code> and a <code>main</code> method that calls <code>SpringApplication.run(...)</code>. That starts the web server and sets up your application. Spring looks for your other classes from the package of this class downwards, so it goes into your top package <code>alpacas</code>, next to your <strong>domain</strong> classes (Lesson 02 shows why that matters).</p>
+<p>The <strong>domain</strong> is what your application is all about: a farm, its pens and animals, which properties (attributes) an animal has, and the rules of the farm, such as when an alpaca is ready to shear. <code>Farm</code>, <code>Pen</code>, <code>Herd</code> and <code>Alpaca</code> are your domain classes. Rules change over time: imagine a new veterinary study says an alpaca is already too heavy at 85 kg, where your <code>isHealthyWeight()</code> allows more. You would change that one method, and nothing about web pages or databases would be involved. A good test: the domain would still make sense without any web page or database. Everything we add from now on only brings the domain to the outside world.</p>
+<p>Now write it: create <code>AlpacasApplication</code> in <code>src/main/java/alpacas/</code> and make the test pass.</p></li>
+<li><strong>Start it and look at it from outside.</strong> Run the application (IntelliJ's green arrow next to <code>main</code>, or <code>mvn spring-boot:run</code>). In a second terminal run <code>curl -i http://localhost:8080/</code> (on Windows PowerShell, write <code>curl.exe</code>; the <code>-i</code> makes curl print the response's status line and headers). That is your first real HTTP request. Read what came back: the status line, the headers, the body. (A browser works too, but it hides the status line.) Stop the app with Ctrl+C.</li>
 </ol>
 
-<h2 id="your-test-list">📋 Your Test List</h2>
-<p>Write your list first. It is short today.</p>
-<details>
-<summary>📋 Check your test list (open only after writing your own)</summary>
-<h3>Acceptance Criteria</h3>
+<h2 id="your-test-list">📋 No Test List Today</h2>
+<p>A test list is for thinking through <em>scenarios</em> before you write a test: which cases, which edge cases, what could go wrong. Today there are no scenarios. It is technical setup, and the only test is a smoke test that says "the application starts". So there is nothing to brainstorm. From Lesson 02 on, the test list is back.</p>
+<p>Use this checklist instead. You are done when all of it is true:</p>
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> All your old tests still pass after the <code>pom.xml</code> change, <strong>before</strong> any Spring class exists</label></li>
-<li class="task-list-item"><label><input type="checkbox"> A <code>@SpringBootTest</code> test with an empty body starts the application context and passes</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A <code>@SpringBootTest</code> test with an empty body starts the application and passes</label></li>
 <li class="task-list-item"><label><input type="checkbox"> The same test fails (red) while no <code>@SpringBootApplication</code> class exists</label></li>
 <li class="task-list-item"><label><input type="checkbox"> The running application answers on port 8080 with a <code>404</code> for <code>/</code>, because you have not mapped anything yet</label></li>
 </ul>
-</details>
 
 <h2 id="hints">Hints</h2>
 <details>
 <summary>Hint 1</summary>
-<p>A smoke test says: "if the whole thing can start, nothing is badly broken". It needs no assertion. If the context can't start, the test fails by itself. Which annotation from <code>spring-boot-starter-test</code> starts an application context for a test?</p>
+<p>Look at step 5 again: one annotation starts your whole application for a test, and an empty test method is enough. It comes with <code>spring-boot-starter-webmvc-test</code>. Which one is it, and what does the test fail with while the application class doesn't exist yet?</p>
 </details>
 
 <details>
 <summary>Hint 2</summary>
-<p>The test annotation is <code>@SpringBootTest</code> (package <code>org.springframework.boot.test.context</code>). It searches <em>upwards</em> from the test's package for a class annotated with <code>@SpringBootApplication</code>. So the test and the application class should live in the same package, or the test in a package below it.</p>
+<p>The test annotation is <code>@SpringBootTest</code> (package <code>org.springframework.boot.test.context</code>). It searches <em>upwards</em> from the test's package for a class annotated with <code>@SpringBootApplication</code>. So put the test in <code>alpacas</code>, next to the application class.</p>
 </details>
 
 <details>
 <summary>Hint 3</summary>
-<p>The application class is tiny: a class annotated with <code>@SpringBootApplication</code> and a <code>public static void main(String[] args)</code> that calls <code>SpringApplication.run(YourClass.class, args)</code>. Both come from <code>org.springframework.boot</code> (<code>org.springframework.boot.autoconfigure.SpringBootApplication</code> and <code>org.springframework.boot.SpringApplication</code>). Name it <code>AlpacasApplication</code> and put it in <code>alpacas.web</code>.</p>
+<p>The application class is tiny: a class annotated with <code>@SpringBootApplication</code> and a <code>public static void main(String[] args)</code> that calls <code>SpringApplication.run(YourClass.class, args)</code>. Both come from <code>org.springframework.boot</code> (<code>org.springframework.boot.autoconfigure.SpringBootApplication</code> and <code>org.springframework.boot.SpringApplication</code>). Name it <code>AlpacasApplication</code> and put it in <code>alpacas</code>.</p>
 </details>
 
 <h2 id="when-youre-done">When You're Done</h2>
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> <code>mvn test</code> is green: all your old tests plus the smoke test</label></li>
 <li class="task-list-item"><label><input type="checkbox"> The app starts, and you saw the <code>404</code> status line with <code>curl -i</code></label></li>
-<li class="task-list-item"><label><input type="checkbox"> No class in <code>alpacas</code> (outside <code>alpacas.web</code>) imports anything from <code>org.springframework</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> Two commits at least: the <code>pom.xml</code> change, and the smoke test with the application class</label></li>
 </ul>
 
 <h2 id="reflect">Reflect</h2>
 <ul>
 <li>Why do most dependencies in the <code>pom.xml</code> have no version number?</li>
-<li>What happens to a bean annotation placed in a package <em>outside</em> <code>alpacas.web</code>? Why did we choose that package for the application class?</li>
+<li>Your domain classes and the application class now share the package <code>alpacas</code>. Which kinds of code would you like to keep in separate packages below it later, and why?</li>
 <li>The app answered even though you wrote no endpoint. What answered, and where did it come from?</li>
 </ul>
 
@@ -162,11 +155,11 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
-        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">Spring Sprout</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
-        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 No Test List Today</a></li>
         <li><a class="toc-l2" href="#hints">Hints</a></li>
         <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
         <li><a class="toc-l2" href="#reflect">Reflect</a></li>

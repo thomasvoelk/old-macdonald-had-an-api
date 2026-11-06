@@ -273,3 +273,9 @@ All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
 
 - Added `FarmConfigTest` (`@SpringBootTest`, `@Autowired Farm`) to `mentor/reference/`; passes with `FarmControllerTest` and `AlpacasApplicationTests`. Lesson 03's test list rests on it.
 - Running app (`mvn spring-boot:run`, Boot 4.1.2): `GET /farm` returns `{"name":"Fiona's Farm","pens":2,"alpacas":2}`; `GET /` with no mapping returns `404` with a **JSON** body (`{"timestamp":...,"status":404,"error":"Not Found","path":"/"}`), not an HTML Whitelabel page, when called with curl. Lesson 02 only says "a 404".
+
+## Verified in the review session (2026-11-06, evening)
+
+- Reference now has `AlpacasApplication` in package `alpacas` (top package) and its smoke test in `alpacas`; `@WebMvcTest(FarmController.class)` + `@Import(FarmConfig.class)` in `alpacas.web` still find it (search upwards). 145 tests green.
+- Component scanning from `alpacas`: a `@Configuration` class in `alpacas.web` is found; the same class moved to a package outside `alpacas` (e.g. `config`) is not found, `@SpringBootTest` + `@Autowired Farm` then fails with `NoSuchBeanDefinitionException: No qualifying bean of type 'alpacas.Farm' available`. Moving it within `alpacas` passes.
+- Sample data renamed: Lita, Batista, pens Ring and Cell (all tests adjusted; path matching stays case-insensitive: `/pens/ring/alpacas` works).

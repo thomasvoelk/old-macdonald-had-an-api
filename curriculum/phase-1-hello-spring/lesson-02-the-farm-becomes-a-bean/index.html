@@ -24,35 +24,56 @@
 <p>The server is up, but it answers every question with "no idea". It has no farm. Until now, <em>you</em> wrote <code>new Farm("Fiona's Farm")</code> in your tests. In a web application, many requests arrive over time and they all must talk to <strong>the same farm</strong>. Someone has to create it once and hand it to whoever needs it. In Spring, that someone is Spring.</p>
 
 <div class="spring-corner">
-<h2 id="spring-corner">🌱 Spring Corner: beans and dependency injection</h2>
-<p>A <strong>bean</strong> is an object that Spring creates and manages for you. Spring keeps all beans in the <strong>application context</strong> (the container you started in Lesson 01). When one object needs another, it doesn't create it with <code>new</code>; it <em>asks for it in its constructor</em> and Spring passes it in. This is <strong>dependency injection</strong>: the object receives its dependencies instead of building them.</p>
-<p>You know the idea already from the Java course: a <code>Pen</code> gets its <code>Herd</code> through the constructor instead of creating it. Spring just automates the "who builds it and who passes it in" part for the whole application.</p>
-<p>There are two main ways to tell Spring about a bean:</p>
-<ul>
-<li>put an annotation (like <code>@RestController</code> or <code>@Component</code>) on <strong>your own class</strong>. Spring finds it by component scanning</li>
-<li>write a <code>@Configuration</code> class with a method annotated <code>@Bean</code>. The method <em>builds the object</em> and Spring keeps what it returns</li>
-</ul>
-<p>Why does this lesson use the second way? Because <code>Farm</code> is a <strong>domain class</strong>, and domain classes <strong>never import Spring</strong>. You can't put <code>@Component</code> on it. A <code>@Bean</code> method in the web layer lets Spring manage a class that doesn't know Spring exists.</p>
-<p>By default a bean is a <strong>singleton</strong>: one instance, shared. That is exactly what we want here: one farm. (It also means the farm is shared between requests, which we'll keep in mind in Phase 3 when requests start changing it.)</p>
+<h2 id="spring-sprout">🌱 Spring Sprout: beans</h2>
+<p>You know how objects come to life: <code>new Farm("Fiona's Farm")</code> calls the constructor and gives you a new object. Almost everything in your application is still created the way you know: you write <code>new Alpaca(...)</code> and <code>new Pen(...)</code> yourself. But a few objects are special because the <em>whole application</em> shares them. The farm is one of them. Spring takes care of those. An object that Spring creates and keeps for everybody is called a <strong>bean</strong>. Spring creates it <em>once</em>, and everybody who asks for it gets that same object: one farm, shared by all requests.</p>
+<figure class="diagram" style="margin:16px auto;max-width:520px;text-align:center">
+<svg viewBox="0 0 520 340" role="img" aria-label="FarmConfig builds a Farm and hands it to Spring. Spring keeps it and hands the same Farm to your test." style="width:100%;height:auto;display:block;font-family:inherit;font-size:14px">
+<defs><marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--grape-700,#A30F54)"/></marker></defs>
+<rect x="150" y="8" width="220" height="58" rx="12" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="32" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">FarmConfig</text>
+<text x="260" y="52" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">farm() builds the Farm</text>
+<line x1="260" y1="68" x2="260" y2="112" style="stroke:var(--grape-700,#A30F54);stroke-width:2" marker-end="url(#arrow-head)"/>
+<text x="274" y="95" style="fill:var(--plum,#2B1B28)">1 · builds it, hands it over</text>
+<rect x="60" y="114" width="400" height="104" rx="16" style="fill:var(--cream,#FFF0F6);stroke:var(--grape,#FF2E93);stroke-width:2;stroke-dasharray:6 4"/>
+<text x="78" y="138" font-weight="700" style="fill:var(--grape-700,#A30F54)">Spring keeps the beans</text>
+<rect x="180" y="150" width="160" height="52" rx="10" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="173" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">Farm</text>
+<text x="260" y="192" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">"Fiona's Farm"</text>
+<line x1="260" y1="220" x2="260" y2="264" style="stroke:var(--grape-700,#A30F54);stroke-width:2" marker-end="url(#arrow-head)"/>
+<text x="274" y="247" style="fill:var(--plum,#2B1B28)">2 · hands the same Farm to the asker</text>
+<rect x="150" y="266" width="220" height="58" rx="12" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="290" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">Your test</text>
+<text x="260" y="310" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">@Autowired Farm farm</text>
+</svg>
+<figcaption style="font-size:14px;color:var(--fg-2,#5E4659)">The farm is built once, in one place. Whoever needs it asks Spring for it.</figcaption>
+</figure>
+<p>Today you do both halves of the picture: first you <em>ask</em> Spring for the farm (in a test), then you <em>teach</em> Spring how to build it. Each step below explains the new words right where you need them.</p>
 <p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/core/beans/introduction.html">Introduction to the Spring IoC container and beans</a>, <a href="https://docs.spring.io/spring-framework/reference/core/beans/java/bean-annotation.html">Using the <code>@Bean</code> annotation</a>.</p>
 </div>
 
 <h2 id="your-task">Your Task</h2>
-<p>Let Spring create <strong>one</strong> <code>Farm</code> named <code>"Fiona's Farm"</code> with two pens: <code>Meadow</code> (two alpacas: Dolly, 70 kg, 4 cm, white, and Pedro, 80 kg, 10 cm, brown) and <code>Hilltop</code> (empty). Put the code that builds it in a configuration class in <code>alpacas.web</code>.</p>
+<p>Let Spring create <strong>one</strong> <code>Farm</code> named <code>"Fiona's Farm"</code> with two pens: <code>Ring</code> (two alpacas: Lita, 70 kg, 4 cm, white, and Batista, 80 kg, 10 cm, brown) and <code>Cell</code> (empty). Spring has to be taught how to build it; step 2 below shows how.</p>
 <p>This is sample data for now. Phase 4 replaces it with a database.</p>
 
 <h2 id="learning-goals">Learning Goals</h2>
 <ul>
-<li>Explain what a bean is and what the application context does</li>
+<li>Explain what a bean is and why Spring builds the farm only once</li>
 <li>Define a bean with a <code>@Configuration</code> class and a <code>@Bean</code> method</li>
-<li>Explain why a domain class is registered this way instead of by annotating it</li>
+<li>Explain why Spring needs your code to build the farm</li>
 <li>Test that a bean exists, with <code>@SpringBootTest</code> and <code>@Autowired</code></li>
 </ul>
 
 <h2 id="getting-started">Getting Started</h2>
 <ol>
-<li>Test first. In <code>src/test/java/alpacas/web/</code> create a test class for your configuration. It is a <code>@SpringBootTest</code> that receives the farm with <code>@Autowired</code> (a field is fine in tests). It fails to start because there is no <code>Farm</code> bean.</li>
-<li>Make the first test pass with the smallest configuration class you can.</li>
+<li><strong>Test first: ask Spring for the farm.</strong>
+<p>Remember the three parts of a test from Java Lesson 03: <em>arrange</em>, <em>act</em>, <em>assert</em>. In the arrange part you have always built the objects yourself with <code>new</code>, constructor and all. For an object that Spring manages, that part is taken care of: Spring has already built it. So the arrange part becomes "ask Spring for it". You do that with a <strong>field</strong> (a variable that belongs to a class, also called an <em>attribute</em>, German: <em>Attribut</em>) and the annotation <code>@Autowired</code>:</p>
+<pre><code class="language-java">@Autowired
+Farm farm;</code></pre>
+<p><code>@Autowired</code> means: "Spring, fill in this field with the bean of this type." Act and assert stay as you know them: you use the field like any other farm, for example <code>farm.getName()</code>. Two things have to be true for it to work. The test class needs <code>@SpringBootTest</code>, which starts your application first so that the beans exist. And Spring needs to have a <code>Farm</code> bean.</p>
+<p>Now write it: in <code>src/test/java/alpacas/web/</code>, create a test class for your configuration, annotated with <code>@SpringBootTest</code>, with the field above and a test that checks the farm's name. It fails right at the start with an error that says there is no <code>Farm</code> bean. That is your red test.</p></li>
+<li><strong>Teach Spring to build the farm.</strong>
+<p>Spring can't invent the farm's name, its pens or its alpacas, so you write the building code yourself. You put it into a <strong>configuration class</strong>: a class annotated with <code>@Configuration</code> that has a method annotated with <code>@Bean</code>. The method builds the object with plain Java, with the <code>new</code> you already know (<code>new Farm(...)</code>, <code>new Pen(...)</code>), and returns it. Spring calls the method once and keeps what it returns. That kept object is the bean from the picture above.</p>
+<p>Now write it: create <code>FarmConfig</code> in <code>alpacas.web</code> and make the first test pass with the smallest configuration you can. (Spring only finds the class if it lives in the right package. The Reflect section at the end lets you try that out.)</p></li>
 <li>Add the second test (the pens) and make it pass.</li>
 <li>Look at the fields you used with <code>@Autowired</code> in the test. In <strong>production</strong> code you will get your dependencies through the <strong>constructor</strong> instead. Lesson 03 does that.</li>
 <li>Commit after every green test.</li>
@@ -63,18 +84,17 @@
 <summary>📋 Check your test list (open only after writing your own)</summary>
 <h3>Acceptance Criteria</h3>
 <ul>
-<li class="task-list-item"><label><input type="checkbox"> The application context contains a <code>Farm</code>, named <code>"Fiona's Farm"</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> Spring has a <code>Farm</code> bean, and the farm is named <code>"Fiona's Farm"</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> The farm has two pens</label></li>
 <li class="task-list-item"><label><input type="checkbox"> <em>(optional)</em> The farm holds two alpacas in total</label></li>
 <li class="task-list-item"><label><input type="checkbox"> The smoke test from Lesson 01 is still green</label></li>
-<li class="task-list-item"><label><input type="checkbox"> <code>Farm</code>, <code>Pen</code>, <code>Herd</code> and <code>Alpaca</code> still don't import anything from Spring</label></li>
 </ul>
 </details>
 
 <h2 id="hints">Hints</h2>
 <details>
 <summary>Hint 1</summary>
-<p>You can't annotate <code>Farm</code> itself. So where can the knowledge "this is how a Farm is built" live, in code that is allowed to know Spring?</p>
+<p>Spring can't invent the farm's name or its pens. So where should the code live that builds the sample farm, and how does Spring learn about it?</p>
 </details>
 
 <details>
@@ -91,15 +111,15 @@
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
 <li class="task-list-item"><label><input type="checkbox"> Exactly one place in your code builds the sample farm</label></li>
-<li class="task-list-item"><label><input type="checkbox"> The domain package still has no Spring imports</label></li>
 <li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
 </ul>
 
 <h2 id="reflect">Reflect</h2>
 <ul>
 <li>What would go wrong if every request did <code>new Farm(...)</code> itself?</li>
-<li>What did you gain by not putting <code>@Component</code> on <code>Farm</code>? What would you lose if you did?</li>
+<li>Why can't Spring just build a <code>Farm</code> on its own? What does your <code>@Bean</code> method provide that Spring cannot invent?</li>
 <li>If two classes both ask for a <code>Farm</code> in their constructors, how many farms exist?</li>
+<li>Try it: move <code>FarmConfig</code> into a new package <code>config</code> outside <code>alpacas</code> and run your test. What happens? Then read why: Spring looks for your configuration classes only in the package of your <code>@SpringBootApplication</code> class (<code>AlpacasApplication</code>, in <code>alpacas</code>) <em>and the packages below it</em>. This is called <strong>component scanning</strong>. Move <code>FarmConfig</code> back afterwards.</li>
 </ul>
 
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
@@ -124,7 +144,7 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
-        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">Spring Sprout</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>

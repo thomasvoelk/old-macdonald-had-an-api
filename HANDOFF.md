@@ -111,3 +111,32 @@ Full, sourced findings: `research/spring-boot-4-findings.md` (read its "Could no
 - Not yet run by hand: the Lesson 04 rename experiment in IntelliJ (reasoning: `countPens()` is not a getter, so `pensCount` vanishes from the leaky JSON and the `$.pensCount` test fails).
 - Follow-up (same day, Thomas): Lesson 03 now opens with a short **"HTTP in two minutes"** section (request = method + path, response = status + body, headers in one sentence, real `curl -v` output, table mapping HTTP parts to `MockMvcTester` calls, note that older tutorials say "content" for body); its Spring Corner lost the HTTP paragraph. Lesson 01 now asks for `curl -i` so the recap points back to something she has seen. The `curl -v /farm` output in the lesson was captured from the running reference.
 - **Next:** Thomas reviews the revised Phase 1 draft; then extend the reference solution through Phase 3 and draft Phase 2 lessons (05–08). Phase 2's first DTO text must not repeat the principle from Lesson 04, only apply it.
+
+## Status after Thomas's second review of Phase 1 (2026-11-06, evening)
+Review session on Lessons 01–04. **The Phase 3 reference (POST/PUT/DELETE, validation, 400/409) was NOT started**; Thomas spent the session on the lesson text. Decisions (all by Thomas, supersede earlier notes where they conflict):
+
+**Story and domain**
+- Fiona is the **customer**, the apprentice is the contractor. Fiona wants her farm on laptop, iPad and phone; "a frontend developer on your team" builds the screens (replaces the neighbour's son / phone app). Lessons 01, 03, 04 reworded.
+- Sample data uses **wrestler names from her own repo**: Lita (70 kg, 4 cm, white), Batista (80 kg, 10 cm, brown); pens **Ring** (both alpacas) and **Cell** (empty). One-word names on purpose (no `%20` in URLs yet). Farm stays "Fiona's Farm". A later lesson may use a two-word wrestler as a deliberate URL-encoding case. Old names (Dolly, Pedro, Meadow, Hilltop) remain only in older HANDOFF/research entries.
+- "Domain" is now explained in plain words at first use (Lesson 01, step 6): what the application is about (farm, animals, attributes, rules), "would make sense without web or database", and a rule-change example (a new veterinary study lowers the healthy-weight limit). No German terms. Also glossed in Lessons 03 and 04. "Field" now carries "also called attribute, German Attribut" (Lessons 02, 03).
+
+**Architecture (supersedes "domain never imports Spring")**
+- Spring annotations in domain classes are **allowed**; the Phase 3 "domain has no Spring imports" architecture test is dropped. Separation is by place: domain in `alpacas`, web in `alpacas.web`, later SQL in `alpacas.sql`. **`AlpacasApplication` lives in the top package `alpacas`** (option A: her domain stays where it is). No formal layers/hexagonal in this course; Thomas may introduce that later. Still holds: controllers never accept or return domain objects. The Phase 3 architecture test, if kept, checks controller signatures only (not designed yet).
+- Reference: `AlpacasApplication` and its smoke test moved to package `alpacas`; **145 tests green**. `FarmConfig` stays in `alpacas.web`.
+- Lesson 02 Reflect experiment: moving `FarmConfig` into a package **outside `alpacas`** (e.g. `config`) fails with `NoSuchBeanDefinitionException ... 'alpacas.Farm'` (verified on a copy); moving it within `alpacas` passes.
+
+**Lesson format (new rule: explain where it is used)**
+- The box at the top of each lesson carries the **idea only** and is short. How-to explanations move into the Getting Started step that uses them, so she never scrolls back. Lessons 01–04 restructured this way (Lesson 02 was the pilot). Lesson 04's principle (contract vs. model, separation of concerns) comes **after** the rename experiment ("What you just felt"), keeping experience first.
+- Box names: **Spring Sprout** 🌱 (pink; was "Spring Corner") and **Barn Briefing** 🚜 (teal; background that is not Spring, first use: HTTP in Lesson 03). CSS classes unchanged (`.spring-corner`, `.concept-corner`). **Llama Drama** is reserved for a future common-mistakes box (warm colour). Recorded in DESIGN.md.
+- Lesson 03: HTTP section is now a Barn Briefing with a request/response diagram (client: browser, phone, curl, your test). `MockMvcTester` is explained as a "fake browser" (no display, no real server). The `@WebMvcTest` slice explanation was cut to "annotate your test with this, because ...".
+- Lesson 01: no test list ("No Test List Today") but a visible checklist; the smoke test is explained in step 5, not in a hint. Lesson 02: `@Autowired` explained via arrange/act/assert (her Java Lesson 03); singleton, dependency injection and "application context" dropped from Lesson 02 (DI moved to Lesson 03, tied to constructors she knows).
+- Diagrams are inline SVG using the course tokens (Lesson 02 and 03 bean pictures, Lesson 03 HTTP picture).
+- **Chicago/London names are not used in Phases 1–2** (index and Lesson 03 cleaned). They get introduced in the Phase 3 explanation lesson right before the London lesson; that lesson should start from "you already worked inside-out" (maybe an excursion page, Thomas's idea). DESIGN.md updated.
+
+**Still open / to do**
+- Phase 3 must bring back the note that the shared farm bean is shared between requests (dropped from Lesson 02 together with the word "singleton").
+- Thomas has not finished reviewing Lessons 03 and 04 in detail; not yet checked on a phone-width screen (long list items in Getting Started, small diagram text).
+- Small known nit: the "Copy" button on the `curl -v` block in Lesson 03 overlaps the first annotation; fix by removing/moving the right-hand annotations.
+- Possible tidy-up: the Spring Sprout in Lesson 02 is shorter now; check the Lesson 04 sprout is not too thin.
+
+**Next:** extend `mentor/reference/` through Phase 3 (POST/PUT/DELETE, validation, exceptions to 400/409; open items: `@Valid` exception type, request records with mapping), then draft Phase 2 lessons (05–08) in the new format (idea box + explanations in the steps; wrestler names; no Chicago/London labels). Finish Thomas's review of Lessons 03–04 first if he has more notes.

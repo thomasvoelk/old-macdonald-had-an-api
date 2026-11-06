@@ -32,7 +32,7 @@
 <li>Testing controllers with <code>@WebMvcTest</code> and MockMvc, test-first</li>
 <li>Turning exceptions into proper error responses (400, 404, 409)</li>
 <li>Validating input</li>
-<li>Two ways of driving a design: Chicago (inside-out) and London (outside-in)</li>
+<li>Starting a feature from the inside or from the outside, and how mocks help when you start from the outside</li>
 <li>Storing the farm in PostgreSQL with <code>JdbcClient</code> and plain SQL</li>
 <li>Documenting your API with Swagger UI</li>
 </ul>
@@ -46,7 +46,8 @@
 <p>Every lesson has the same shape as in the Java curriculum:</p>
 <ul>
 <li><strong>Story</strong> — what Fiona needs this time</li>
-<li><strong>Spring Corner</strong> — a short box explaining the Spring idea you need, with a link to the official docs. Spring concepts can't be discovered by trial and error, so you read first</li>
+<li><strong>🌱 Spring Sprout</strong> — a short box explaining the Spring idea you need, with a link to the official docs. Spring concepts can't be discovered by trial and error, so you read first. Later steps explain new words again right where you use them</li>
+<li><strong>🚜 Barn Briefing</strong> — a short box with background that is not Spring itself, for example how HTTP works</li>
 <li><strong>Your Task</strong>, <strong>Learning Goals</strong>, <strong>Getting Started</strong></li>
 <li><strong>Test List</strong> — the behaviour to build, one test at a time; the acceptance criteria are hidden until you want them</li>
 <li><strong>Hints</strong> — three, escalating</li>
@@ -54,9 +55,9 @@
 </ul>
 <h3 id="the-one-rule">The one rule</h3>
 <blockquote>
-<p><strong>Your domain classes never import Spring.</strong> Spring is the delivery mechanism around the farm. The farm doesn't know it is on the web.</p>
+<p><strong>A controller never accepts or returns a domain object.</strong> The farm and the way it is shown on the web are different concerns.</p>
 </blockquote>
-<p>Everything under <code>alpacas.web</code> may use Spring. Everything else may not. From Lesson 04 on, a controller never accepts or returns a domain object; it has its own request and response types. You'll feel why in Lessons 03 and 04, and an architecture test will hold you to it later.</p>
+<p>We keep the code in separate places: the domain in <code>alpacas</code>, the web code in <code>alpacas.web</code>, later the SQL code in its own package. From Lesson 04 on, a controller has its own request and response types. You'll feel why in Lessons 03 and 04, and an architecture test will hold you to it later.</p>
 <h3 id="how-we-test">How we test</h3>
 <ul>
 <li>Domain code: plain JUnit, as before</li>
@@ -66,7 +67,7 @@
 </ul>
 <h3 id="when-youre-stuck">When you're stuck</h3>
 <ol>
-<li>Re-read the Spring Corner and the official docs link — is there an idea you skimmed past?</li>
+<li>Re-read the Spring Sprout and the official docs link — is there an idea you skimmed past?</li>
 <li>Open <strong>Hint 1</strong>, then <strong>Hint 2</strong>, then <strong>Hint 3</strong></li>
 <li>Still stuck? Use GitHub Copilot Chat with the prompt at the bottom of the lesson</li>
 </ol>
@@ -94,7 +95,7 @@
 
 <h3 id="phase-1-hello-spring">Phase 1 — Hello Spring <em>(Lessons 01–04)</em></h3>
 <blockquote>
-<p>Style: Chicago (inside-out). Core concepts: Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc, and what happens when the domain leaks into the API</p>
+<p>Core concepts: Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc, and what happens when the domain leaks into the API</p>
 </blockquote>
 <table>
 <thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
@@ -108,7 +109,7 @@
 
 <h3 id="phase-2-reading-the-farm">Phase 2 — Reading the Farm <em>(Lessons 05–08)</em></h3>
 <blockquote>
-<p>Style: Chicago. Needs Java Lessons 21 (records) and 22 (<code>Optional</code>). Core concepts: <code>GET</code> endpoints, response records and mapping, <code>Optional</code> to 404, <code>@RestControllerAdvice</code></p>
+<p>Needs Java Lessons 21 (records) and 22 (<code>Optional</code>). Core concepts: <code>GET</code> endpoints, response records and mapping, <code>Optional</code> to 404, <code>@RestControllerAdvice</code></p>
 </blockquote>
 <table>
 <thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
@@ -119,12 +120,12 @@
 
 <h3 id="phase-3-changing-the-farm">Phase 3 — Changing the Farm <em>(Lessons 09–13)</em></h3>
 <blockquote>
-<p>Style: Chicago, then London. Core concepts: <code>POST</code>/<code>PUT</code>/<code>DELETE</code>, validation, exceptions to 400/409, an architecture test, London vs. Chicago</p>
+<p>Core concepts: <code>POST</code>/<code>PUT</code>/<code>DELETE</code>, validation, exceptions to 400/409, an architecture test, London vs. Chicago</p>
 </blockquote>
 <table>
 <thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
 <tbody>
-<tr><td>09–13</td><td>Create, change and remove things; reject bad input; guard the "no Spring in the domain" rule with a test; then build <code>POST /pens/{pen}/alpacas/{name}/shear</code> outside-in with your first mock</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+<tr><td>09–13</td><td>Create, change and remove things; reject bad input; guard the "controllers never return domain objects" rule with a test; then build <code>POST /pens/{pen}/alpacas/{name}/shear</code> outside-in with your first mock</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
 </tbody>
 </table>
 <p><strong>Side Quest (optional):</strong> the Clean Coders series <a href="https://cleancoders.com/series/comparativeDesign">Comparative Design</a> compares outside-in and inside-out designs of the same app. It is long and entirely optional.</p>

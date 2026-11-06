@@ -20,15 +20,34 @@
       <article class="markdown">
 <h1 id="lesson-03-the-first-request">Lesson 03: The First Request</h1>
 
-<blockquote>
-<p>Style for this phase: Chicago (inside-out). We start from the domain you already have and build outwards, one small test at a time.</p>
-</blockquote>
-
 <h2 id="story">Story</h2>
-<p>The phone app's first question is the simplest one: <em>"What is this farm?"</em> You already have a <code>Farm</code> object that knows exactly that, and Spring can now hand it to a controller. So the quickest way to answer is to return the farm itself. Let's do the simplest thing that could work, and then take a good look at what comes out.</p>
+<p>Fiona's first question for her screens is the simplest one: <em>"What is this farm?"</em> You already have a <code>Farm</code> object that knows exactly that, and Spring can now hand it to a controller. So the quickest way to answer is to return the farm itself. Let's do the simplest thing that could work, and then take a good look at what comes out.</p>
 
-<h2 id="http-in-two-minutes">HTTP in two minutes</h2>
+<div class="concept-corner">
+<h2 id="http-in-two-minutes">🚜 Barn Briefing: HTTP in two minutes</h2>
 <p>Before any Spring: what actually happens when a browser, a phone app or <code>curl</code> talks to a server? It is always the same conversation: <strong>one request, one response</strong>. The server does nothing until a request arrives.</p>
+<figure class="diagram" style="margin:16px auto;max-width:520px;text-align:center">
+<svg viewBox="0 0 520 250" role="img" aria-label="A client (browser, phone, curl or your test) sends a request, for example GET /farm, to the server. The server sends back a response, for example 200 with a JSON body." style="width:100%;height:auto;display:block;font-family:inherit;font-size:14px">
+<defs><marker id="http-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:#0A6B60"/></marker></defs>
+<rect x="8" y="30" width="120" height="170" rx="14" style="fill:var(--paper,#FFFCFD);stroke:#0A6B60;stroke-width:2"/>
+<text x="68" y="96" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">Client</text>
+<text x="68" y="118" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">browser,</text>
+<text x="68" y="136" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">phone, curl,</text>
+<text x="68" y="154" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">your test</text>
+<rect x="392" y="30" width="120" height="170" rx="14" style="fill:var(--paper,#FFFCFD);stroke:#0A6B60;stroke-width:2"/>
+<text x="452" y="104" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">Server</text>
+<text x="452" y="126" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">your Spring</text>
+<text x="452" y="144" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">application</text>
+<text x="260" y="60" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">1 · Request</text>
+<line x1="134" y1="72" x2="386" y2="72" style="stroke:#0A6B60;stroke-width:2" marker-end="url(#http-arrow)"/>
+<text x="260" y="92" text-anchor="middle" style="fill:var(--plum,#2B1B28)">method + path: GET /farm</text>
+<text x="260" y="146" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">2 · Response</text>
+<line x1="386" y1="158" x2="134" y2="158" style="stroke:#0A6B60;stroke-width:2" marker-end="url(#http-arrow)"/>
+<text x="260" y="178" text-anchor="middle" style="fill:var(--plum,#2B1B28)">status + body: 200 + JSON</text>
+<text x="260" y="232" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">Both sides can add headers: small labelled extras.</text>
+</svg>
+<figcaption style="font-size:14px;color:var(--fg-2,#5E4659)">One request, one response. The server does nothing until a request arrives.</figcaption>
+</figure>
 <ul>
 <li>A <strong>request</strong> says <em>what</em> to do and <em>to which resource</em>: a <strong>method</strong> (<code>GET</code> = "give me") and a <strong>URL path</strong> (<code>/farm</code>). The server looks for the code that is responsible for exactly that pair, <code>GET /farm</code>.</li>
 <li>A <strong>response</strong> says how it went and what came out: a <strong>status code</strong> (<code>200</code> = ok, <code>404</code> = nothing is responsible for this method and path) and usually a <strong>body</strong>, here JSON.</li>
@@ -56,22 +75,17 @@
 </tbody>
 </table>
 <p>Older tutorials call the body the <em>content</em> (<code>content()</code> matchers, <code>getContentAsString()</code>). It is the same thing.</p>
+</div>
 
 <div class="spring-corner">
-<h2 id="spring-corner">🌱 Spring Corner: controllers, JSON and testing the web layer</h2>
-<p>A <strong>REST API</strong> is a program that answers such requests. A <strong>controller</strong> is a bean whose methods answer them. Two annotations do the work:</p>
-<ul>
-<li><code>@RestController</code> on the class: "this is a controller, and what its methods return becomes the response body"</li>
-<li><code>@GetMapping("/farm")</code> on a method: "call this method for <code>GET /farm</code>"</li>
-</ul>
-<p>The method returns a Java object and Spring turns it into JSON using a library called <strong>Jackson</strong>. By default Jackson writes one JSON field for every <strong>public getter</strong> (<code>getName()</code> becomes <code>"name"</code>, <code>isHealthyWeight()</code> becomes <code>"healthyWeight"</code>) and for every <strong>public field</strong>. It calls those methods for real, on real objects. The controller gets the <code>Farm</code> through its <strong>constructor</strong>: that is the dependency injection from Lesson 02.</p>
-<p><strong>Testing it.</strong> Starting the whole application for every test is slow. <code>@WebMvcTest(FarmController.class)</code> starts only the web layer: that controller, the JSON conversion and the request routing, and <em>no other beans</em>. Inside it you get a <code>MockMvcTester</code>: it sends a fake request to the controller without starting a server and gives you the response to check with AssertJ, a style you already know. Because the slice contains only web beans, you load the farm configuration with <code>@Import(...)</code>.</p>
-<p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html">Annotated controllers</a>, <a href="https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html">Testing Spring Boot applications</a>. In Boot 4, <code>@WebMvcTest</code> lives in <code>org.springframework.boot.webmvc.test.autoconfigure</code>. Older tutorials show a different package.</p>
+<h2 id="spring-sprout">🌱 Spring Sprout: controllers</h2>
+<p>A <strong>REST API</strong> is a program that answers HTTP requests like the one above. In Spring, the code that answers them lives in a <strong>controller</strong>: a class whose methods are each responsible for one method-and-path pair, such as <code>GET /farm</code>. A controller is a bean, like the farm from Lesson 02. Today you build one controller with one method, and a test that sends it a request. Each step below explains the new words right where you need them.</p>
+<p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html">Annotated controllers</a>, <a href="https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html">Testing Spring Boot applications</a>.</p>
 </div>
 
 <h2 id="your-task">Your Task</h2>
 <p>Build <code>GET /farm</code>. It answers <code>200</code> with JSON for the farm. Keep it as simple as possible: <strong>return the <code>Farm</code> object itself</strong> from the controller method.</p>
-<p>Then look at what comes out. Before you call it the first time, take one minute and <strong>write down what you expect the JSON to look like</strong> (use the Spring Corner rule for getters and public fields). You'll compare in a moment.</p>
+<p>Then look at what comes out. Before you call it the first time, take one minute and <strong>write down what you expect the JSON to look like</strong> (step 4 below explains how Jackson decides what goes in). You'll compare in a moment.</p>
 
 <h2 id="learning-goals">Learning Goals</h2>
 <ul>
@@ -83,9 +97,45 @@
 
 <h2 id="getting-started">Getting Started</h2>
 <ol>
-<li>Test first, in <code>src/test/java/alpacas/web/</code>: a class annotated with <code>@WebMvcTest(FarmController.class)</code> and <code>@Import(FarmConfig.class)</code>, with an <code>@Autowired MockMvcTester mvc</code> field. Send <code>mvc.get().uri("/farm")</code> and assert the status. It does not compile: <code>FarmController</code> doesn't exist.</li>
-<li>Create an empty <code>FarmController</code> so it compiles. The test fails with a <code>404</code>: a good red.</li>
-<li>Make the status pass. Then add one test at a time for the farm's name, its number of pens and the pens themselves, and make each pass. Commit after every green test.</li>
+<li><strong>Test first: send a fake request.</strong>
+<p>A test that sends fake requests to your controller needs three things:</p>
+<ul>
+<li><code>@WebMvcTest(FarmController.class)</code> on the test class: it prepares the test for sending fake requests to that controller</li>
+<li><code>@Import(FarmConfig.class)</code> on the test class: it loads your farm configuration from Lesson 02, so the controller can get its <code>Farm</code></li>
+<li>a field <code>@Autowired MockMvcTester mvc</code>: you ask Spring for it, just like the farm in Lesson 02. Think of it as a <strong>fake browser</strong>: it plays the client on the left of the picture above. It sends a request to your controller and hands you the response, but nothing is displayed and no real server is started. You check the response with AssertJ, a style you already know. The table above shows which call stands for which part of HTTP</li>
+</ul>
+<p>(In Boot 4, <code>@WebMvcTest</code> lives in <code>org.springframework.boot.webmvc.test.autoconfigure</code>. Older tutorials show a different package.)</p>
+<p>Now write it, in <code>src/test/java/alpacas/web/</code>: a test class with the three things above. Send <code>mvc.get().uri("/farm")</code> and assert the status. It does not compile: <code>FarmController</code> doesn't exist.</p></li>
+<li><strong>Create the controller.</strong>
+<p>A controller is a class annotated with <code>@RestController</code>: "this class answers HTTP requests, and what its methods return becomes the response body". Create an empty <code>FarmController</code> with that annotation so the test compiles. The test now fails with a <code>404</code>: the controller exists, but no method is responsible for <code>GET /farm</code> yet. That is a good red.</p></li>
+<li><strong>Answer <code>GET /farm</code>.</strong>
+<p>A method annotated with <code>@GetMapping("/farm")</code> means: "call this method for <code>GET /farm</code>". The method returns a Java object, and Spring turns it into JSON for the response body. The method needs the farm, and it does not build one with <code>new</code>. It asks for it in the controller's <strong>constructor</strong>. Spring creates the controller by calling that constructor, just like your own <code>new</code> would, and passes in the <code>Farm</code> bean from Lesson 02 as the argument:</p>
+<figure class="diagram" style="margin:16px auto;max-width:520px;text-align:center">
+<svg viewBox="0 0 520 340" role="img" aria-label="FarmConfig builds a Farm and hands it to Spring. Spring hands the same Farm to the FarmController through its constructor." style="width:100%;height:auto;display:block;font-family:inherit;font-size:14px">
+<defs><marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--grape-700,#A30F54)"/></marker></defs>
+<rect x="150" y="8" width="220" height="58" rx="12" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="32" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">FarmConfig</text>
+<text x="260" y="52" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">farm() builds the Farm</text>
+<line x1="260" y1="68" x2="260" y2="112" style="stroke:var(--grape-700,#A30F54);stroke-width:2" marker-end="url(#arrow-head)"/>
+<text x="274" y="95" style="fill:var(--plum,#2B1B28)">1 · builds it, hands it over</text>
+<rect x="60" y="114" width="400" height="104" rx="16" style="fill:var(--cream,#FFF0F6);stroke:var(--grape,#FF2E93);stroke-width:2;stroke-dasharray:6 4"/>
+<text x="78" y="138" font-weight="700" style="fill:var(--grape-700,#A30F54)">Spring keeps the beans</text>
+<rect x="180" y="150" width="160" height="52" rx="10" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="173" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">Farm</text>
+<text x="260" y="192" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">"Fiona's Farm"</text>
+<line x1="260" y1="220" x2="260" y2="264" style="stroke:var(--grape-700,#A30F54);stroke-width:2" marker-end="url(#arrow-head)"/>
+<text x="274" y="247" style="fill:var(--plum,#2B1B28)">2 · hands the same Farm to the asker</text>
+<rect x="150" y="266" width="220" height="58" rx="12" style="fill:var(--paper,#FFFCFD);stroke:var(--grape-700,#A30F54);stroke-width:2"/>
+<text x="260" y="290" text-anchor="middle" font-weight="700" style="fill:var(--plum,#2B1B28)">FarmController</text>
+<text x="260" y="310" text-anchor="middle" style="fill:var(--plum-soft,#5E4659)">constructor(Farm farm)</text>
+</svg>
+<figcaption style="font-size:14px;color:var(--fg-2,#5E4659)">Same picture as Lesson 02, with a new asker: the controller.</figcaption>
+</figure>
+<p>This is called <strong>dependency injection</strong>: an object receives what it needs instead of building it. You know the idea from the Java course: a <code>Pen</code> gets its <code>Herd</code> through the constructor instead of creating it. Spring just does the handing-over for the whole application.</p>
+<p>Now write it: make the status test pass. Then add one test at a time for the farm's name, its number of pens and the pens themselves, and make each pass. Commit after every green test.</p></li>
+<li><strong>Predict the JSON.</strong>
+<p>The conversion from object to JSON is done by a library called <strong>Jackson</strong>. By default it writes one entry into the JSON for every <strong>public getter</strong> (<code>getName()</code> becomes <code>"name"</code>, <code>isHealthyWeight()</code> becomes <code>"healthyWeight"</code>) and for every <strong>public field</strong> (a variable of the class, also called an <em>attribute</em>, German <em>Attribut</em>). It calls those methods for real, on real objects.</p>
+<p>Now take one minute: look at your <code>Farm</code>, <code>Pen</code>, <code>Herd</code> and <code>Alpaca</code> classes and <strong>write down what you expect the JSON to look like</strong>.</p></li>
 <li>Start the application and call it by hand: <code>curl http://localhost:8080/farm</code> (Windows PowerShell: <code>curl.exe</code>) or open the URL in a browser. <strong>Read every line of the JSON.</strong> Watch the console of your running application while you call it.</li>
 <li>Create <code>docs/api-notes.md</code> and write down: where was your prediction right, where was it wrong, and what surprised you? Keep it short.</li>
 </ol>
@@ -104,12 +154,12 @@
 <h3>What you should have seen</h3>
 <p>Your exact output depends on your domain, but with the sample farm from Lesson 02 it looks like this (shortened):</p>
 <pre><code class="language-json">{"name":"Fiona's Farm",
- "pens":[{"name":"Meadow",
+ "pens":[{"name":"Ring",
           "herd":{"alpacaCount":2,
-                  "alpacas":[{"name":"Dolly","weight":70.0,"fleeceLength":4,"fleeceColor":"WHITE","healthyWeight":true,"readyToShear":false}, ...],
+                  "alpacas":[{"name":"Lita","weight":70.0,"fleeceLength":4,"fleeceColor":"WHITE","healthyWeight":true,"readyToShear":false}, ...],
                   "alpacasReadyToShear":[ ... ],
                   "capacity":30}},
-         {"name":"Hilltop", "herd":{ ... }}],
+         {"name":"Cell", "herd":{ ... }}],
  "pensCount":2}</code></pre>
 <p>And in the console: a line like <em>"The Alpaca is healthy. 😊"</em> for every alpaca, printed while the response was being built.</p>
 </details>
@@ -117,13 +167,13 @@
 <h2 id="hints">Hints</h2>
 <details>
 <summary>Hint 1</summary>
-<p>The test needs three things: a slice annotation that starts only the web layer, a way to get the farm into that slice, and a tool to send the fake request. Re-read the Spring Corner for each.</p>
+<p>The test needs three things: an annotation that prepares it for fake requests to your controller, a way to get your farm configuration into it, and a tool to send the fake request. Re-read step 1.</p>
 </details>
 
 <details>
 <summary>Hint 2</summary>
 <p>Imports for Boot 4: <code>org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest</code>, <code>org.springframework.test.web.servlet.assertj.MockMvcTester</code>, and AssertJ's <code>assertThat</code>. The pattern is <code>assertThat(mvc.get().uri("/farm")).hasStatusOk()</code>. For a field in the JSON, chain <code>.bodyJson().extractingPath("$.name").isEqualTo(...)</code>; <code>$</code> means "the whole JSON document". To count the entries of a list, use a path like <code>"$.pens.length()"</code>.</p>
-<p>If the test fails with an exception about a missing bean for <code>Farm</code>, you haven't told the slice where the farm comes from. Careful: an unrestricted <code>@WebMvcTest</code> loads <em>all</em> controllers, so a missing bean in any of them fails every test in the slice.</p>
+<p>If the test fails with an exception about a missing bean for <code>Farm</code>, you haven't told the test where the farm comes from. Check your <code>@Import</code>.</p>
 </details>
 
 <details>
@@ -141,7 +191,7 @@
 
 <h2 id="reflect">Reflect</h2>
 <ul>
-<li>Did the phone app ask for all of that? Which parts would it never use?</li>
+<li>Did Fiona's screens ask for all of that? Which parts would it never use?</li>
 <li>Your <code>isHealthyWeight()</code> printed to the console during a request that never asked about health. What does that tell you about how Jackson uses your methods?</li>
 <li>Does the JSON contain the total number of alpacas on the farm? Where would a client have to look for it?</li>
 <li>Who now depends on the names <code>getPensCount</code> and <code>getHerd</code>?</li>
@@ -170,7 +220,7 @@
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
         <li><a class="toc-l2" href="#http-in-two-minutes">HTTP in two minutes</a></li>
-        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">Spring Sprout</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>

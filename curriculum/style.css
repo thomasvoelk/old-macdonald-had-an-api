@@ -124,7 +124,7 @@ aside.toc h2 { margin: 0 0 10px; font-family: var(--font-display, Fredoka, sans-
 .status-pill--planned { background: var(--cream-deep, #FFE0EC); color: var(--fg-3, #7A6073); }
 
 
-/* ---- Spring Corner: short concept box that opens every lesson ---- */
+/* ---- Spring Sprout (.spring-corner): short concept box that opens every lesson. Barn Briefing (.concept-corner): same look, for background that is not Spring (e.g. HTTP). Class names are internal; learners see the box names. ---- */
 .spring-corner {
   margin: var(--sp-5, 20px) 0;
   padding: var(--sp-4, 16px) var(--sp-5, 20px);
@@ -135,3 +135,19 @@ aside.toc h2 { margin: 0 0 10px; font-family: var(--font-display, Fredoka, sans-
 }
 .spring-corner > h2, .spring-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: var(--grape-700, #A30F54); }
 .spring-corner > :last-child { margin-bottom: 0; }
+/* Barn Briefing: same shape, teal instead of pink so the two boxes are easy to tell apart. Heading #0A6B60 is 5.2:1 on --teal-200. */
+.concept-corner {
+  margin: var(--sp-5, 20px) 0;
+  padding: var(--sp-4, 16px) var(--sp-5, 20px);
+  border: 2px solid var(--teal, #14B8A6);
+  border-radius: var(--r-md, 16px);
+  background: var(--teal-200, #C7F1EB);
+  box-shadow: var(--chunk-teal);
+}
+.concept-corner > h2, .concept-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: #0A6B60; }
+.concept-corner > :last-child { margin-bottom: 0; }
+.concept-corner a { color: #0A6B60; }
+article.markdown .concept-corner th { background: #E3F8F4; color: #0A6B60; }
+article.markdown .concept-corner td, article.markdown .concept-corner th { border-bottom-color: #8FD9CE; }
+article.markdown .concept-corner table { border-color: #8FD9CE; }
+.concept-corner :not(pre) > code { background: #E3F8F4; color: #0A6B60; }

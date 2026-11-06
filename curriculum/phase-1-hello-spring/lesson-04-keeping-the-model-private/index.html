@@ -21,23 +21,11 @@
 <h1 id="lesson-04-keeping-the-model-private">Lesson 04: Keeping the Model Private</h1>
 
 <h2 id="story">Story</h2>
-<p>The phone app's developer has seen your JSON. "Lovely," they say, "but I only need three things: the farm's name, how many pens, and how many alpacas. Why am I receiving the whole herd? And why does my phone have to count the alpacas itself?" Then Fiona asks you to rename a method in <code>Farm</code> to make the code clearer. Before you do, try it, and watch what happens to the phone app.</p>
+<p>The frontend developer has seen your JSON. "Lovely," they say, "but the start screen only needs three things: the farm's name, how many pens, and how many alpacas. Why am I receiving the whole herd? And why does my screen have to count the alpacas itself?" Then Fiona asks you to rename a method in <code>Farm</code> to make the code clearer. Before you do, try it, and watch what happens to the frontend.</p>
 
 <div class="spring-corner">
-<h2 id="spring-corner">🌱 Spring Corner: the domain is not the API</h2>
-<p>In Lesson 03 the controller returned a <code>Farm</code>, so Jackson published whatever the <code>Farm</code> happens to look like inside. That's a quick start and a trap, for three reasons:</p>
-<ul>
-<li><strong>The JSON is a contract.</strong> Other programs (the phone app, later an Angular frontend) depend on its field names and shape. A contract should only change when you decide it should.</li>
-<li><strong>The domain is a model.</strong> You change it whenever the business or your understanding improves: rename a method, add a field, remove a <code>println</code>. It should be free to change.</li>
-<li>If both are the <strong>same class</strong>, every internal change is an API change, and every API wish changes the domain.</li>
-</ul>
-<p>The principle behind this is <strong>separation of concerns</strong>: <em>domain logic</em> (what an alpaca is, when it is ready to shear) is one concern, the <em>delivery mechanism</em> (HTTP, JSON, status codes) is another. They live in different places and know as little about each other as possible. In this course:</p>
-<ul>
-<li>the domain package <code>alpacas</code> never imports Spring (you saw this in Lesson 02)</li>
-<li>everything web-related lives in <code>alpacas.web</code></li>
-<li><strong>a controller never accepts or returns a domain object.</strong> Every endpoint has its own <em>response</em> type, a small <strong>record</strong>, and the controller <strong>copies</strong> values from the domain into it. This copying is called <em>mapping</em></li>
-</ul>
-<p>A record such as <code>record FarmResponse(String name, int pens, int alpacas)</code> becomes <code>{"name":"…","pens":2,"alpacas":2}</code> with no annotations. You could also hide fields of the domain class with Jackson annotations, but then your domain class carries delivery concerns, which is exactly what we are avoiding.</p>
+<h2 id="spring-sprout">🌱 Spring Sprout: the domain is not the API</h2>
+<p>There is almost nothing new from Spring today. The new idea is about design: what you <em>send over HTTP</em> and what you <em>model in Java</em> are two different things, even when they look alike. In Lesson 03 the controller returned a <code>Farm</code>, so Jackson published whatever the <code>Farm</code> happens to look like inside. You will feel what that costs first (step 1 below), and the explanation follows right after.</p>
 <p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/return-types.html">Controller method return values</a>. The records themselves are Java Lesson 21.</p>
 </div>
 
@@ -58,11 +46,24 @@
 
 <h2 id="getting-started">Getting Started</h2>
 <ol>
-<li>Do step 1 of the task. Write two sentences in <code>docs/api-notes.md</code>: what failed, and what that tells you about who owns the name <code>pensCount</code>.</li>
-<li>Test first. Change the existing tests to describe the new contract: <code>pens</code> is the number <code>2</code>, <code>alpacas</code> is the number <code>2</code>. The old <code>pensCount</code> and "list of pens" tests describe the old contract and are replaced. They fail now: <code>pens</code> is still a list and <code>alpacas</code> does not exist. That's your red.</li>
-<li>Make them pass with the smallest change: a record and a mapping line in the controller. Commit after every green test.</li>
+<li><strong>Feel the coupling.</strong> Do step 1 of the task. Write two sentences in <code>docs/api-notes.md</code>: what failed, and what that tells you about who owns the name <code>pensCount</code>.
+<p><strong>What you just felt.</strong> Returning a <code>Farm</code> was a quick start and a trap, for three reasons:</p>
+<ul>
+<li><strong>The JSON is a contract.</strong> Other programs (Fiona's screens, later an Angular frontend) depend on its field names and shape. A contract should only change when you decide it should.</li>
+<li><strong>The domain is a model.</strong> It describes what the application is all about: the farm, its animals and the rules. You change it whenever the business or your understanding improves: a new study moves the healthy-weight limit, you rename a method, add a field, remove a <code>println</code>. It should be free to change.</li>
+<li>If both are the <strong>same class</strong>, every internal change is an API change, and every API wish changes the domain.</li>
+</ul>
+<p>The principle behind this is <strong>separation of concerns</strong>: <em>domain logic</em> (what an alpaca is, when it is ready to shear) is one concern, the <em>delivery mechanism</em> (HTTP, JSON, status codes) is another. They live in different places and know as little about each other as possible. In this course:</p>
+<ul>
+<li>the domain classes live in <code>alpacas</code>, and everything web-related lives in its own package <code>alpacas.web</code></li>
+<li><strong>a controller never accepts or returns a domain object.</strong> Every endpoint has its own <em>response</em> type, a small <strong>record</strong>, and the controller <strong>copies</strong> values from the domain into it. This copying is called <em>mapping</em></li>
+</ul></li>
+<li><strong>Test first.</strong> Change the existing tests to describe the new contract: <code>pens</code> is the number <code>2</code>, <code>alpacas</code> is the number <code>2</code>. The old <code>pensCount</code> and "list of pens" tests describe the old contract and are replaced. They fail now: <code>pens</code> is still a list and <code>alpacas</code> does not exist. That's your red.</li>
+<li><strong>Write the response record.</strong>
+<p>A record such as <code>record FarmResponse(String name, int pens, int alpacas) {}</code> becomes <code>{"name":"…","pens":2,"alpacas":2}</code> with no annotations: Jackson writes one entry per record component. (You could also hide fields of the domain class with Jackson annotations, but then your domain class carries delivery concerns, which is exactly what we are avoiding.)</p>
+<p>Now write it: make the tests pass with the smallest change, a record and a mapping line in the controller. Commit after every green test.</p></li>
 <li>Start the application and call <code>GET /farm</code> again. Compare with Lesson 03.</li>
-<li>Repeat the rename experiment (step 3). Then undo it.</li>
+<li>Repeat the rename experiment (step 3 of the task). Then undo it.</li>
 <li>Finish <code>docs/api-notes.md</code>: what is better now, and what does it cost you (hint: you wrote a class and a mapping)?</li>
 </ol>
 
@@ -101,7 +102,7 @@
 <h2 id="when-youre-done">When You're Done</h2>
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
-<li class="task-list-item"><label><input type="checkbox"> <code>Farm</code> and the other domain classes still contain no Spring and no Jackson annotations</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>Farm</code> and the other domain classes still contain no Jackson annotations</label></li>
 <li class="task-list-item"><label><input type="checkbox"> You did the rename experiment before and after, and wrote down the difference</label></li>
 <li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
 </ul>
@@ -145,7 +146,7 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
-        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">Spring Sprout</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
