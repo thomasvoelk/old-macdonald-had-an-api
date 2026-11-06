@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 12: Change and Remove · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 12 change and remove</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-12-change-and-remove">Lesson 12: Change and Remove</h1>
+
+<h2 id="story">Story</h2>
+<p>Two phone calls from Fiona. First: Triple H has been to the barber. He weighs 72.5 kg now and has no fleece left (0 cm), and his colour is listed as grey, because "black" was a typo from the start. Second: a buyer has collected Batista. He is gone, so take him off the list.</p>
+<p>Ilona's screen has an edit form and a delete button per alpaca. "The edit form always shows all three values," she says, "so I just send all three back. And for delete I only need to know it worked."</p>
+
+<div class="concept-corner">
+<h2 id="replace-or-remove">🚜 Barn Briefing: replace and remove</h2>
+<p><code>PUT</code> means: <em>this is how the thing at this address should look now</em>. The client sends the complete new version, and whatever was there before is gone. If it sends the same <code>PUT</code> twice, the second one changes nothing more. (The word for that is <em>idempotent</em>. You do not need it, but you will hear it.) Fields the client leaves out are not "kept as they were": they are missing, and so the request is incomplete and answers <code>400</code>. Changing only one field is a different verb, <code>PATCH</code>, which this course does not build.</p>
+<p>Two choices come with it. The <em>name</em> is the address of the alpaca (<code>/pens/Cell/alpacas/Triple%20H</code>), so the body does not carry it; the address says which alpaca is meant. And a <code>PUT</code> to an address where nothing lives could create the thing there, but here it answers <code>404</code>: new alpacas are made with <code>POST</code> (Lesson 10), one way to do each job.</p>
+<p><code>DELETE</code> removes what is at the address. It answers <code>204</code>, "done, nothing to send back", with an empty body. Deleting something that is already gone is <code>404</code>.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: put, delete and a fixed status</h2>
+<p><code>@PutMapping</code> and <code>@DeleteMapping</code> work like <code>@GetMapping</code> and <code>@PostMapping</code>; only the HTTP method differs. A controller method that returns <code>void</code> answers <code>200</code> by default. When the status should always be the same, you do not need a <code>ResponseEntity</code>: put <code>@ResponseStatus(HttpStatus.NO_CONTENT)</code> on the method. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html">request mapping</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-exceptionhandler.html">@ResponseStatus</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build two endpoints.</p>
+<p><code>PUT /pens/{penName}/alpacas/{alpacaName}</code>, the client sends the complete new values (no name):</p>
+<pre><code class="language-json">{"weight": 72.5, "fleeceLengthCm": 0, "fleeceColor": "GREY"}</code></pre>
+<ul>
+<li>success: <code>200</code>, body in the shape of <code>AlpacaResponse</code>; the alpaca keeps its place in the herd</li>
+<li>unknown pen or unknown alpaca: <code>404</code></li>
+<li>a missing or invalid value: <code>400</code> (Lesson 11 should make this free)</li>
+</ul>
+<p><code>DELETE /pens/{penName}/alpacas/{alpacaName}</code>:</p>
+<ul>
+<li>success: <code>204</code>, empty body, and the alpaca is gone from the pen</li>
+<li>unknown pen or unknown alpaca (also the second delete of the same one): <code>404</code></li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Use <code>@PutMapping</code>, <code>@DeleteMapping</code> and <code>@ResponseStatus</code></li>
+<li>Take the identity of a thing from the address, not from the body</li>
+<li>Build domain operations test-first before the web layer needs them</li>
+<li>Recognise which tests you get for free from earlier lessons</li>
+<li>Keep your tests away from Ring and Cell: create the alpaca in a pen of your own, then change it</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>The domain first.</strong> Your <code>Herd</code> can add and find, but it cannot remove or swap. Write four tests in <code>HerdTest</code> before the controller exists: <code>removeByName</code> takes an alpaca out (the name matches ignoring case) and tells you with a <code>boolean</code> whether there was one; for an unknown name it returns <code>false</code>. <code>replace(Alpaca)</code> swaps the alpaca that has the same name for the new one, keeps its position in the list and returns <code>true</code>; with no such name it returns <code>false</code> and changes nothing. Red, green, one commit each. Why <code>boolean</code>? The controller will turn <code>false</code> into a <code>404</code>, and the herd should not know anything about HTTP.</li>
+<li><strong>Start red: PUT.</strong> In <code>PenChangesTest</code> create a pen <code>Workshop</code> (<code>POST /pens</code>) and post Triple H into it, exactly as in Lesson 10. Then <code>mvc.put().uri("/pens/Workshop/alpacas/Triple H")</code> with the body above. Expect <code>200</code> and a weight of <code>72.5</code> in the body, then check with <code>GET</code> that the colour is now <code>GREY</code>. Never replace Lita or Batista: other tests read them.</li>
+<li><strong>The request record.</strong> Create <code>UpdateAlpacaRequest(Double weight, Integer fleeceLengthCm, String fleeceColor)</code> with the same validation annotations as <code>CreateAlpacaRequest</code>. The name is missing on purpose. Give it a method <code>toAlpaca(String name)</code>: the name comes in as a parameter, from the address. (Why not make <code>CreateAlpacaRequest</code> do both jobs? Then a <code>POST</code> body could omit the name or a <code>PUT</code> body could contradict the address, and every endpoint would need rules for it. Two small records, each exactly as wide as its endpoint, are simpler.)</li>
+<li><strong>The controller method.</strong> <code>@PutMapping("/pens/{penName}/alpacas/{alpacaName}")</code>, two <code>@PathVariable</code>s and a <code>@Valid @RequestBody</code>. Find the herd, build the replacement, call <code>herd.replace(...)</code>. If it returns <code>false</code>, throw <code>AlpacaNotFoundException</code>, which you wrote in Lesson 07 and which Lesson 08 already maps to <code>404</code>. Otherwise return the <code>AlpacaResponse</code>. Green.</li>
+<li><strong>Look: three tests you do not have to make green.</strong> Write the test for an unknown alpaca (<code>PUT /pens/Ring/alpacas/Nobody</code>, expect <code>404</code>, it changes nothing in Ring because nobody is there). Then one for an unknown pen, and one with the field <code>fleeceLengthCm</code> missing (expect <code>400</code> and <code>errors.fleeceLengthCm</code> saying <code>must not be null</code>). The first is green because of step 4's exception; the other two are green at once. Which earlier lesson wrote each of them? Note it in <code>docs/api-notes.md</code>.</li>
+<li><strong>DELETE.</strong> Write the test: pen <code>Auction</code>, post Triple H, <code>mvc.delete().uri("/pens/Auction/alpacas/Triple H")</code> expects <code>204</code>; afterwards <code>GET</code> on the same address answers <code>404</code>. Red. The method looks like the <code>PUT</code> without the body and returns <code>void</code>; annotate it with <code>@ResponseStatus(HttpStatus.NO_CONTENT)</code>. When <code>removeByName</code> returns <code>false</code>, throw <code>AlpacaNotFoundException</code> again. Then add the test for an unknown alpaca (<code>404</code>).</li>
+<li><strong>Experiments with the running app</strong> (use your <code>docs/requests.http</code>, against a pen you create first, say Workshop). Predict each answer, then look, and write the results into <code>docs/api-notes.md</code>:
+<ul>
+<li>A <code>PUT</code> to <code>/pens/Workshop/alpacas/Triple H</code> (after you posted him there) whose body also contains <code>"name": "Other"</code>. What is the alpaca called afterwards?</li>
+<li>A <code>PUT</code> with the address spelled <code>triple h</code> in lower case. What is the alpaca called afterwards?</li>
+<li>The same <code>DELETE</code> twice. What does the second one answer?</li>
+</ul>
+The reference solution answers like this:
+<pre><code class="language-text">"name": "Other" in the body      200, still called Triple H (the body's name is ignored)
+address "triple h"               200, and the alpaca is now called "triple h"
+DELETE a second time             404 "No alpaca named Triple H in pen Workshop"</code></pre>
+The first is what you wanted. The second is a small wart: <code>replace</code> finds the alpaca ignoring case, but then stores the new one under the spelling of the address. Decide in Reflect what you would do about it.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>Herd.removeByName</code> removes ignoring case and answers <code>true</code>; unknown name answers <code>false</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>Herd.replace</code> swaps the alpaca with the same name, keeps the order, answers <code>true</code>; unknown name answers <code>false</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>PUT</code> on an existing alpaca answers <code>200</code> with the new values</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A <code>GET</code> afterwards shows the new values</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>PUT</code> on an unknown alpaca answers <code>404</code>, and creates nothing</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>PUT</code> with a missing value answers <code>400</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>DELETE</code> answers <code>204</code> and the alpaca is gone</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>DELETE</code> on an unknown alpaca answers <code>404</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>UpdateAlpacaRequest</code> has no name, and no domain type is in a controller signature</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The tests of Lessons 09 to 11 are still green</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>For <code>replace</code> you need the position of the old alpaca, so a loop with an index fits better than a for-each. <code>List.set(index, alpaca)</code> swaps without moving the others. For <code>removeByName</code>, look at what <code>List.removeIf</code> returns.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The mapping lives in the record: <code>Alpaca toAlpaca(String name) { return new Alpaca(name, weight, fleeceLengthCm, FleeceColors.parse(fleeceColor)); }</code>. The boxed <code>Double</code> and <code>Integer</code> unbox automatically here because <code>@NotNull</code> has already run.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The controller: <code>Herd herd = farm.findPen(penName).getHerd(); Alpaca replacement = request.toAlpaca(alpacaName); if (!herd.replace(replacement)) { throw new AlpacaNotFoundException(alpacaName, penName); } return AlpacaResponse.from(replacement);</code>. For the delete: <code>@DeleteMapping("/pens/{penName}/alpacas/{alpacaName}") @ResponseStatus(HttpStatus.NO_CONTENT) void deleteAlpaca(...)</code> and the same <code>if (!...removeByName(alpacaName)) throw ...</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You changed and deleted an alpaca against the running app</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The experiment results are in <code>docs/api-notes.md</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No test changes Ring or Cell</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>A client sends <code>PUT</code> to <code>/pens/Ring/alpacas/Nobody</code>. A friendlier API might create the alpaca instead. What would you gain, and what could go wrong (think of a typo in the name)?</li>
+<li>You saw that a <code>PUT</code> to <code>triple h</code> renames the alpaca to <code>triple h</code>. Where would you fix it: in the controller, in <code>Herd.replace</code>, or not at all? Which one would you have to change tests for?</li>
+<li>Is the second <code>DELETE</code> an error? Some APIs answer <code>204</code> again, so that "delete twice" looks the same as "delete once". What does <code>404</code> tell Ilona's screen that <code>204</code> would not?</li>
+<li>Two clients edit the same alpaca at the same moment, one changes the weight, the other the colour, and both send all three values. What does the herd look like afterwards? (<code>PATCH</code> and, later, version numbers are what people use against this.)</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 12: Change and Remove and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the record or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-11-say-no-politely/index.html">Lesson 11: Say No Politely</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 13 (coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#replace-or-remove">🚜 Replace and remove</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>
