@@ -140,3 +140,11 @@ Review session on Lessons 01–04. **The Phase 3 reference (POST/PUT/DELETE, val
 - Possible tidy-up: the Spring Sprout in Lesson 02 is shorter now; check the Lesson 04 sprout is not too thin.
 
 **Next:** extend `mentor/reference/` through Phase 3 (POST/PUT/DELETE, validation, exceptions to 400/409; open items: `@Valid` exception type, request records with mapping), then draft Phase 2 lessons (05–08) in the new format (idea box + explanations in the steps; wrestler names; no Chicago/London labels). Finish Thomas's review of Lessons 03–04 first if he has more notes.
+
+## Follow-up: end of Thomas's Phase 1 review (2026-11-06, late)
+- **Lesson 04** has **no Spring Sprout** any more (its idea is design, not Spring). "What you just felt" is a **Barn Briefing** inside step 1, after the rename experiment; the doc link moved to the record step. DESIGN.md: a lesson opens with a Spring Sprout only when it teaches a Spring idea.
+- **Rename story fixed:** Fiona (customer) would not ask for a method rename. Now **Hasi** (reviewer) suggests `getPensCount()` -> `countPens()`; the learner tries it as an experiment without committing, fixes the contract, tries it again (harmless this time), and undoes it so her code keeps matching later lessons.
+- **Cast** (in DESIGN.md): Fiona = customer; **Ilona** (she/her, real apprentice one year ahead) = frontend developer (Lessons 01, 04); **Hasi** (he/him) = code reviewer (Lesson 04). Real first names in a public repo/Pages site: Thomas to check with them before pushing, or swap the names. Later lessons can reuse them (Ilona asks for endpoints, Hasi reviews).
+- Thomas's review of Phase 1 is finished unless he sends more notes.
+
+**Next:** unchanged from the section above: extend `mentor/reference/` through Phase 3 (POST/PUT/DELETE, validation, exceptions to 400/409), then draft Phase 2 lessons (05–08) in the new format (short idea box only where Spring teaches something new, explanations inside the steps, wrestler names, Ilona/Hasi, no Chicago/London labels).

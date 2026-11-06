@@ -6,6 +6,13 @@ Mentor-facing planning notes. Not learner-facing (that is `curriculum/`). All de
 
 A first-year apprentice who has done Java + TDD (Old MacDonald) and SQL (Data Barn). Company stack: Spring REST backend + Angular frontend. This curriculum covers the backend only; **no Angular, no CORS**.
 
+## Cast (the learner's world)
+
+- **Fiona**: the customer (owns the alpaca farm). The learner is the contractor.
+- **Ilona** (she/her): real fellow apprentice one year ahead of the learner; plays the frontend developer who builds Fiona's screens and asks for API changes (Lessons 01, 04).
+- **Hasi** (he/him): plays the code reviewer (Lesson 04: wants `getPensCount()` renamed).
+- Names are an in-joke for the learner. The repo and Pages site are **public**: Thomas should check with Ilona and Hasi before pushing, or swap the names.
+
 ## Relationship to the siblings
 
 - Own numbering: **Lessons 01–~20, Phases 1–5**, like the SQL curriculum. Java lessons are referred to as "Java Lesson N".
@@ -41,7 +48,7 @@ Her existing domain (package `alpacas`: `Alpaca`, `Herd`, `Pen`, `Farm`, `Shephe
 ## Teaching approach
 
 - TDD continues. Domain: plain JUnit. Controllers: `@WebMvcTest` + MockMvc (`MockMvcTester` is the likely default: AssertJ-style, matches her habits; decide when building the reference). One `@SpringBootTest` smoke test per phase. **Mockito appears only in the London lesson.**
-- **Spring Sprout** (renamed from "Spring Corner" 2026-11-06, Thomas; CSS class still `.spring-corner`): each lesson opens with a short box (a few paragraphs + link to official docs), because Spring concepts cannot be discovered by trial and error. It carries the *idea* only. New words are explained again in the step that uses them ("explain where it is used"), so she never has to scroll back. Tasks and hints follow; test-first work stays the core.
+- **Spring Sprout** (renamed from "Spring Corner" 2026-11-06, Thomas; CSS class still `.spring-corner`): each lesson that teaches a Spring idea opens with a short box (Lesson 04 has none: its idea is design, so it uses a Barn Briefing inside step 1) (a few paragraphs + link to official docs), because Spring concepts cannot be discovered by trial and error. It carries the *idea* only. New words are explained again in the step that uses them ("explain where it is used"), so she never has to scroll back. Tasks and hints follow; test-first work stays the core.
 - **Barn Briefing** (CSS class `.concept-corner`): same shape, for background that is not Spring (first use: HTTP in Lesson 03). **Colour: teal** (`--teal`, `--teal-200`, text `#0A6B60`) so it is distinct from the pink Spring Sprout. Diagrams inside it use the same teal.
 - **Llama Drama** (idea, not built yet): a possible box for common mistakes, wanted by Thomas. Add if a lesson needs it; use a warm colour (coral or marigold tokens) so it differs from pink and teal.
 - Chicago (inside-out) is how Phases 1–3 work, but **the names Chicago and London are not used in the learner-facing text before the Phase 3 explanation lesson** (decided 2026-11-06, Thomas): she already builds inside-out without knowing it (domain first, web around it), so a label adds a term and no insight. The explanation lesson, right before the London lesson, introduces both styles with the contrast in front of her. One explanation lesson on London vs. Chicago, then one London (outside-in) lesson: `POST /pens/{pen}/alpacas/{name}/shear`, controller test first with a mocked `ShearingService`, discovering the service; touches `Shepherd` and `Farm`; her first Mockito use.
