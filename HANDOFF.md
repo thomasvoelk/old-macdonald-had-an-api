@@ -96,3 +96,10 @@ Full, sourced findings: `research/spring-boot-4-findings.md` (read its "Could no
 - Open note: the `/pens/{penName}` summary endpoint for a single pen is not built (lesson text can leave it as an exercise or skip it). Lessons 05-08 map roughly to: pens list, alpacas of a pen + DTO mapping, `Optional` -> 404, advice.
 - **Next (one step):** draft Phase 1 lesson HTML (Lessons 01-04, Spring Corner boxes) and show Thomas before writing the rest. Phase 3 reference (POST/PUT/DELETE, validation) comes after.
 - Working protocol (one step per session, record, commit, `/clear`) is in `CLAUDE.md`. That file is temporary: delete it when the curriculum is done (last wrap-up step).
+
+## Status after the Phase 1 lesson draft (2026-11-06)
+- Drafted the four Phase 1 lessons as HTML in `curriculum/phase-1-hello-spring/`: `lesson-01-is-the-farm-ready-for-the-web` (audit, no code, writes `docs/api-audit.md`, predicts Dolly's JSON), `lesson-02-planting-spring` (pom to Boot 4.1.2, `AlpacasApplication`, smoke test, run and see 404), `lesson-03-the-farm-becomes-a-bean` (`FarmConfig`, `@SpringBootTest` + `@Autowired Farm`), `lesson-04-the-first-request` (`GET /farm`, `@WebMvcTest` + `MockMvcTester`, `FarmResponse`, throwaway leak experiment, Phase 1 demo). Each has a Spring Corner box with official-docs links, hidden test list, 3 hints, Reflect, Copilot prompt, lesson nav.
+- Index Phase 1 row now lists the four lessons (status pill "Draft"); setup page links Lesson 01.
+- Every snippet and test in the lessons matches `mentor/reference/` (new `FarmConfigTest` added there and green).
+- **Waiting for Thomas's review of the Phase 1 draft.** Do not write later phases before he has seen it. Points worth his eye: Lesson 01 is a pure paper audit (no Spring yet); the leak experiment lives in Lesson 04 (not committed by the learner); the learner's own `pom.xml` cleanup is described generically since her pom isn't on disk.
+- **Next:** incorporate Thomas's feedback on the Phase 1 draft, then extend the reference solution through Phase 3 (POST/PUT/DELETE, validation, exceptions to 400/409), then draft Phase 2 lessons (05–08).

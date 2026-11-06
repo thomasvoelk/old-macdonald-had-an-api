@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 02: Planting Spring · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 02 planting spring</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-02-planting-spring">Lesson 02: Planting Spring</h1>
+
+<h2 id="story">Story</h2>
+<p>Your audit is done. Fiona nods, reads your list of awkward bits, and says: "Good. We'll deal with those one at a time. First I need the farm to <em>answer the phone</em>." Time to turn your Java project into a Spring Boot application.</p>
+
+<div class="spring-corner">
+<h2 id="spring-corner">🌱 Spring Corner: what Spring Boot actually does for you</h2>
+<p><strong>Spring Boot</strong> is a bundle of decisions. You say "I want a web application", and it brings a web server (Tomcat), a JSON library (Jackson) and sensible settings, all wired together. You get this through your <code>pom.xml</code> in three pieces:</p>
+<ul>
+<li>the <strong>parent</strong> <code>spring-boot-starter-parent</code> fixes the versions of hundreds of libraries so that they fit together (that is why most dependencies below have no <code>&lt;version&gt;</code>)</li>
+<li>a <strong>starter</strong> is a dependency that pulls in a whole group of libraries: <code>spring-boot-starter-webmvc</code> for "web application with Tomcat and JSON"</li>
+<li>a <strong>test starter</strong> does the same for tests: <code>spring-boot-starter-webmvc-test</code> brings JUnit, AssertJ, Mockito and Spring's test tools</li>
+</ul>
+<p>The entry point is one class annotated with <code>@SpringBootApplication</code>. Its <code>main</code> method calls <code>SpringApplication.run(...)</code>, which starts the web server and creates the <strong>application context</strong>: a container that finds, creates and wires the objects ("beans") of your application. Lesson 03 is about beans.</p>
+<p>The annotation also switches on <strong>component scanning</strong>: Spring looks for its own annotations in the package of that class <em>and everything below it</em>, and nowhere else. Remember that when you choose where the class goes.</p>
+<p>This course uses <strong>Spring Boot 4.1</strong>. Boot 4 renamed several things compared to older tutorials (starter names, test packages, <code>@MockBean</code> is gone), so if a search result looks different from this course, it is probably about Boot 3. Official docs: <a href="https://docs.spring.io/spring-boot/index.html">Spring Boot reference</a>, <a href="https://docs.spring.io/spring-boot/system-requirements.html">system requirements</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Make your project a Spring Boot application <strong>without breaking a single existing test</strong>, then start it.</p>
+<ul>
+<li>Change your <code>pom.xml</code>: Spring Boot parent <code>4.1.2</code>, <code>java.version</code> 25, the two starters above, and the Spring Boot Maven plugin</li>
+<li>Create the application class in a new package <code>alpacas.web</code> (the delivery mechanism lives there; the domain stays in <code>alpacas</code>)</li>
+<li>Write a <strong>smoke test</strong>: a test that only checks that the whole application starts</li>
+<li>Start the application and look at it from outside</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Know what the parent, a starter and <code>@SpringBootApplication</code> each contribute</li>
+<li>Add Spring to a project that already has green tests, and keep them green</li>
+<li>Write and understand a <code>@SpringBootTest</code> smoke test</li>
+<li>Start a server, call it, and read its answer</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>Run <code>mvn test</code> first and note how many tests you have. That number must be the same at the end of this lesson, plus one.</li>
+<li>Edit <code>pom.xml</code>. The parent and the Java version:
+<pre><code class="language-xml">&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;4.1.2&lt;/version&gt;
+&lt;/parent&gt;
+
+&lt;properties&gt;
+    &lt;java.version&gt;25&lt;/java.version&gt;
+&lt;/properties&gt;</code></pre>
+</li>
+<li>The dependencies and the plugin:
+<pre><code class="language-xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-webmvc&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-webmvc-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+
+&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+</li>
+<li>Your <code>pom.xml</code> already has JUnit and AssertJ entries from the Java course, and perhaps a <code>maven-compiler-plugin</code> or <code>maven.compiler.*</code> properties. The test starter already brings JUnit and AssertJ <em>in versions that fit together</em>, and the parent sets the compiler level from <code>java.version</code>. Remove your old versions of these and run <code>mvn test</code> again. All old tests should still pass.</li>
+<li>Commit: <code>chore: turn project into a Spring Boot app</code>.</li>
+<li>Now test first. Write the smoke test in <code>src/test/java/alpacas/web/</code>. It fails because there is no application class yet.</li>
+<li>Create the application class in <code>src/main/java/alpacas/web/</code> and make the test pass.</li>
+<li>Run the application (IntelliJ's green arrow next to <code>main</code>, or <code>mvn spring-boot:run</code>). Open <code>http://localhost:8080/</code> in a browser, or run <code>curl -i http://localhost:8080/</code> (on Windows PowerShell, write <code>curl.exe</code>). Read the status line and the body. Stop the app with Ctrl+C.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<p>Write your list first. It is short today.</p>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All your old tests still pass after the <code>pom.xml</code> change, <strong>before</strong> any Spring class exists</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A <code>@SpringBootTest</code> test with an empty body starts the application context and passes</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The same test fails (red) while no <code>@SpringBootApplication</code> class exists</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The running application answers on port 8080 with a <code>404</code> for <code>/</code>, because you have not mapped anything yet</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>A smoke test says: "if the whole thing can start, nothing is badly broken". It needs no assertion. If the context can't start, the test fails by itself. Which annotation from <code>spring-boot-starter-test</code> starts an application context for a test?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The test annotation is <code>@SpringBootTest</code> (package <code>org.springframework.boot.test.context</code>). It searches <em>upwards</em> from the test's package for a class annotated with <code>@SpringBootApplication</code>. So the test and the application class should live in the same package, or the test in a package below it.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The application class is tiny: a class annotated with <code>@SpringBootApplication</code> and a <code>public static void main(String[] args)</code> that calls <code>SpringApplication.run(YourClass.class, args)</code>. Both come from <code>org.springframework.boot</code> (<code>org.springframework.boot.autoconfigure.SpringBootApplication</code> and <code>org.springframework.boot.SpringApplication</code>). Name it <code>AlpacasApplication</code> and put it in <code>alpacas.web</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>mvn test</code> is green: all your old tests plus the smoke test</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The app starts, and you saw the <code>404</code> in your browser or <code>curl</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No class in <code>alpacas</code> (outside <code>alpacas.web</code>) imports anything from <code>org.springframework</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> Two commits at least: the <code>pom.xml</code> change, and the smoke test with the application class</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Why do most dependencies in the <code>pom.xml</code> have no version number?</li>
+<li>What happens to a bean annotation placed in a package <em>outside</em> <code>alpacas.web</code>? Why did we choose that package for the application class?</li>
+<li>The app answered even though you wrote no endpoint. What answered, and where did it come from?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 02: Planting Spring and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-01-is-the-farm-ready-for-the-web/index.html">Lesson 01: Is the Farm Ready for the Web?</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-03-the-farm-becomes-a-bean/index.html">Lesson 03: The Farm Becomes a Bean</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

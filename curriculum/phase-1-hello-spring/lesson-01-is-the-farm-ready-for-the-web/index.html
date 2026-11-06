@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 01: Is the Farm Ready for the Web? · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 01 is the farm ready for the web</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-01-is-the-farm-ready-for-the-web">Lesson 01: Is the Farm Ready for the Web?</h1>
+
+<blockquote>
+<p><strong>Phase 1 — Hello Spring.</strong> Style: Chicago (inside-out). We start from the domain you already have and build outwards. No Spring code in this lesson: we read first.</p>
+</blockquote>
+
+<h2 id="story">Story</h2>
+<p>The neighbour's son has built a phone app. It wants to ask Fiona's farm: <em>"How many alpacas do you have? Which ones are ready to shear?"</em> The app can't call your Java methods. It can only send HTTP requests and read what comes back.</p>
+<p>Before you build anything, Fiona wants to know whether the farm you wrote is ready for that. Spoiler: it mostly isn't, and that is fine. It was written to be correct, not to be talked to over a network.</p>
+
+<div class="spring-corner">
+<h2 id="spring-corner">🌱 Spring Corner: what is a REST API?</h2>
+<p>A <strong>REST API</strong> is a program that waits for <strong>HTTP requests</strong> and answers with <strong>HTTP responses</strong>. A request has a <em>method</em> (<code>GET</code> = "give me", <code>POST</code> = "create", <code>PUT</code> = "change", <code>DELETE</code> = "remove"), a <em>path</em> (<code>/pens/Meadow</code>) and sometimes a body. A response has a <em>status code</em> (<code>200</code> ok, <code>404</code> not found, <code>400</code> your request was bad, <code>409</code> conflict) and usually a body. The body is almost always <strong>JSON</strong>.</p>
+<p>Java objects are not JSON, so something has to translate. Spring Boot does this with a library called <strong>Jackson</strong>. By default Jackson looks at your object and writes one JSON field for every <strong>public getter</strong> (<code>getName()</code> becomes <code>"name"</code>, <code>isHealthyWeight()</code> becomes <code>"healthyWeight"</code>) and for every <strong>public field</strong>. It calls those methods for real. Remember that; it matters in a minute.</p>
+<p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc.html">Spring Web MVC</a>. You don't need to read it yet; Lesson 04 sends the first request.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Audit your own domain for the web. Create a file <code>docs/api-audit.md</code> in your repo and fill it in. Nothing is compiled or run; the output is a document.</p>
+<ol>
+<li>Open <code>Alpaca</code>, <code>Herd</code>, <code>Pen</code>, <code>Farm</code> and <code>Shepherd</code>. For each class, write down everything that would feel awkward if a stranger's program talked to it over HTTP. Look at fields, return values, side effects and exceptions.</li>
+<li><strong>Predict</strong> the JSON. Suppose a controller returned an <code>Alpaca</code> directly, e.g. Dolly (70 kg, 4 cm of fleece, white). Using the Spring Corner rule, write the JSON you expect, field by field. Note which fields you didn't mean to publish.</li>
+<li>Answer: <em>what happens to the phone app if you later rename <code>fleeceLength</code> to <code>fleeceLengthCm</code> inside <code>Alpaca</code>?</em></li>
+<li>Sort your findings into two columns: <strong>"fix in the domain"</strong> and <strong>"keep the domain, protect the API from it"</strong>.</li>
+</ol>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Read your own code as a stranger's client would see it</li>
+<li>Understand that a JSON response is a <strong>public contract</strong>, while your classes are an <strong>internal model</strong></li>
+<li>Meet the project's core principle early: <strong>domain logic and delivery mechanism are separate concerns</strong></li>
+<li>Know why some problems are fixed in the domain and others are hidden behind a boundary</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>Make a <code>docs/</code> folder next to <code>src/</code> and create <code>api-audit.md</code>.</li>
+<li>Work through one class at a time. For each public method ask: what does it return? Can it return <code>null</code>? Does it print? What does it throw?</li>
+<li>For each public <em>field</em> ask: who could change this from outside?</li>
+<li>Don't fix anything. You will fix some of these, test-first, in later lessons. Today you only find them.</li>
+<li>Commit with something like <code>docs: audit domain for HTTP</code>.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<p>There are no tests today, but there is still a list: write down your findings <em>before</em> you open the checklist below.</p>
+<details>
+<summary>📋 Check your findings (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> You found the <strong>public fields</strong> (<code>Alpaca.name</code>, <code>weight</code>, <code>fleeceLength</code>; <code>Herd.capacity</code>; <code>Llama</code>) and said who could change them from outside</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You found that <strong>nothing has an id</strong>: two alpacas are told apart only by name (inside a herd)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You found the methods that can return <strong><code>null</code></strong> (<code>Herd.heaviestAlpaca()</code> on an empty herd) or <code>Optional</code>-shaped questions that still use <code>null</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> You found the <strong><code>System.out.println</code></strong> inside <code>isHealthyWeight()</code> and <code>isReadyToShear()</code>, and noticed that a <em>question</em> has a <em>side effect</em></label></li>
+<li class="task-list-item"><label><input type="checkbox"> You listed the exceptions and which HTTP status each one should become later: <code>IllegalArgumentException</code> (bad input, 400), <code>IllegalStateException</code> (herd is full, 409), <code>PenNotFoundException</code> (404)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Your predicted JSON for Dolly contains <code>name</code>, <code>weight</code>, <code>fleeceLength</code>, <code>fleeceColor</code> <strong>and</strong> <code>healthyWeight</code> and <code>readyToShear</code> (from the <code>is...()</code> methods)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You noticed that a rename inside <code>Alpaca</code> would change the JSON and break the phone app, even though no business rule changed</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Your two columns exist, and "the JSON shape is not the model's business" is in the second one</label></li>
+</ul>
+<p>We will check your prediction against reality in Lesson 04.</p>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Imagine you are the phone app. You never see the Java code, only text coming back. Which of your methods would you be surprised by?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>Jackson calls getters, including <code>is...()</code> methods, to build the JSON. Re-read the Spring Corner: which of your methods would be called? What happens inside them?</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>Look for three kinds of things: <strong>leaks</strong> (public fields, internals visible from outside), <strong>surprises</strong> (<code>null</code>, printing, unusual exceptions) and <strong>missing pieces</strong> (no ids). Then ask for each: is this wrong in the domain too, or is it only a problem once the domain is exposed?</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-audit.md</code> exists and covers all five classes</label></li>
+<li class="task-list-item"><label><input type="checkbox"> It contains your predicted JSON for Dolly</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Your findings are sorted into "fix in the domain" and "protect the API from it"</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The file is committed</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Who should decide what the JSON looks like: the people who write the domain, or the people who use the API? Can they be different people?</li>
+<li>If the JSON shape and the Java class are the same thing, what is the cost of renaming a field?</li>
+<li>Which of your findings would you fix even if the farm never went on the web?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring REST API on top of an existing Java domain. I'm on Lesson 01: Is the Farm Ready for the Web? and I'm auditing my classes for things that are awkward over HTTP. I've found [what you found]. Please don't list the problems for me — ask me questions that help me notice what I've missed."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous</span>
+          <a class="lesson-nav__link" href="../../setup/index.html">Setting Up</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-02-planting-spring/index.html">Lesson 02: Planting Spring</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

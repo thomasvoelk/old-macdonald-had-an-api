@@ -268,3 +268,8 @@ All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
 - Domain change test-first: `Herd.findByName` now returns `Optional<Alpaca>` (5 existing tests in `HerdTest` rewritten red first, then green). Nothing else in her code called it.
 - Design choice in the reference: `AlpacaResponse(name, weight, fleeceLengthCm, fleeceColor)` deliberately renames `fleeceLength` to `fleeceLengthCm` and exposes the colour as a `String`, to demonstrate that the JSON contract can differ from the domain. "Alpaca not found" is a web-level `AlpacaNotFoundException` thrown from the controller via `Optional.orElseThrow`; the domain only knows `Optional`.
 - Still open: `JdbcClient` in `@JdbcTest`, KeyHolder on H2/Postgres, `MethodArgumentNotValidException` for `@Valid`.
+
+## Verified while drafting Phase 1 lessons (2026-11-06)
+
+- Added `FarmConfigTest` (`@SpringBootTest`, `@Autowired Farm`) to `mentor/reference/`; passes with `FarmControllerTest` and `AlpacasApplicationTests`. Lesson 03's test list rests on it.
+- Running app (`mvn spring-boot:run`, Boot 4.1.2): `GET /farm` returns `{"name":"Fiona's Farm","pens":2,"alpacas":2}`; `GET /` with no mapping returns `404` with a **JSON** body (`{"timestamp":...,"status":404,"error":"Not Found","path":"/"}`), not an HTML Whitelabel page, when called with curl. Lesson 02 only says "a 404".
