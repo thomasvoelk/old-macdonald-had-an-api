@@ -70,7 +70,7 @@
 <li>Write a <code>POST</code> endpoint that reads a JSON body into a request record</li>
 <li>Answer <code>201</code> with a <code>Location</code> header</li>
 <li>Test a request with a body in <code>MockMvcTester</code></li>
-<li>Understand that tests share one farm, and what to do about it</li>
+<li>Understand that tests share one farm, and keep them independent without restarting Spring</li>
 <li>Find the right place for a new rule (domain) and the right place for its HTTP meaning (advice)</li>
 </ul>
 
@@ -83,9 +83,8 @@
                 {"name": "Stable"}""")</code></pre>
 This is your fake browser sending a <code>POST</code>. Add the assertions: status <code>201</code>, the <code>Location</code> header, and the member <code>alpacas</code> in the body.</li>
 <li><strong>Make it green.</strong> Three things are new. First, a record <code>CreatePenRequest</code> with the one component <code>name</code>: it is the contract for what the client sends, the counterpart of your response records (Lesson 04, same rule: no domain object in the controller signature). Second, a method with <code>@PostMapping("/pens")</code> whose parameter is annotated with <code>@RequestBody</code>. Third, it returns a <code>ResponseEntity</code>, built with <code>ResponseEntity.created(location).body(...)</code>, where <code>location</code> is a <code>URI</code>. Map the request to a domain <code>Pen</code> with an empty <code>Herd</code>, add it to the farm and answer with the same <code>PenSummaryResponse</code> that <code>GET /pens</code> uses.</li>
-<li><strong>Tests share one farm.</strong> Let the first test also check, after the post, that <code>GET /pens</code> has three entries. Then add a second test that creates "Stable" and checks the same (call it <code>aNewPenAppearsInTheList</code>). Run the class. Each test passes alone, and together the one that runs second is red: the farm has four pens, not three. Why? Your <code>Farm</code> is a bean (Lesson 02), and a bean is created <em>once</em>; Spring keeps the application context between the tests of a class, and every request, in a test or a real one, reaches the very same <code>Farm</code> object. The first test left "Stable" in it. Tell Spring to throw the context away after each test method and build a fresh farm:
-<pre><code class="language-java">@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)</code></pre>
-on <code>PenChangesTest</code>. It makes the class slower, which is why your reading tests stay in their own class without it. (The same sharing is true of the running application: all clients change one farm, and two requests at the same moment could trip over each other. A database in Phase 4 takes this job over.)</li>
+<li><strong>Tests share one farm.</strong> Let the first test also check, after the post, that <code>GET /pens</code> has three entries. Then add a second test that creates "Stable" and checks the same (call it <code>aNewPenAppearsInTheList</code>). Run the class. Each test passes alone, and together the one that runs second is red: the farm has four pens, not three. Why? Your <code>Farm</code> is a bean (Lesson 02), and a bean is created <em>once</em>. Spring keeps the application context, with that one farm in it, for all tests of a class (and of other classes with the same setup), because building a context is slow. So every request, in a test or a real one, reaches the very same <code>Farm</code> object, and the first test left "Stable" in it. (The running application is the same: all clients change one farm, and two requests at the same moment could trip over each other. A database in Phase 4 takes this job over.)
+<p>There is an annotation, <code>@DirtiesContext</code>, that makes Spring throw the context away and build a new one after each test. It works, and you will see it recommended. Do not use it for this: it makes every test of the class pay for a full application start, and a suite of hundreds of tests becomes painfully slow. The cheap fix is a habit: <strong>a test that changes the farm works in a pen of its own</strong> and leaves Ring and Cell alone. The first test creates "Stable", the second one creates "Barn" (and checks that the list contains "Barn", not that it has a certain length). Then they can run in any order, on one shared farm, in the same fast context.</p></li>
 <li><strong>The name can be used only once.</strong> Write the test: post <code>{"name": "ring"}</code> and expect <code>409</code> and <code>application/problem+json</code>. It stays red, because your domain happily adds a second "Ring". Rules about the farm belong in the domain, so go one level down and write a <code>FarmTest</code> first: adding two pens whose names differ only in case throws an <code>IllegalStateException</code>. Make that green in <code>Farm.addPen</code>, commit, and go back to the controller test.</li>
 <li><strong>Who says 409?</strong> The domain knows nothing about HTTP; it throws <code>IllegalStateException</code>. The controller test is still red, because nobody translates that exception. You know the place from Lesson 08: add a handler for it to <code>ApiExceptionHandler</code> that answers <code>409</code> with a <code>ProblemDetail</code>. The test turns green without touching the controller.</li>
 <li><strong>Try it for real.</strong> Typing JSON into <code>curl</code> on Windows is a quoting nightmare. IntelliJ can send requests from a plain file: create <code>docs/requests.http</code> with
@@ -115,7 +114,8 @@ The farm lives in memory, so a restart brings back Ring and Cell only. Write a s
 <li class="task-list-item"><label><input type="checkbox"> <code>POST /pens</code> with <code>{"name": "Stable"}</code> answers <code>201</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> The <code>Location</code> header is <code>/pens/Stable</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> The body is <code>{"name":"Stable","alpacas":0}</code></label></li>
-<li class="task-list-item"><label><input type="checkbox"> The farm has three pens afterwards (<code>GET /pens</code> lists "Stable")</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens</code> lists "Stable" afterwards</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Every test that changes the farm uses its own pen name, and no test uses <code>@DirtiesContext</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> Posting <code>ring</code> answers <code>409</code> with <code>application/problem+json</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> <code>FarmTest</code>: two pens with names that differ only in case throw <code>IllegalStateException</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> The controller method has no domain type in its signature</label></li>
@@ -141,7 +141,7 @@ The farm lives in memory, so a restart brings back Ring and Cell only. Write a s
 
 <h2 id="when-youre-done">When You're Done</h2>
 <ul>
-<li class="task-list-item"><label><input type="checkbox"> All tests pass, in any order</label></li>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass, in any order, with the Spring context shared</label></li>
 <li class="task-list-item"><label><input type="checkbox"> You saw <code>201</code> and <code>409</code> in a real call</label></li>
 <li class="task-list-item"><label><input type="checkbox"> <code>docs/requests.http</code> and the note in <code>docs/api-notes.md</code> are committed</label></li>
 <li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
