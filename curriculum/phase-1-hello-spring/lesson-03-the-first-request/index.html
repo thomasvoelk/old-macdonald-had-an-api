@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 03: The First Request · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 03 the first request</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-03-the-first-request">Lesson 03: The First Request</h1>
+
+<blockquote>
+<p>Style for this phase: Chicago (inside-out). We start from the domain you already have and build outwards, one small test at a time.</p>
+</blockquote>
+
+<h2 id="story">Story</h2>
+<p>The phone app's first question is the simplest one: <em>"What is this farm?"</em> You already have a <code>Farm</code> object that knows exactly that, and Spring can now hand it to a controller. So the quickest way to answer is to return the farm itself. Let's do the simplest thing that could work, and then take a good look at what comes out.</p>
+
+<div class="spring-corner">
+<h2 id="spring-corner">🌱 Spring Corner: controllers, JSON and testing the web layer</h2>
+<p>A <strong>REST API</strong> waits for <strong>HTTP requests</strong> and answers with <strong>HTTP responses</strong>. A request has a method (<code>GET</code> = "give me"), a path (<code>/farm</code>) and sometimes a body. A response has a status code (<code>200</code> = ok, <code>404</code> = not found) and usually a body, almost always <strong>JSON</strong>.</p>
+<p>A <strong>controller</strong> is a bean whose methods answer requests. Two annotations do the work:</p>
+<ul>
+<li><code>@RestController</code> on the class: "this is a controller, and what its methods return becomes the response body"</li>
+<li><code>@GetMapping("/farm")</code> on a method: "call this method for <code>GET /farm</code>"</li>
+</ul>
+<p>The method returns a Java object and Spring turns it into JSON using a library called <strong>Jackson</strong>. By default Jackson writes one JSON field for every <strong>public getter</strong> (<code>getName()</code> becomes <code>"name"</code>, <code>isHealthyWeight()</code> becomes <code>"healthyWeight"</code>) and for every <strong>public field</strong>. It calls those methods for real, on real objects. The controller gets the <code>Farm</code> through its <strong>constructor</strong>: that is the dependency injection from Lesson 02.</p>
+<p><strong>Testing it.</strong> Starting the whole application for every test is slow. <code>@WebMvcTest(FarmController.class)</code> starts only the web layer: that controller, the JSON conversion and the request routing, and <em>no other beans</em>. Inside it you get a <code>MockMvcTester</code>: it sends a fake request to the controller without starting a server and gives you the response to check with AssertJ, a style you already know. Because the slice contains only web beans, you load the farm configuration with <code>@Import(...)</code>.</p>
+<p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html">Annotated controllers</a>, <a href="https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html">Testing Spring Boot applications</a>. In Boot 4, <code>@WebMvcTest</code> lives in <code>org.springframework.boot.webmvc.test.autoconfigure</code>. Older tutorials show a different package.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build <code>GET /farm</code>. It answers <code>200</code> with JSON for the farm. Keep it as simple as possible: <strong>return the <code>Farm</code> object itself</strong> from the controller method.</p>
+<p>Then look at what comes out. Before you call it the first time, take one minute and <strong>write down what you expect the JSON to look like</strong> (use the Spring Corner rule for getters and public fields). You'll compare in a moment.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Write a controller test first with <code>@WebMvcTest</code> and <code>MockMvcTester</code></li>
+<li>Build a <code>@RestController</code> with constructor injection</li>
+<li>Understand how Jackson turns an object into JSON (getters and public fields)</li>
+<li>Call your own API by hand and read the response critically</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>Test first, in <code>src/test/java/alpacas/web/</code>: a class annotated with <code>@WebMvcTest(FarmController.class)</code> and <code>@Import(FarmConfig.class)</code>, with an <code>@Autowired MockMvcTester mvc</code> field. Send <code>mvc.get().uri("/farm")</code> and assert the status. It does not compile: <code>FarmController</code> doesn't exist.</li>
+<li>Create an empty <code>FarmController</code> so it compiles. The test fails with a <code>404</code>: a good red.</li>
+<li>Make the status pass. Then add one test at a time for the farm's name, its number of pens and the pens themselves, and make each pass. Commit after every green test.</li>
+<li>Start the application and call it by hand: <code>curl http://localhost:8080/farm</code> (Windows PowerShell: <code>curl.exe</code>) or open the URL in a browser. <strong>Read every line of the JSON.</strong> Watch the console of your running application while you call it.</li>
+<li>Create <code>docs/api-notes.md</code> and write down: where was your prediction right, where was it wrong, and what surprised you? Keep it short.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /farm</code> answers <code>200 OK</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The body has <code>name</code> equal to <code>"Fiona's Farm"</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The body has <code>pensCount</code> equal to <code>2</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The body has a <code>pens</code> list with two entries</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You compared the real JSON with your prediction and wrote down the differences</label></li>
+</ul>
+<h3>What you should have seen</h3>
+<p>Your exact output depends on your domain, but with the sample farm from Lesson 02 it looks like this (shortened):</p>
+<pre><code class="language-json">{"name":"Fiona's Farm",
+ "pens":[{"name":"Meadow",
+          "herd":{"alpacaCount":2,
+                  "alpacas":[{"name":"Dolly","weight":70.0,"fleeceLength":4,"fleeceColor":"WHITE","healthyWeight":true,"readyToShear":false}, ...],
+                  "alpacasReadyToShear":[ ... ],
+                  "capacity":30}},
+         {"name":"Hilltop", "herd":{ ... }}],
+ "pensCount":2}</code></pre>
+<p>And in the console: a line like <em>"The Alpaca is healthy. 😊"</em> for every alpaca, printed while the response was being built.</p>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The test needs three things: a slice annotation that starts only the web layer, a way to get the farm into that slice, and a tool to send the fake request. Re-read the Spring Corner for each.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>Imports for Boot 4: <code>org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest</code>, <code>org.springframework.test.web.servlet.assertj.MockMvcTester</code>, and AssertJ's <code>assertThat</code>. The pattern is <code>assertThat(mvc.get().uri("/farm")).hasStatusOk()</code>. For a field in the JSON, chain <code>.bodyJson().extractingPath("$.name").isEqualTo(...)</code>; <code>$</code> means "the whole JSON document". To count the entries of a list, use a path like <code>"$.pens.length()"</code>.</p>
+<p>If the test fails with an exception about a missing bean for <code>Farm</code>, you haven't told the slice where the farm comes from. Careful: an unrestricted <code>@WebMvcTest</code> loads <em>all</em> controllers, so a missing bean in any of them fails every test in the slice.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The controller: a package-private class annotated <code>@RestController</code>, with a <code>private final Farm farm</code> set by the constructor (no <code>@Autowired</code> needed: one constructor is enough). A method annotated <code>@GetMapping("/farm")</code> with return type <code>Farm</code> returns <code>farm</code>. That's all.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass, old ones and new</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You called <code>GET /farm</code> by hand and read the whole JSON</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-notes.md</code> holds your prediction versus the real output</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Did the phone app ask for all of that? Which parts would it never use?</li>
+<li>Your <code>isHealthyWeight()</code> printed to the console during a request that never asked about health. What does that tell you about how Jackson uses your methods?</li>
+<li>Does the JSON contain the total number of alpacas on the farm? Where would a client have to look for it?</li>
+<li>Who now depends on the names <code>getPensCount</code> and <code>getHerd</code>?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 03: The First Request and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-02-the-farm-becomes-a-bean/index.html">Lesson 02: The Farm Becomes a Bean</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-04-keeping-the-model-private/index.html">Lesson 04: Keeping the Model Private</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

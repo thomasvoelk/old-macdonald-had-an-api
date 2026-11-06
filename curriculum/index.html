@@ -56,7 +56,7 @@
 <blockquote>
 <p><strong>Your domain classes never import Spring.</strong> Spring is the delivery mechanism around the farm. The farm doesn't know it is on the web.</p>
 </blockquote>
-<p>Everything under <code>alpacas.web</code> may use Spring. Everything else may not. A controller never accepts or returns a domain object; it has its own request and response types. You'll see why in Lesson 01, and an architecture test will hold you to it later.</p>
+<p>Everything under <code>alpacas.web</code> may use Spring. Everything else may not. From Lesson 04 on, a controller never accepts or returns a domain object; it has its own request and response types. You'll feel why in Lessons 03 and 04, and an architecture test will hold you to it later.</p>
 <h3 id="how-we-test">How we test</h3>
 <ul>
 <li>Domain code: plain JUnit, as before</li>
@@ -94,15 +94,15 @@
 
 <h3 id="phase-1-hello-spring">Phase 1 — Hello Spring <em>(Lessons 01–04)</em></h3>
 <blockquote>
-<p>Style: Chicago (inside-out). Core concepts: auditing your domain for the web, Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc</p>
+<p>Style: Chicago (inside-out). Core concepts: Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc, and what happens when the domain leaks into the API</p>
 </blockquote>
 <table>
 <thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-1-hello-spring/lesson-01-is-the-farm-ready-for-the-web/index.html">01</a></td><td>Is the Farm Ready for the Web? Audit your own domain</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-02-planting-spring/index.html">02</a></td><td>Planting Spring: turn the project into a Spring Boot app</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-03-the-farm-becomes-a-bean/index.html">03</a></td><td>The Farm Becomes a Bean: dependency injection</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-04-the-first-request/index.html">04</a></td><td>The First Request: <code>GET /farm</code> with MockMvc</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-01-planting-spring/index.html">01</a></td><td>Planting Spring: turn the project into a Spring Boot app</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-02-the-farm-becomes-a-bean/index.html">02</a></td><td>The Farm Becomes a Bean: dependency injection</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-03-the-first-request/index.html">03</a></td><td>The First Request: <code>GET /farm</code>, returning the domain object as it is</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-04-keeping-the-model-private/index.html">04</a></td><td>Keeping the Model Private: response records and the line between domain and API</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
 </tbody>
 </table>
 
@@ -176,7 +176,7 @@
 <p>GitHub Copilot is available to you, with one rule for this course: <strong>it never writes a controller, a test, or a SQL query for you.</strong> Each lesson ends with a Copilot prompt that keeps it Socratic. If you catch yourself pasting code you don't understand, stop and go back to the hints.</p>
 <hr>
 <h2 id="how-to-start">How to start</h2>
-<p><a href="setup/index.html">Check your setup</a>, then begin with <a href="phase-1-hello-spring/lesson-01-is-the-farm-ready-for-the-web/index.html">Lesson 01</a>. 🌱</p>
+<p><a href="setup/index.html">Check your setup</a>, then begin with <a href="phase-1-hello-spring/lesson-01-planting-spring/index.html">Lesson 01</a>. 🌱</p>
       </article>
       <p class="footer-note">Hand-authored HTML — Old MacDonald Had an API curriculum. See <code>DESIGN.md</code> in the repo root for the design rationale.</p>
     </main>

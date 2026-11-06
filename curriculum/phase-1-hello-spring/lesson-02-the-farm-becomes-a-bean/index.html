@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 03: The Farm Becomes a Bean · Old MacDonald Had an API</title>
+  <title>Lesson 02: The Farm Becomes a Bean · Old MacDonald Had an API</title>
   <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../colors_and_type.css">
   <link rel="stylesheet" href="../../style.css">
@@ -14,18 +14,18 @@
     <main class="content">
       <div class="topbar">
         <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
-        <span class="breadcrumbs">phase 1 hello spring / lesson 03 the farm becomes a bean</span>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 02 the farm becomes a bean</span>
         <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
       </div>
       <article class="markdown">
-<h1 id="lesson-03-the-farm-becomes-a-bean">Lesson 03: The Farm Becomes a Bean</h1>
+<h1 id="lesson-03-the-farm-becomes-a-bean">Lesson 02: The Farm Becomes a Bean</h1>
 
 <h2 id="story">Story</h2>
 <p>The server is up, but it answers every question with "no idea". It has no farm. Until now, <em>you</em> wrote <code>new Farm("Fiona's Farm")</code> in your tests. In a web application, many requests arrive over time and they all must talk to <strong>the same farm</strong>. Someone has to create it once and hand it to whoever needs it. In Spring, that someone is Spring.</p>
 
 <div class="spring-corner">
 <h2 id="spring-corner">🌱 Spring Corner: beans and dependency injection</h2>
-<p>A <strong>bean</strong> is an object that Spring creates and manages for you. Spring keeps all beans in the <strong>application context</strong> (the container you started in Lesson 02). When one object needs another, it doesn't create it with <code>new</code>; it <em>asks for it in its constructor</em> and Spring passes it in. This is <strong>dependency injection</strong>: the object receives its dependencies instead of building them.</p>
+<p>A <strong>bean</strong> is an object that Spring creates and manages for you. Spring keeps all beans in the <strong>application context</strong> (the container you started in Lesson 01). When one object needs another, it doesn't create it with <code>new</code>; it <em>asks for it in its constructor</em> and Spring passes it in. This is <strong>dependency injection</strong>: the object receives its dependencies instead of building them.</p>
 <p>You know the idea already from the Java course: a <code>Pen</code> gets its <code>Herd</code> through the constructor instead of creating it. Spring just automates the "who builds it and who passes it in" part for the whole application.</p>
 <p>There are two main ways to tell Spring about a bean:</p>
 <ul>
@@ -54,7 +54,7 @@
 <li>Test first. In <code>src/test/java/alpacas/web/</code> create a test class for your configuration. It is a <code>@SpringBootTest</code> that receives the farm with <code>@Autowired</code> (a field is fine in tests). It fails to start because there is no <code>Farm</code> bean.</li>
 <li>Make the first test pass with the smallest configuration class you can.</li>
 <li>Add the second test (the pens) and make it pass.</li>
-<li>Look at the fields you used with <code>@Autowired</code> in the test. In <strong>production</strong> code you will get your dependencies through the <strong>constructor</strong> instead. Lesson 04 does that.</li>
+<li>Look at the fields you used with <code>@Autowired</code> in the test. In <strong>production</strong> code you will get your dependencies through the <strong>constructor</strong> instead. Lesson 03 does that.</li>
 <li>Commit after every green test.</li>
 </ol>
 
@@ -66,7 +66,7 @@
 <li class="task-list-item"><label><input type="checkbox"> The application context contains a <code>Farm</code>, named <code>"Fiona's Farm"</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> The farm has two pens</label></li>
 <li class="task-list-item"><label><input type="checkbox"> <em>(optional)</em> The farm holds two alpacas in total</label></li>
-<li class="task-list-item"><label><input type="checkbox"> The smoke test from Lesson 02 is still green</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The smoke test from Lesson 01 is still green</label></li>
 <li class="task-list-item"><label><input type="checkbox"> <code>Farm</code>, <code>Pen</code>, <code>Herd</code> and <code>Alpaca</code> still don't import anything from Spring</label></li>
 </ul>
 </details>
@@ -105,17 +105,17 @@
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
 <p>Open GitHub Copilot Chat and start with this message:</p>
 <blockquote>
-<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 03: The Farm Becomes a Bean and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code for me — guide me with questions so I can figure it out myself."</p>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 02: The Farm Becomes a Bean and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code for me — guide me with questions so I can figure it out myself."</p>
 </blockquote>
       </article>
       <nav class="lesson-nav" aria-label="Lesson navigation">
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Previous lesson</span>
-          <a class="lesson-nav__link" href="../lesson-02-planting-spring/index.html">Lesson 02: Planting Spring</a>
+          <a class="lesson-nav__link" href="../lesson-01-planting-spring/index.html">Lesson 01: Planting Spring</a>
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>
-          <a class="lesson-nav__link" href="../lesson-04-the-first-request/index.html">Lesson 04: The First Request</a>
+          <a class="lesson-nav__link" href="../lesson-03-the-first-request/index.html">Lesson 03: The First Request</a>
         </div>
       </nav>
       <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>

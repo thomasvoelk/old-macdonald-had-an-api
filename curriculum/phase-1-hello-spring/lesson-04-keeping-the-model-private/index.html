@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 04: Keeping the Model Private · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 04 keeping the model private</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-04-keeping-the-model-private">Lesson 04: Keeping the Model Private</h1>
+
+<h2 id="story">Story</h2>
+<p>The phone app's developer has seen your JSON. "Lovely," they say, "but I only need three things: the farm's name, how many pens, and how many alpacas. Why am I receiving the whole herd? And why does my phone have to count the alpacas itself?" Then Fiona asks you to rename a method in <code>Farm</code> to make the code clearer. Before you do, try it, and watch what happens to the phone app.</p>
+
+<div class="spring-corner">
+<h2 id="spring-corner">🌱 Spring Corner: the domain is not the API</h2>
+<p>In Lesson 03 the controller returned a <code>Farm</code>, so Jackson published whatever the <code>Farm</code> happens to look like inside. That's a quick start and a trap, for three reasons:</p>
+<ul>
+<li><strong>The JSON is a contract.</strong> Other programs (the phone app, later an Angular frontend) depend on its field names and shape. A contract should only change when you decide it should.</li>
+<li><strong>The domain is a model.</strong> You change it whenever the business or your understanding improves: rename a method, add a field, remove a <code>println</code>. It should be free to change.</li>
+<li>If both are the <strong>same class</strong>, every internal change is an API change, and every API wish changes the domain.</li>
+</ul>
+<p>The principle behind this is <strong>separation of concerns</strong>: <em>domain logic</em> (what an alpaca is, when it is ready to shear) is one concern, the <em>delivery mechanism</em> (HTTP, JSON, status codes) is another. They live in different places and know as little about each other as possible. In this course:</p>
+<ul>
+<li>the domain package <code>alpacas</code> never imports Spring (you saw this in Lesson 02)</li>
+<li>everything web-related lives in <code>alpacas.web</code></li>
+<li><strong>a controller never accepts or returns a domain object.</strong> Every endpoint has its own <em>response</em> type, a small <strong>record</strong>, and the controller <strong>copies</strong> values from the domain into it. This copying is called <em>mapping</em></li>
+</ul>
+<p>A record such as <code>record FarmResponse(String name, int pens, int alpacas)</code> becomes <code>{"name":"…","pens":2,"alpacas":2}</code> with no annotations. You could also hide fields of the domain class with Jackson annotations, but then your domain class carries delivery concerns, which is exactly what we are avoiding.</p>
+<p>Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/return-types.html">Controller method return values</a>. The records themselves are Java Lesson 21.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<ol>
+<li><strong>Feel the coupling first.</strong> With IntelliJ's rename refactoring, rename <code>Farm.getPensCount()</code> to <code>Farm.countPens()</code>. IntelliJ fixes all callers. Run <code>mvn test</code>. Which test fails, and why? Nothing about the business changed. Then undo the rename (<code>git restore .</code> or IntelliJ's undo).</li>
+<li><strong>Change the contract.</strong> <code>GET /farm</code> should answer with exactly <code>{"name": "Fiona's Farm", "pens": 2, "alpacas": 2}</code>: <code>pens</code> and <code>alpacas</code> are plain numbers, and there is nothing else. Do it test-first, with a response record in <code>alpacas.web</code> and the mapping in the controller.</li>
+<li><strong>Repeat the rename</strong> from step 1. What breaks this time, and where does it break?</li>
+</ol>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Experience that a JSON response is a contract, and what coupling it to the domain costs</li>
+<li>Explain separation of concerns between domain logic and delivery mechanism</li>
+<li>Write a response record and map from the domain to it</li>
+<li>Change a test deliberately because the <em>contract</em> changed</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>Do step 1 of the task. Write two sentences in <code>docs/api-notes.md</code>: what failed, and what that tells you about who owns the name <code>pensCount</code>.</li>
+<li>Test first. Change the existing tests to describe the new contract: <code>pens</code> is the number <code>2</code>, <code>alpacas</code> is the number <code>2</code>. The old <code>pensCount</code> and "list of pens" tests describe the old contract and are replaced. They fail now: <code>pens</code> is still a list and <code>alpacas</code> does not exist. That's your red.</li>
+<li>Make them pass with the smallest change: a record and a mapping line in the controller. Commit after every green test.</li>
+<li>Start the application and call <code>GET /farm</code> again. Compare with Lesson 03.</li>
+<li>Repeat the rename experiment (step 3). Then undo it.</li>
+<li>Finish <code>docs/api-notes.md</code>: what is better now, and what does it cost you (hint: you wrote a class and a mapping)?</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /farm</code> still answers <code>200 OK</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>name</code> is <code>"Fiona's Farm"</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>pens</code> is the <strong>number</strong> <code>2</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>alpacas</code> is the number <code>2</code> (the total across all pens)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> When you call it by hand, the body contains these three fields and nothing else</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The controller method returns a response record; <code>Farm</code> does not appear in its signature</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Renaming <code>getPensCount()</code> now breaks <strong>no test</strong>. At most one line in the controller changes, and the JSON stays the same</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The console is quiet: no more "The Alpaca is healthy" while answering <code>/farm</code></label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Ask yourself: who decides the shape of the JSON now? If it should be decided by the people who use the API, where should the class that describes it live, and should <code>Farm</code> know about it?</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>You need a new, small class that has exactly the three fields of the new JSON, and nothing else. Java Lesson 21 gives you a one-line way to write such a class. The controller builds an instance from what it asks the <code>Farm</code>. Which <code>Farm</code> methods already give you the name, the number of pens and the total number of alpacas?</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>Put <code>record FarmResponse(String name, int pens, int alpacas) {}</code> next to the controller in <code>alpacas.web</code>. The controller method's return type becomes <code>FarmResponse</code> and its body is <code>return new FarmResponse(farm.getName(), farm.getPensCount(), farm.totalAlpacas());</code>. The tests for number values use <code>.extractingPath("$.pens").isEqualTo(2)</code>.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>Farm</code> and the other domain classes still contain no Spring and no Jackson annotations</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You did the rename experiment before and after, and wrote down the difference</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="phase-1-demo">Phase 1 demo</h2>
+<p>Show your mentor:</p>
+<ul>
+<li>Start the app and call <code>GET /farm</code></li>
+<li>Run the tests and walk through the <code>FarmController</code> test</li>
+<li>Show the JSON from Lesson 03 next to the JSON from now, and explain in your own words why the controller returns <code>FarmResponse</code> and not <code>Farm</code></li>
+<li>Answer the Reflect questions below</li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Who owns the name <code>pens</code> in the JSON now, and who owns the name <code>getPensCount</code>? Can they change independently?</li>
+<li>What did this cost: how many extra lines and classes? Is it worth it for one endpoint? For thirty?</li>
+<li>Your <code>println</code> in <code>isHealthyWeight()</code> no longer runs during <code>/farm</code>. Is it fixed? Or only hidden from this one endpoint?</li>
+<li>If the app wants a new field tomorrow, which files change?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 04: Keeping the Model Private and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the record, the mapping or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-03-the-first-request/index.html">Lesson 03: The First Request</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 05 (Phase 2, coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#phase-1-demo">Phase 1 demo</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

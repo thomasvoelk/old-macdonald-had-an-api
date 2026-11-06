@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 02: Planting Spring · Old MacDonald Had an API</title>
+  <title>Lesson 01: Planting Spring · Old MacDonald Had an API</title>
   <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../colors_and_type.css">
   <link rel="stylesheet" href="../../style.css">
@@ -14,14 +14,14 @@
     <main class="content">
       <div class="topbar">
         <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
-        <span class="breadcrumbs">phase 1 hello spring / lesson 02 planting spring</span>
+        <span class="breadcrumbs">phase 1 hello spring / lesson 01 planting spring</span>
         <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
       </div>
       <article class="markdown">
-<h1 id="lesson-02-planting-spring">Lesson 02: Planting Spring</h1>
+<h1 id="lesson-01-planting-spring">Lesson 01: Planting Spring</h1>
 
 <h2 id="story">Story</h2>
-<p>Your audit is done. Fiona nods, reads your list of awkward bits, and says: "Good. We'll deal with those one at a time. First I need the farm to <em>answer the phone</em>." Time to turn your Java project into a Spring Boot application.</p>
+<p>Your farm works. It is tested, tidy and correct, but it can only talk to a test class. The neighbour's son has built a phone app that wants to ask Fiona's farm questions, and the only language the app speaks is HTTP. "First," says Fiona, "the farm needs to <em>answer the phone</em>." Time to turn your Java project into a Spring Boot application.</p>
 
 <div class="spring-corner">
 <h2 id="spring-corner">🌱 Spring Corner: what Spring Boot actually does for you</h2>
@@ -31,7 +31,7 @@
 <li>a <strong>starter</strong> is a dependency that pulls in a whole group of libraries: <code>spring-boot-starter-webmvc</code> for "web application with Tomcat and JSON"</li>
 <li>a <strong>test starter</strong> does the same for tests: <code>spring-boot-starter-webmvc-test</code> brings JUnit, AssertJ, Mockito and Spring's test tools</li>
 </ul>
-<p>The entry point is one class annotated with <code>@SpringBootApplication</code>. Its <code>main</code> method calls <code>SpringApplication.run(...)</code>, which starts the web server and creates the <strong>application context</strong>: a container that finds, creates and wires the objects ("beans") of your application. Lesson 03 is about beans.</p>
+<p>The entry point is one class annotated with <code>@SpringBootApplication</code>. Its <code>main</code> method calls <code>SpringApplication.run(...)</code>, which starts the web server and creates the <strong>application context</strong>: a container that finds, creates and wires the objects ("beans") of your application. Lesson 02 is about beans.</p>
 <p>The annotation also switches on <strong>component scanning</strong>: Spring looks for its own annotations in the package of that class <em>and everything below it</em>, and nowhere else. Remember that when you choose where the class goes.</p>
 <p>This course uses <strong>Spring Boot 4.1</strong>. Boot 4 renamed several things compared to older tutorials (starter names, test packages, <code>@MockBean</code> is gone), so if a search result looks different from this course, it is probably about Boot 3. Official docs: <a href="https://docs.spring.io/spring-boot/index.html">Spring Boot reference</a>, <a href="https://docs.spring.io/spring-boot/system-requirements.html">system requirements</a>.</p>
 </div>
@@ -143,17 +143,17 @@
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
 <p>Open GitHub Copilot Chat and start with this message:</p>
 <blockquote>
-<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 02: Planting Spring and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code for me — guide me with questions so I can figure it out myself."</p>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 01: Planting Spring and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code for me — guide me with questions so I can figure it out myself."</p>
 </blockquote>
       </article>
       <nav class="lesson-nav" aria-label="Lesson navigation">
         <div class="lesson-nav__item">
-          <span class="lesson-nav__label">Previous lesson</span>
-          <a class="lesson-nav__link" href="../lesson-01-is-the-farm-ready-for-the-web/index.html">Lesson 01: Is the Farm Ready for the Web?</a>
+          <span class="lesson-nav__label">Previous</span>
+          <a class="lesson-nav__link" href="../../setup/index.html">Setting Up</a>
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>
-          <a class="lesson-nav__link" href="../lesson-03-the-farm-becomes-a-bean/index.html">Lesson 03: The Farm Becomes a Bean</a>
+          <a class="lesson-nav__link" href="../lesson-02-the-farm-becomes-a-bean/index.html">Lesson 02: The Farm Becomes a Bean</a>
         </div>
       </nav>
       <p class="footer-note">Old MacDonald Had an API curriculum — Phase 1.</p>
