@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Old MacDonald Had an API mark">
+  <defs>
+    <clipPath id="round"><rect width="200" height="200" rx="44"></rect></clipPath>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="200" height="200" fill="#FF2E93"></rect>
+
+    <circle cx="28" cy="34" r="5" fill="#FFB422"></circle>
+    <circle cx="170" cy="28" r="6" fill="#14B8A6"></circle>
+    <circle cx="176" cy="150" r="5" fill="#FFFCFD"></circle>
+    <circle cx="24" cy="158" r="6" fill="#34C759"></circle>
+
+    <!-- sprout: stem, two leaves, soil mound -->
+    <path d="M100 148 V92" fill="none" stroke="#FFFCFD" stroke-width="8" stroke-linecap="round"></path>
+    <path d="M100 100 C100 66 74 50 44 56 C44 88 66 108 100 100 Z" fill="#FFFCFD"></path>
+    <path d="M100 86 C100 54 124 38 156 44 C156 76 134 94 100 86 Z" fill="#FFD9EA"></path>
+    <path d="M100 100 C84 88 70 78 52 64" fill="none" stroke="#FF2E93" stroke-width="3" stroke-linecap="round"></path>
+    <path d="M100 86 C116 74 130 64 148 52" fill="none" stroke="#FF2E93" stroke-width="3" stroke-linecap="round"></path>
+    <path d="M62 152 Q100 128 138 152 Z" fill="#2B1B28"></path>
+  </g>
+</svg>

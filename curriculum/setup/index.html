@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setting Up · Old MacDonald Had an API</title>
+  <link rel="icon" href="../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../index.html"><img src="../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">setting up</span>
+        <div class="controls"></div>
+      </div>
+      <article class="markdown">
+<h1 id="setting-up">Setting Up</h1>
+<p>Do this once, before Lesson 01. It is a short check: you already have almost everything from the Java course. Spring itself arrives in Lesson 02, and the database tooling later, in Phase 4.</p>
+
+<h2 id="check-your-tools">Check your tools</h2>
+<p>In a terminal, run:</p>
+<pre><code class="language-bash">java -version
+mvn -version
+git --version</code></pre>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>java -version</code> says 25</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>mvn -version</code> says 3.6.3 or newer, and reports the same Java 25</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>git --version</code> prints a version</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Your Java project builds and its tests are green: <code>mvn test</code></label></li>
+</ul>
+
+<h2 id="where-your-code-lives">Where your code lives</h2>
+<p>You keep working in <strong>your own repository</strong>, the one with your farm code. Copy this curriculum's <code>curriculum/</code> folder next to it (or into it) so you can read the lessons while you build. You don't start a new project: Lesson 02 turns the one you have into a Spring Boot application.</p>
+
+<h2 id="copilot-rules">Copilot rules</h2>
+<p>Your repo already has Copilot instructions from the Java course. You'll get an updated version for this course to merge in; until it arrives, the rule is the old one plus a new line: Copilot never writes a controller, a test, or a SQL query for you.</p>
+
+<h2 id="git-workflow">Git workflow</h2>
+<p>Unchanged from the Java course: one commit per green test, with the prefixes <code>feat:</code>, <code>test:</code>, <code>refactor:</code>, <code>fix:</code>.</p>
+<pre><code class="language-bash">git add .
+git commit -m "feat: GET /pens returns all pens"</code></pre>
+
+<h2 id="later">Coming later</h2>
+<p>Podman and PostgreSQL are set up at the start of Phase 4. Nothing to install for them now.</p>
+
+<p>Ready? Head back to the <a href="../index.html">curriculum home</a>. Lesson 01 is coming soon.</p>
+      </article>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Setup.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#check-your-tools">Check your tools</a></li>
+        <li><a class="toc-l2" href="#where-your-code-lives">Where your code lives</a></li>
+        <li><a class="toc-l2" href="#copilot-rules">Copilot rules</a></li>
+        <li><a class="toc-l2" href="#git-workflow">Git workflow</a></li>
+        <li><a class="toc-l2" href="#later">Coming later</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../app.js"></script>
+</body>
+</html>

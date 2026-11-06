@@ -1,0 +1,151 @@
+/* ============================================================
+   OLD MACDONALD HAD AN API — Design Tokens
+   Third sibling of the Java (purple) and SQL (denim) curricula:
+   same fonts, spacing, radii, motion; recoloured hot pink on a
+   blush "cream". Token NAMES (--grape, --cream, --plum, ...) are
+   kept identical to the siblings so the shared style.css/app.js
+   diff cleanly; only the values changed.
+   ------------------------------------------------------------
+   Contrast (WCAG): --primary #C2185B is 5.3:1 on --cream and
+   5.8:1 on --paper (text/links). --grape #FF2E93 is the bright
+   decorative pink (progress bar, mark, chunky shadows) and is
+   NOT used for text. --fg-3 is 4.6:1 on --cream.
+   ------------------------------------------------------------ */
+
+@import below).
+   NOTE: self-hosted woff2 not bundled — flagged to user.
+   ------------------------------------------------------------ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Press+Start+2P&display=swap');
+
+:root {
+  /* ---------- BRAND CORE ---------- */
+  --grape:        #FF2E93;  /* bright brand pink · decorative only */
+  --grape-700:    #A30F54;  /* deep pink · text on tint, pressed   */
+  --grape-200:    #FFD9EA;  /* pink tint surface                   */
+
+  --teal:         #14B8A6;  /* joins / connections                 */
+  --teal-700:     #0C8678;
+  --teal-200:     #C7F1EB;
+
+  --marigold:     #FFB422;  /* points · highlight                  */
+  --marigold-700: #D98A00;
+  --marigold-200: #FFE9BE;
+
+  --coral:        #FF5A5F;  /* heat · wrong · warnings              */
+  --coral-700:    #D13338;
+  --coral-200:    #FFD7D8;
+
+  --green:        #34C759;  /* correct                             */
+  --green-700:    #1E9E40;
+  --green-200:    #CDF3D6;
+
+  --leaf:         #2BB673;  /* sprout mark · matches nothing else */
+  --sky:          #3FA7F0;  /* informational accent                */
+
+  /* ---------- LEDGER NEUTRALS ---------- */
+  --cream:        #FFF0F6;  /* app background (blush)              */
+  --cream-deep:   #FFE0EC;  /* sunken blush                        */
+  --paper:        #FFFCFD;  /* raised card surface                 */
+  --plum:         #2B1B28;  /* ink / dark plum                     */
+  --plum-soft:    #5E4659;  /* secondary text                      */
+  --plum-faint:   #7A6073;  /* tertiary / disabled text             */
+  --wool-line:    #F2CFDD;  /* hairline borders                     */
+  --white:        #FFFFFF;
+
+  /* ---------- SEMANTIC ROLES ---------- */
+  --fg-1:         var(--plum);
+  --fg-2:         var(--plum-soft);
+  --fg-3:         var(--plum-faint);
+  --bg-app:       var(--cream);
+  --bg-surface:   var(--paper);
+  --bg-sunken:    var(--cream-deep);
+  --primary:      #C2185B;  /* text/link pink, AA on cream+paper */
+  --on-primary:   #FFFFFF;
+  --border:       var(--wool-line);
+  --focus-ring:   var(--grape-700);
+
+  /* ---------- TYPE FAMILIES ---------- */
+  --font-display: 'Fredoka', 'Trebuchet MS', sans-serif;
+  --font-body:    'Nunito', system-ui, sans-serif;
+  --font-pixel:   'Press Start 2P', 'Courier New', monospace;
+
+  /* ---------- TYPE SCALE (mobile-first) ---------- */
+  --fs-display-xl: 40px;  --lh-display-xl: 1.02;
+  --fs-display:    32px;  --lh-display:    1.05;
+  --fs-h1:         28px;  --lh-h1:         1.1;
+  --fs-h2:         22px;  --lh-h2:         1.15;
+  --fs-h3:         18px;  --lh-h3:         1.2;
+  --fs-body:       16px;  --lh-body:       1.5;
+  --fs-small:      14px;  --lh-small:      1.45;
+  --fs-caption:    12px;  --lh-caption:    1.3;
+  --fs-pixel:      12px;  --lh-pixel:      1.4;
+
+  /* ---------- SPACING (4px base) ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px;
+
+  /* ---------- RADII ---------- */
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  24px;
+  --r-xl:  32px;
+  --r-pill: 999px;
+
+  /* ---------- ELEVATION ---------- */
+  --shadow-1: 0 1px 3px rgba(43,27,40,.10), 0 1px 2px rgba(43,27,40,.06);
+  --shadow-2: 0 4px 12px rgba(43,27,40,.12);
+  --shadow-3: 0 12px 28px rgba(43,27,40,.16);
+  --chunk-grape:    0 5px 0 var(--grape-700);
+  --chunk-marigold: 0 5px 0 var(--marigold-700);
+  --chunk-teal:     0 5px 0 var(--teal-700);
+  --chunk-coral:    0 5px 0 var(--coral-700);
+  --chunk-ink:      0 5px 0 var(--plum);
+
+  /* ---------- MOTION ---------- */
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out:    cubic-bezier(.22, 1, .36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPE CLASSES
+   ============================================================ */
+.t-display-xl {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--fs-display-xl); line-height: var(--lh-display-xl);
+  letter-spacing: -.01em; color: var(--fg-1);
+}
+.t-display {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--fs-display); line-height: var(--lh-display);
+  letter-spacing: -.01em; color: var(--fg-1);
+}
+.t-h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h1); line-height: var(--lh-h1); color: var(--fg-1); }
+.t-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h2); line-height: var(--lh-h2); color: var(--fg-1); }
+.t-h3 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h3); line-height: var(--lh-h3); color: var(--fg-1); }
+.t-body { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-body); line-height: var(--lh-body); color: var(--fg-1); }
+.t-body-strong { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-body); line-height: var(--lh-body); color: var(--fg-1); }
+.t-small { font-family: var(--font-body); font-weight: 600; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--fg-2); }
+.t-caption {
+  font-family: var(--font-body); font-weight: 800;
+  font-size: var(--fs-caption); line-height: var(--lh-caption);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--fg-3);
+}
+.t-pixel { font-family: var(--font-pixel); font-size: var(--fs-pixel); line-height: var(--lh-pixel); color: var(--fg-1); }
+.t-score { font-family: var(--font-pixel); font-size: 28px; line-height: 1; color: var(--marigold-700); }
+
+/* ============================================================
+   PRIMITIVE HELPERS
+   ============================================================ */
+.df-chip {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  font-family: var(--font-body); font-weight: 800; font-size: 13px;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  letter-spacing: .02em;
+}
+.df-chip--knowledge { background: var(--grape-200); color: var(--grape-700); }
+.df-chip--geography { background: var(--teal-200);  color: var(--teal-700); }

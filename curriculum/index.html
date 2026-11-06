@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Old MacDonald Had an API — Spring Curriculum</title>
+  <link rel="icon" href="assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="colors_and_type.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="index.html"><img src="assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">Curriculum home</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="old-macdonald-had-an-api">🌱 Old MacDonald Had an API — Spring Curriculum</h1>
+<p>Fiona's alpacas live in your Java code. Now the rest of the farm wants to talk to them: a website, a phone app, a barn scanner. They all speak HTTP. In this curriculum you put a Spring Boot REST API around the domain you already wrote, test-first, and finally give it a real database.</p>
+<blockquote>
+<p>This is the third sibling of <strong>Old MacDonald Had a Farm</strong> (Java/TDD) and <strong>The Data Barn</strong> (SQL). Same world, same Fiona. The Angular frontend is the <em>next</em> curriculum; there is none of it here.</p>
+</blockquote>
+<hr>
+<h2 id="what-you-will-learn">What you will learn</h2>
+<ul>
+<li>Starting a Spring Boot application and letting Spring wire your objects together (dependency injection)</li>
+<li>Exposing your domain over HTTP: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, status codes, JSON</li>
+<li>Keeping the <strong>business model</strong> and the <strong>JSON contract</strong> apart, with request and response records</li>
+<li>Testing controllers with <code>@WebMvcTest</code> and MockMvc, test-first</li>
+<li>Turning exceptions into proper error responses (400, 404, 409)</li>
+<li>Validating input</li>
+<li>Two ways of driving a design: Chicago (inside-out) and London (outside-in)</li>
+<li>Storing the farm in PostgreSQL with <code>JdbcClient</code> and plain SQL</li>
+<li>Documenting your API with Swagger UI</li>
+</ul>
+<hr>
+<h2 id="before-you-start">Before you start</h2>
+<p>This curriculum starts after <strong>Java Lesson 19</strong> (the end of Java Phase 4). Before Phase 2 you also need <strong>Java Lesson 21</strong> (records) and <strong>Java Lesson 22</strong> (<code>Optional</code>). Java Lessons 20, 23 and 24 can run in parallel or afterwards.</p>
+<p>One-time checks live on their own page, not inside a lesson: <a href="setup/index.html">Setting Up</a>. Do that first.</p>
+<hr>
+<h2 id="how-this-curriculum-works">How this curriculum works</h2>
+<h3 id="reading-a-lesson">Reading a lesson</h3>
+<p>Every lesson has the same shape as in the Java curriculum:</p>
+<ul>
+<li><strong>Story</strong> — what Fiona needs this time</li>
+<li><strong>Spring Corner</strong> — a short box explaining the Spring idea you need, with a link to the official docs. Spring concepts can't be discovered by trial and error, so you read first</li>
+<li><strong>Your Task</strong>, <strong>Learning Goals</strong>, <strong>Getting Started</strong></li>
+<li><strong>Test List</strong> — the behaviour to build, one test at a time; the acceptance criteria are hidden until you want them</li>
+<li><strong>Hints</strong> — three, escalating</li>
+<li><strong>When You're Done</strong>, <strong>Reflect</strong>, and a Copilot prompt for when you're stuck</li>
+</ul>
+<h3 id="the-one-rule">The one rule</h3>
+<blockquote>
+<p><strong>Your domain classes never import Spring.</strong> Spring is the delivery mechanism around the farm. The farm doesn't know it is on the web.</p>
+</blockquote>
+<p>Everything under <code>alpacas.web</code> may use Spring. Everything else may not. A controller never accepts or returns a domain object; it has its own request and response types. You'll see why in Lesson 01, and an architecture test will hold you to it later.</p>
+<h3 id="how-we-test">How we test</h3>
+<ul>
+<li>Domain code: plain JUnit, as before</li>
+<li>Controllers: <code>@WebMvcTest</code> with MockMvc</li>
+<li>One <code>@SpringBootTest</code> smoke test per phase: does the whole app start?</li>
+<li>Mocks (Mockito) appear in exactly one lesson, on purpose</li>
+</ul>
+<h3 id="when-youre-stuck">When you're stuck</h3>
+<ol>
+<li>Re-read the Spring Corner and the official docs link — is there an idea you skimmed past?</li>
+<li>Open <strong>Hint 1</strong>, then <strong>Hint 2</strong>, then <strong>Hint 3</strong></li>
+<li>Still stuck? Use GitHub Copilot Chat with the prompt at the bottom of the lesson</li>
+</ol>
+<blockquote>
+<p><strong>Important:</strong> don't jump to the hints. Struggling productively is how you learn.</p>
+</blockquote>
+<hr>
+<h2 id="tools-you-need">Tools you need</h2>
+<table>
+<thead>
+<tr><th>Tool</th><th>Why</th></tr>
+</thead>
+<tbody>
+<tr><td>Java 25 + Maven</td><td>Same as the Java course; Spring Boot 4.1 runs on Java 25</td></tr>
+<tr><td>IntelliJ IDEA</td><td>Where you write and run everything</td></tr>
+<tr><td>Git</td><td>One commit per green test</td></tr>
+<tr><td>A browser, plus <code>curl</code> or the IDE's HTTP client</td><td>To poke your running API by hand</td></tr>
+<tr><td>Podman Desktop</td><td>Runs PostgreSQL for you, needed from Phase 4 only</td></tr>
+<tr><td>GitHub Copilot</td><td>Socratic mode only, after hints</td></tr>
+</tbody>
+</table>
+<hr>
+<h2 id="the-curriculum-map">The Curriculum Map</h2>
+<p>Five phases, about 20 lessons over 8–9 weeks. Lesson titles are filled in as each lesson is written; the numbers are approximate until then.</p>
+
+<h3 id="phase-1-hello-spring">Phase 1 — Hello Spring <em>(Lessons 01–04)</em></h3>
+<blockquote>
+<p>Style: Chicago (inside-out). Core concepts: auditing your domain for the web, Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc</p>
+</blockquote>
+<table>
+<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>01–04</td><td>Audit your own domain ("what is awkward about exposing this over HTTP?"), turn the project into a Spring Boot app, make <code>Farm</code> a bean, answer your first request</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+</tbody>
+</table>
+
+<h3 id="phase-2-reading-the-farm">Phase 2 — Reading the Farm <em>(Lessons 05–08)</em></h3>
+<blockquote>
+<p>Style: Chicago. Needs Java Lessons 21 (records) and 22 (<code>Optional</code>). Core concepts: <code>GET</code> endpoints, response records and mapping, <code>Optional</code> to 404, <code>@RestControllerAdvice</code></p>
+</blockquote>
+<table>
+<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>05–08</td><td>List pens, alpacas and the ones ready to shear; stop leaking domain objects; turn "not found" into 404 in one central place</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+</tbody>
+</table>
+
+<h3 id="phase-3-changing-the-farm">Phase 3 — Changing the Farm <em>(Lessons 09–13)</em></h3>
+<blockquote>
+<p>Style: Chicago, then London. Core concepts: <code>POST</code>/<code>PUT</code>/<code>DELETE</code>, validation, exceptions to 400/409, an architecture test, London vs. Chicago</p>
+</blockquote>
+<table>
+<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>09–13</td><td>Create, change and remove things; reject bad input; guard the "no Spring in the domain" rule with a test; then build <code>POST /pens/{pen}/alpacas/{name}/shear</code> outside-in with your first mock</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+</tbody>
+</table>
+<p><strong>Side Quest (optional):</strong> the Clean Coders series <a href="https://cleancoders.com/series/comparativeDesign">Comparative Design</a> compares outside-in and inside-out designs of the same app. It is long and entirely optional.</p>
+
+<h3 id="phase-4-the-barn-gets-a-database">Phase 4 — The Barn Gets a Database <em>(Lessons 14–17)</em></h3>
+<blockquote>
+<p>Core concepts: ids, a repository interface owned by the domain, an in-memory implementation, then <code>JdbcClient</code> with plain SQL against PostgreSQL</p>
+</blockquote>
+<table>
+<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>14–17</td><td>Give things identities, put storage behind an interface, swap in a real database without touching the domain's rules</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+</tbody>
+</table>
+
+<h3 id="phase-5-wrap-up">Phase 5 — Wrap-up <em>(Lessons 18–20)</em></h3>
+<blockquote>
+<p>Core concepts: OpenAPI and Swagger UI, a review of the whole API, what comes next</p>
+</blockquote>
+<table>
+<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>18–20</td><td>Document the API automatically, review the whole farm API with fresh eyes, look ahead to the Angular curriculum</td><td><span class="status-pill status-pill--planned">Planned</span></td></tr>
+</tbody>
+</table>
+<hr>
+<h2 id="phase-end-demos">Phase-end demos</h2>
+<p>At the end of each phase, show your mentor:</p>
+<ul>
+<li>Start the app and call the endpoints from the phase by hand</li>
+<li>Run the tests and walk through one of them</li>
+<li>Pick one design decision you're proud of and explain it in your own words</li>
+<li>Answer the Reflect questions from the last lesson in the phase</li>
+</ul>
+<hr>
+<h2 id="git-conventions">Git conventions</h2>
+<p>Same as the Java course: one commit per green test.</p>
+<table>
+<thead><tr><th>Prefix</th><th>When to use</th></tr></thead>
+<tbody>
+<tr><td><code>feat:</code></td><td>New behaviour, test now passes</td></tr>
+<tr><td><code>test:</code></td><td>A new failing test, or a test-only change</td></tr>
+<tr><td><code>refactor:</code></td><td>Structure changed, behaviour didn't</td></tr>
+<tr><td><code>fix:</code></td><td>Corrected a bug</td></tr>
+</tbody>
+</table>
+<hr>
+<h2 id="a-note-on-ai">A note on AI</h2>
+<p>GitHub Copilot is available to you, with one rule for this course: <strong>it never writes a controller, a test, or a SQL query for you.</strong> Each lesson ends with a Copilot prompt that keeps it Socratic. If you catch yourself pasting code you don't understand, stop and go back to the hints.</p>
+<hr>
+<h2 id="how-to-start">How to start</h2>
+<p><a href="setup/index.html">Check your setup</a>, then begin with Lesson 01 (coming soon). 🌱</p>
+      </article>
+      <p class="footer-note">Hand-authored HTML — Old MacDonald Had an API curriculum. See <code>DESIGN.md</code> in the repo root for the design rationale.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <input id="toc-filter" type="search" placeholder="Filter sections" aria-label="Filter sections" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;">
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#what-you-will-learn">What you will learn</a></li>
+        <li><a class="toc-l2" href="#before-you-start">Before you start</a></li>
+        <li><a class="toc-l2" href="#how-this-curriculum-works">How this curriculum works</a></li>
+        <li><a class="toc-l3" href="#reading-a-lesson">Reading a lesson</a></li>
+        <li><a class="toc-l3" href="#the-one-rule">The one rule</a></li>
+        <li><a class="toc-l3" href="#how-we-test">How we test</a></li>
+        <li><a class="toc-l3" href="#when-youre-stuck">When you're stuck</a></li>
+        <li><a class="toc-l2" href="#tools-you-need">Tools you need</a></li>
+        <li><a class="toc-l2" href="#the-curriculum-map">The Curriculum Map</a></li>
+        <li><a class="toc-l3" href="#phase-1-hello-spring">Phase 1 — Hello Spring</a></li>
+        <li><a class="toc-l3" href="#phase-2-reading-the-farm">Phase 2 — Reading the Farm</a></li>
+        <li><a class="toc-l3" href="#phase-3-changing-the-farm">Phase 3 — Changing the Farm</a></li>
+        <li><a class="toc-l3" href="#phase-4-the-barn-gets-a-database">Phase 4 — The Barn Gets a Database</a></li>
+        <li><a class="toc-l3" href="#phase-5-wrap-up">Phase 5 — Wrap-up</a></li>
+        <li><a class="toc-l2" href="#phase-end-demos">Phase-end demos</a></li>
+        <li><a class="toc-l2" href="#git-conventions">Git conventions</a></li>
+        <li><a class="toc-l2" href="#a-note-on-ai">A note on AI</a></li>
+        <li><a class="toc-l2" href="#how-to-start">How to start</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
