@@ -24,9 +24,33 @@
 <p>The start screen works, and now Ilona wants the next one: the <em>pen overview</em>. "One row per pen," she says. "The pen's name and how many alpacas stand in it. Tap a row, and later I'll show the alpacas." Fiona nods: "Ring and Cell, at a glance."</p>
 <p><strong>Phase 2 is about reading.</strong> Every endpoint in this phase is a <code>GET</code>: it looks at the farm and changes nothing. Before you start, make sure you have finished Java Lesson 21 (records) and Java Lesson 22 (<code>Optional</code>); Lesson 05 already uses records, Lesson 07 uses <code>Optional</code>.</p>
 
-<div class="spring-corner">
-<h2 id="spring-sprout">🌱 Spring Sprout: lists</h2>
-<p>A controller method can return a <code>List</code>. Spring then answers with a <strong>JSON array</strong> and one entry per element, each written the way you saw in Lesson 04. A controller is a bean, so it gets the farm the same way as before: through its constructor. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html">Request mapping</a>.</p>
+<div class="concept-corner">
+<h2 id="how-jackson-writes-json">🚜 Barn Briefing: how Jackson writes JSON</h2>
+<p>Your controller returns a Java object, and the client receives text. The one who turns one into the other is not Spring itself but a library called <strong>Jackson</strong>. Spring calls it for you, and also sets the header <code>Content-Type: application/json</code>. You never import Jackson in this course, but you have already seen its work in Lessons 03 and 04. Its rules are small. We build them up one step at a time. Left is the Java, right is the JSON that Jackson writes:</p>
+<p><strong>1.</strong> A record with nothing in it is an empty JSON object, just curly braces.</p>
+<pre><code>record Nothing()
+new Nothing()                   →   {}</code></pre>
+<p><strong>2.</strong> A record with one component: one member, named like the component. Text has quotes.</p>
+<pre><code>record Greeting(String text)
+new Greeting("hello")           →   {"text": "hello"}</code></pre>
+<p>From here on the record around it is left out. Each example adds <strong>one more component</strong> to a record like the one above, and shows the JSON member it becomes. The types are written with <code>var</code> to keep the lines short; the compiler works them out from the value (<code>70.0</code> is a <code>double</code>, <code>70</code> would be an <code>int</code>).</p>
+<p><strong>3.</strong> Numbers (and <code>true</code>/<code>false</code>) have no quotes.</p>
+<pre><code>var kg = 70.0                   →   "kg": 70.0</code></pre>
+<p><strong>4.</strong> A <code>List</code> becomes an array, in the same order.</p>
+<pre><code>var names = List.of("Lita", "Batista")
+                                →   "names": ["Lita", "Batista"]</code></pre>
+<p><strong>5.</strong> An enum is written as its name, in quotes.</p>
+<pre><code>var color = FleeceColor.WHITE   →   "color": "WHITE"</code></pre>
+<p><strong>6.</strong> A <code>null</code> is written as <code>null</code>. The member is not left out. (Here <code>var</code> cannot work, because <code>null</code> has no type to guess.)</p>
+<pre><code>String nickname = null         →   "nickname": null</code></pre>
+<p><strong>7.</strong> A record inside a record becomes an object inside the object.</p>
+<pre><code>var inner = new Greeting("hi")  →   "inner": {"text": "hi"}</code></pre>
+<p><strong>8.</strong> A normal class, like your domain classes, has no components. Jackson looks at its <strong>getters</strong> instead. Here are four members of a class <code>Barn</code>:</p>
+<pre><code>public String getName() { return "Ring"; }   →   "name": "Ring"
+public boolean isOpen() { return true; }     →   "open": true
+public int countPens()  { return 2; }        →   (nothing)
+private int secret = 3;                      →   (nothing)</code></pre>
+<p>Only getters count: a <code>get...</code> or <code>is...</code> method, with the name shortened. Two things follow that you have felt already: the names in the JSON come from the names in your Java (which is why the rename in Lesson 04 broke a test), and Jackson calls <em>every</em> getter, including the ones that print to the console. A response record with only the members you chose is the safer shape. Official docs: <a href="https://docs.spring.io/spring-boot/reference/features/json.html">JSON in Spring Boot</a>. (Phase 3 uses the same machinery in the other direction: JSON from a client becomes a record.)</p>
 </div>
 
 <h2 id="your-task">Your Task</h2>
@@ -45,7 +69,7 @@
 <h2 id="getting-started">Getting Started</h2>
 <ol>
 <li><strong>Test first.</strong> Create <code>PenControllerTest</code> in <code>alpacas.web</code>. It looks like your <code>FarmControllerTest</code>, except that the annotation names the new controller: <code>@WebMvcTest(PenController.class)</code>, with <code>@Import(FarmConfig.class)</code> as before. (If you write <code>@WebMvcTest</code> without a class, Spring loads <em>every</em> controller, which also works but gets slower with each new controller.) The new class does not exist yet. Let IntelliJ create it for you after the test is written.</li>
-<li><strong>Read an array in a test.</strong> In a JSON array, <code>$[0]</code> is the first entry and <code>$[1]</code> the second, so <code>.extractingPath("$[0].name")</code> reads the name of the first pen. <code>.extractingPath("$.length()")</code> counts the entries.</li>
+<li><strong>Read an array in a test.</strong> In a JSON array, <code>$[0]</code> is the first entry and <code>$[1]</code> the second (the briefing above said a list becomes an array in the same order), so <code>.extractingPath("$[0].name")</code> reads the name of the first pen. <code>.extractingPath("$.length()")</code> counts the entries.</li>
 <li><strong>Make it pass.</strong> The smallest controller has a constructor taking the <code>Farm</code>, and one method annotated <code>@GetMapping("/pens")</code>. Inside, loop over <code>farm.getPens()</code> and build one record per pen. Use only methods that <code>Pen</code> already has. Commit after every green test.</li>
 <li>Start the application and open <code>http://localhost:8080/pens</code> in your browser. Your browser is just another client: it shows the array.</li>
 <li>Show the result to Ilona (your mentor plays Ilona): is this what her screen needs?</li>
@@ -117,7 +141,7 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
-        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#how-jackson-writes-json">🚜 Barn Briefing</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>

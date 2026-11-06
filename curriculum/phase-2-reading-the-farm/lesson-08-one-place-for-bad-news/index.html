@@ -26,7 +26,7 @@
 
 <div class="spring-corner">
 <h2 id="spring-sprout">🌱 Spring Sprout: central-error-handling</h2>
-<p>A class annotated with <code>@RestControllerAdvice</code> collects <code>@ExceptionHandler</code> methods for <em>all</em> controllers: one place that turns exceptions into answers. For the answer itself Spring has <code>ProblemDetail</code>, a small object that follows a standard error format (RFC 9457). It is sent as <code>application/problem+json</code> and has the fields <code>status</code>, <code>title</code> and <code>detail</code>, so every error in your API looks alike. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html">Controller Advice</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html">Error Responses</a>.</p>
+<p>A class annotated with <code>@RestControllerAdvice</code> collects <code>@ExceptionHandler</code> methods for <em>all</em> controllers: one place that turns exceptions into answers. For the answer itself Spring has a class called <code>ProblemDetail</code>. Its objects describe an error in a standard format (RFC 9457) and are sent as <code>application/problem+json</code>, with the JSON members <code>status</code>, <code>title</code> and <code>detail</code>, so every error in your API looks alike. Official docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html">Controller Advice</a> and <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html">Error Responses</a>.</p>
 </div>
 
 <h2 id="your-task">Your Task</h2>

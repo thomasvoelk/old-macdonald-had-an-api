@@ -22,7 +22,33 @@
 
 <h2 id="story">Story</h2>
 <p>Ilona's detail screen shows one alpaca: tap "Lita" in the Ring list. She needs <code>GET /pens/Ring/alpacas/Lita</code>. "And if there is no such alpaca," she adds, "tell me! I can't show an empty page and call it a day."</p>
-<p>Your <code>Herd.findByName</code> has a problem: when there is no such alpaca, it returns <code>null</code>. Everyone who forgets to check for <code>null</code> gets a <code>NullPointerException</code>, and a method signature does not warn them. Java Lesson 22 has the cure. The domain may change for the sake of the web code, but test-first.</p>
+<p>Your <code>Herd.findByName</code> has a problem: when there is no such alpaca, it returns <code>null</code>. The briefing below says why that matters. The domain may change for the sake of the web code, but test-first.</p>
+
+<div class="concept-corner">
+<h2 id="nothing-found">🚜 Barn Briefing: when nothing is found</h2>
+<p>Look at what a caller of your current <code>findByName</code> can write, and what a caller of an <code>Optional</code> version can write:</p>
+<pre><code>// returns null
+Alpaca alpaca = herd.findByName("Nobody");
+// compiles, then NullPointerException
+alpaca.getWeight();
+
+Optional&lt;Alpaca&gt; found = herd.findByName("Nobody");
+// does not compile: Optional has no getWeight()
+found.getWeight();</code></pre>
+<p>The difference starts in the method's first line, the one a caller reads before using it:</p>
+<pre><code>// "give me a name, you get an Alpaca"
+public Alpaca findByName(String name)
+
+// "give me a name, you get an Alpaca, or nothing"
+public Optional&lt;Alpaca&gt; findByName(String name)</code></pre>
+<p>When a method says it returns an <code>Alpaca</code>, you expect an alpaca, so you use the result straight away: <code>alpaca.getWeight()</code>. But sometimes you do not get an alpaca. You get <code>null</code>. That is not obvious from the first line, which says <code>Alpaca</code> and does not always deliver one, and nothing in the code makes you check. You only find out when the program crashes. In a web application that crash reaches Ilona's screen as a <code>500</code>.</p>
+<p>When a method returns an <code>Optional&lt;Alpaca&gt;</code>, the first line tells the truth: the result is a box that either holds an alpaca or is empty. You cannot call <code>getWeight()</code> on the box. First you have to take the alpaca out, for example with <code>orElseThrow(...)</code>, and while you write that you also write what should happen when the box is empty. So the empty case cannot slip through unnoticed (Java Lesson 22).</p>
+<p>A rule of thumb that fits your whole domain:</p>
+<ul>
+<li><strong>Many results:</strong> return a <code>List</code>, and an <em>empty</em> list when nothing matches. Your <code>getAlpacasReadyToShear()</code> already does this. Never <code>null</code>.</li>
+<li><strong>One result that may not exist:</strong> return an <code>Optional</code>. Never <code>null</code>.</li>
+</ul>
+</div>
 
 <div class="spring-corner">
 <h2 id="spring-sprout">🌱 Spring Sprout: exceptions</h2>
@@ -116,6 +142,7 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#nothing-found">🚜 Barn Briefing</a></li>
         <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>

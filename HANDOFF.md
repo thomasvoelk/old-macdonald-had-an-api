@@ -162,3 +162,21 @@ Review session on Lessons 01–04. **The Phase 3 reference (POST/PUT/DELETE, val
 **Open:** Thomas reviews Lessons 05–08 (do not write Phase 3 lessons before that). Phase 3 needs: reminder that the farm bean is shared between requests (and not thread-safe), `@DirtiesContext` explanation, a two-word name (`Triple H`) as URL-encoding case, 400 vs 409 vs 404 table, optional controller-signature architecture test.
 
 **Next:** incorporate Thomas's feedback on the Phase 2 draft (Lessons 05–08); then draft the Phase 3 lessons (09–13) against the reference, starting with POST/PUT/DELETE and validation.
+
+## Status after Thomas's review of Phase 2 lessons 05–08 (2026-11-06)
+Review finished; feedback incorporated. **Phase 3 lessons were NOT started** (Thomas chose a fresh session for it).
+
+**Changes (all by Thomas's feedback)**
+- **Lesson 05:** the Spring Sprout was dropped (its content was a repeat of Lesson 03 plus Jackson behaviour, not a Spring idea). Replaced by a **Barn Briefing "how Jackson writes JSON"**: a staircase of tiny examples, one block each (empty record `{}`, text, number, list, enum, null, nested record, then a normal class via getters). The record is shown fully only in steps 1–2; afterwards just the field and the JSON member, written with `var` (`var kg = 70.0`, because `70` would give `70`; the `null` case keeps `String nickname = null`). All outputs verified by a probe test in a scratch copy of the reference (Jackson 3: records and getters/`is...()` become members, `countPens()` and private fields do not, `null` is written as `null`, enum as its name, `Optional.empty()` also as `null`, empty list `[]`).
+- **Lesson 03 / 06:** "path" had never been defined. Lesson 03 now says: the part of the address after host and port. Lesson 06's sprout defines it again, explains that the braces exist **only in the controller pattern**, and shows pattern vs. real request path in one block; step 3 explains `@PathVariable` where it is used.
+- **Lesson 07:** new **Barn Briefing "when nothing is found"** before the Spring Sprout: method signature with `Alpaca` (not obvious that it can be `null`, nothing makes you check) vs. `Optional<Alpaca>` (the box holds an alpaca or is empty; you must take it out, e.g. `orElseThrow`, and so decide the empty case), plus the rule of thumb **many results -> `List` (empty when nothing matches), one maybe-missing result -> `Optional`, never `null`**. Code comments sit above their lines (no sideways scrolling).
+- **Lesson 08:** `ProblemDetail` is described as a class whose objects describe an error; "fields" became "JSON members".
+- **`curriculum/style.css`:** Spring Sprout / Barn Briefing headings had a large top gap (specificity: `article.markdown h2` margin beat the box rule). Fixed with more specific selectors.
+- Confirmed in her original code: `Herd.findByName` and `heaviestAlpaca()` return `null`. `heaviestAlpaca()` is not changed (no lesson uses it yet); it could be a later exercise.
+- Rule recorded for later lessons: a Spring Sprout only when the lesson teaches a Spring idea; a Barn Briefing for Jackson/HTTP/`Optional`-style background. Code comments go above the line, not at the end. Prefer one small example per block and show a record only once, then just the field.
+
+**Still open**
+- Not checked on phone width (Lesson 05 `→` staircase, Lesson 06 pattern block, Lesson 03 `curl -v` block with the Copy-button overlap).
+- Phase 3 needs (unchanged): reminder that the farm bean is shared between requests (and not thread-safe), `@DirtiesContext` explanation, `Triple H` as the URL-encoding case (`Location` header must be encoded), 400 vs 409 vs 404 table, request-body direction of Jackson (JSON -> record; plant is in the Lesson 05 briefing), optional controller-signature architecture test, London/Chicago explanation lesson plus the shear lesson (not built in the reference).
+
+**Next:** draft the Phase 3 lessons (09–13) against `mentor/reference/`, starting with POST/PUT/DELETE and validation. Show Thomas the first Phase 3 lessons before writing further ones.

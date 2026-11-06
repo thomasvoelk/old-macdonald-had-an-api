@@ -49,7 +49,7 @@
 <figcaption style="font-size:14px;color:var(--fg-2,#5E4659)">One request, one response. The server does nothing until a request arrives.</figcaption>
 </figure>
 <ul>
-<li>A <strong>request</strong> says <em>what</em> to do and <em>to which resource</em>: a <strong>method</strong> (<code>GET</code> = "give me") and a <strong>URL path</strong> (<code>/farm</code>). The server looks for the code that is responsible for exactly that pair, <code>GET /farm</code>.</li>
+<li>A <strong>request</strong> says <em>what</em> to do and <em>to which resource</em>: a <strong>method</strong> (<code>GET</code> = "give me") and a <strong>URL path</strong>: the part of the address after the host and port. In <code>http://localhost:8080/farm</code> the path is <code>/farm</code>. The server looks for the code that is responsible for exactly that pair, <code>GET /farm</code>.</li>
 <li>A <strong>response</strong> says how it went and what came out: a <strong>status code</strong> (<code>200</code> = ok, <code>404</code> = nothing is responsible for this method and path) and usually a <strong>body</strong>, here JSON.</li>
 <li>Both sides also send <strong>headers</strong>: small labelled extras such as <code>Content-Type: application/json</code> ("the body is JSON"). We mostly ignore them for now.</li>
 </ul>

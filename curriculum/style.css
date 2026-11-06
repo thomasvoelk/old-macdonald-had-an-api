@@ -133,7 +133,7 @@ aside.toc h2 { margin: 0 0 10px; font-family: var(--font-display, Fredoka, sans-
   background: var(--grape-200, #FFD9EA);
   box-shadow: var(--chunk-grape);
 }
-.spring-corner > h2, .spring-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: var(--grape-700, #A30F54); }
+article.markdown .spring-corner > h2, article.markdown .spring-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: var(--grape-700, #A30F54); }
 .spring-corner > :last-child { margin-bottom: 0; }
 /* Barn Briefing: same shape, teal instead of pink so the two boxes are easy to tell apart. Heading #0A6B60 is 5.2:1 on --teal-200. */
 .concept-corner {
@@ -144,7 +144,7 @@ aside.toc h2 { margin: 0 0 10px; font-family: var(--font-display, Fredoka, sans-
   background: var(--teal-200, #C7F1EB);
   box-shadow: var(--chunk-teal);
 }
-.concept-corner > h2, .concept-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: #0A6B60; }
+article.markdown .concept-corner > h2, article.markdown .concept-corner > h3 { margin-top: 0; font-family: var(--font-display, Fredoka, sans-serif); color: #0A6B60; }
 .concept-corner > :last-child { margin-bottom: 0; }
 .concept-corner a { color: #0A6B60; }
 article.markdown .concept-corner th { background: #E3F8F4; color: #0A6B60; }
