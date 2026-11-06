@@ -13,6 +13,7 @@ Thomas works in small steps, one per session, each in a fresh context. Do this w
 3. **Write down what happened** in a new dated section at the end of `HANDOFF.md`: what was built or decided, facts verified (also into `research/spring-boot-4-findings.md` when they are version facts), what is still open, and one **Next:** line naming the next single step.
 4. **Commit** the step (docs and curriculum files; `mentor/` stays git-ignored). Do not push unless Thomas says so.
 5. **End** the session with a short summary and the line: "Step done and recorded. Run `/clear` to start the next step." Claude cannot clear the session itself; Thomas types `/clear`.
+6. **Give Thomas the prompt** for the next session, in a code block he can paste after `/clear`. Format: "Read HANDOFF.md, DESIGN.md and research/spring-boot-4-findings.md, then <the Next step, one sentence>." It must match the **Next:** line in `HANDOFF.md`.
 
 ## Rules that matter
 
