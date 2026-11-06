@@ -256,3 +256,15 @@ Built in `mentor/reference/` (git-ignored), Boot 4.1.2, built with JDK 27 and `j
 - Lesson 01 leak, observed: returning an `Alpaca` from a controller produces `{"name":"Dolly","weight":70.0,"fleeceLength":4,"fleeceColor":"WHITE","healthyWeight":true,"readyToShear":false}`. The `is...()` methods become JSON properties and their `System.out.println` runs during serialisation.
 - Mockito self-attach warning appears on JDK 27; harmless, ignore for now (see section 10).
 - Still open: JdbcClient in `@JdbcTest`, KeyHolder on H2/Postgres, `ProblemDetail`, validation exceptions.
+
+## Verified while building the reference solution (Phase 2 slice)
+
+All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
+
+- `ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, message)` compiles and works with Framework 7.0.10; a plain `@RestControllerAdvice` with `@ExceptionHandler` methods returning `ProblemDetail` needs no property and no `ResponseEntityExceptionHandler`. The response has `Content-Type: application/problem+json` (asserted with `.hasContentType(MediaType.APPLICATION_PROBLEM_JSON)`) and `$.detail` holds the message.
+- `@WebMvcTest(PenController.class)` picks up the `@RestControllerAdvice` automatically; no `@Import` of the advice is needed (tested by removing it).
+- `MockMvcTester`: `.hasStatus(404)`, `.hasContentType(MediaType)`, `.bodyJson().extractingPath("$.length()").isEqualTo(1)` and indexed paths (`$[0].name`) all work. A path variable arrives case as typed, so `Farm.findPen` (case-insensitive) and `Herd.findByName` do the matching.
+- Jackson 3 serialises a top-level `List<Record>` with no annotations.
+- Domain change test-first: `Herd.findByName` now returns `Optional<Alpaca>` (5 existing tests in `HerdTest` rewritten red first, then green). Nothing else in her code called it.
+- Design choice in the reference: `AlpacaResponse(name, weight, fleeceLengthCm, fleeceColor)` deliberately renames `fleeceLength` to `fleeceLengthCm` and exposes the colour as a `String`, to demonstrate that the JSON contract can differ from the domain. "Alpaca not found" is a web-level `AlpacaNotFoundException` thrown from the controller via `Optional.orElseThrow`; the domain only knows `Optional`.
+- Still open: `JdbcClient` in `@JdbcTest`, KeyHolder on H2/Postgres, `MethodArgumentNotValidException` for `@Valid`.
