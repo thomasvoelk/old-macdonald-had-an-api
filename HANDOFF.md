@@ -1,4 +1,4 @@
-# Handoff — Spring Web Backend Curriculum ("Fiona's Farm API")
+# Handoff — Spring Web Backend Curriculum ("Old MacDonald Had an API")
 
 Written at the end of a design interview (grilling session). All decisions below are **confirmed by Thomas**. Do not re-litigate them; build from them. Start a fresh session inside this folder.
 
@@ -48,14 +48,14 @@ A Spring Boot REST backend tutorial for a first-year apprentice who has done Jav
 **Persistence**
 - **`JdbcClient` with plain SQL** (not JPA; JPA mentioned in one sentence at most). Repository interface owned by the domain; first an in-memory implementation, then JDBC.
 - Her own small schema (`farm`, `pens`, `alpacas`) in a plain `schema.sql` run by Spring at startup — no Flyway.
-- Running the app: **Postgres in Podman** (short `compose.yml`, setup page at start of Phase 9; Thomas will confirm `podman compose up` works on her machine, fix when we get there). Tests: **embedded H2** (Spring's in-memory DB) via `@JdbcTest`, used silently — **no lesson about H2 vs Postgres differences, no Testcontainers** (too much; at most one sentence "teams do this later"). Note H2 PostgreSQL-compat mode quirks in `mentor/` notes only.
+- Running the app: **Postgres in Podman** (short `compose.yml`, setup page at start of Phase 4, Lesson 14; an older numbering said "Phase 9"; Thomas will confirm `podman compose up` works on her machine, fix when we get there). Tests: **embedded H2** (Spring's in-memory DB) via `@JdbcTest`, used silently — **no lesson about H2 vs Postgres differences, no Testcontainers** (too much; at most one sentence "teams do this later"). Note H2 PostgreSQL-compat mode quirks in `mentor/` notes only.
 - Optional bonus lesson (low priority): connect read-only to the SQL curriculum's `farm` DB (`/Users/thomas/Development/Projekte/sql-curriculum/db/schema.sql`) to show a different mapping of the same world. Treat as nice-to-have.
 
 ## Process (do in this order)
 1. **[DONE]** **Research pass** (use the `mattpocock-skills:research` skill or a sub-agent): verify against official docs the exact Spring Boot 4.1.x details — starters (`spring-boot-starter-webmvc`, `-webmvc-test`, validation), `@WebMvcTest` package/location, `@MockitoBean` (replaces `@MockBean`), `MockMvc`/`MockMvcTester`, `ProblemDetail`/`@RestControllerAdvice`, `JdbcClient`, `@JdbcTest` + embedded H2, springdoc compatibility with Boot 4. Do **not** write from memory; Boot 4 renamed/moved several things. Capture findings as a Markdown file in the repo.
-2. Scaffold the repo: `DESIGN.md` (decisions above, mentor-facing), `README.md`, `curriculum/` with `index.html`, shared chrome adapted from `sql-curriculum/curriculum/` (recoloured hot pink, new sprout mark), `setup/` page.
+2. **[DONE]** Scaffold the repo: `DESIGN.md` (decisions above, mentor-facing), `README.md`, `curriculum/` with `index.html`, shared chrome adapted from `sql-curriculum/curriculum/` (recoloured hot pink, new sprout mark), `setup/` page.
 3. **Build the reference solution** in a scratch dir using a copy of her domain from `old-marina-had-a-farm-main/src` at end-of-Phase-4 state. Work through lessons in order; every test, snippet, and hint must compile and pass. Final reference goes into `mentor/` (mentor-only, labelled, not part of what she copies).
-4. Write the lesson HTML pages per the Java lesson format + Spring Corner. Draft Phase 6 first and show Thomas before writing the rest.
+4. Write the lesson HTML pages per the Java lesson format + Spring Corner. Draft Phase 1 first (an older numbering said "Phase 6"; there is no Phase 6) and show Thomas before writing the rest.
 5. Write the Spring-adapted `copilot-instructions.md`.
 
 ## Still open / to confirm with Thomas when it comes up
@@ -74,3 +74,11 @@ Full, sourced findings: `research/spring-boot-4-findings.md` (read its "Could no
 - Jackson 3: `tools.jackson.*`, but annotations stay `com.fasterxml.jackson.annotation`.
 - SQL init: `schema.sql` runs automatically only for embedded DBs; for Postgres set `spring.sql.init.mode=always`. `@JdbcTest` replaces the DataSource with embedded H2 by default (H2 `MODE=PostgreSQL` is ignored unless `replace = NONE`).
 - Still to verify while building the reference solution: JdbcClient bean inside `@JdbcTest`, KeyHolder generated-key pattern on H2 and Postgres, `ProblemDetail` API details.
+
+## Status after the scaffold session (2026-11-06)
+- Final name: **Old MacDonald Had an API** (a pun like the siblings; "Fiona's Farm API" was only the working title). Visual identity unchanged: hot pink, sprout mark.
+- Repo: public, https://github.com/thomasvoelk/old-macdonald-had-an-api (personal account `thomasvoelk`, remote `origin`, branch `main`). Published via GitHub Pages from `curriculum/` by `.github/workflows/pages.yml`: https://thomasvoelk.github.io/old-macdonald-had-an-api/ (redeploys on every push to `main`).
+- Steps 1 and 2 are done. `DESIGN.md` now holds the decisions and build order; this file keeps the original interview record.
+- **Next: step 3**, the reference solution in a scratch dir, starting with the Phase 1 slice (Boot 4.1.2 pom, `Farm` bean, first MockMvc test). Close the open research items on the way (see the end of `research/spring-boot-4-findings.md`).
+- Because the repo is public, **keep `mentor/` (reference solution) out of it** (separate private repo or `.gitignore`), unless Thomas decides otherwise. The lesson HTML's hidden hints are public regardless.
+- Thomas's other repo `thomasvoelk/alpaka-farm` (public) is not part of this; decided against adding the curriculum as a branch.
