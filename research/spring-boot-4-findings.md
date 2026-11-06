@@ -244,3 +244,15 @@ long id = keys.getKey().longValue();
 - Any official statement that Mockito/JUnit 6 are tested on Java 25 (none found). The practical evidence is the company project.
 - The H2 default `@JdbcTest` embedded database name/quirks, and the `Replace.NONE` + `MODE=PostgreSQL` combination were not run.
 - Whether `spring-boot-starter-jdbc-test` also brings H2 (it does not; POM lists no H2) so the explicit H2 dependency is needed.
+
+## Verified while building the reference solution (2026-11-06, Phase 1 slice)
+
+Built in `mentor/reference/` (git-ignored), Boot 4.1.2, built with JDK 27 and `java.version` 25; all 135 tests green.
+
+- `MockMvcTester`: `assertThat(mvc.get().uri("/farm")).hasStatusOk().bodyJson().extractingPath("$.name").isEqualTo("...")` compiles and works. For a raw response use `mvc.get().uri(..).exchange().getResponse()` (the request builder itself has no `getResponse()`).
+- Jackson 3 serialises plain records with no annotations (`FarmResponse`).
+- `@WebMvcTest(FarmController.class)` + `@Import(FarmConfig.class)` works; the `@SpringBootApplication` class in `alpacas.web` is found by searching up from the test package. An unrestricted `@WebMvcTest` loads every controller, so a controller whose bean dependency is missing fails the whole context.
+- `@SpringBootTest` `contextLoads()` smoke test works with no extra annotations.
+- Lesson 01 leak, observed: returning an `Alpaca` from a controller produces `{"name":"Dolly","weight":70.0,"fleeceLength":4,"fleeceColor":"WHITE","healthyWeight":true,"readyToShear":false}`. The `is...()` methods become JSON properties and their `System.out.println` runs during serialisation.
+- Mockito self-attach warning appears on JDK 27; harmless, ignore for now (see section 10).
+- Still open: JdbcClient in `@JdbcTest`, KeyHolder on H2/Postgres, `ProblemDetail`, validation exceptions.

@@ -3,3 +3,6 @@
 *.iml
 .DS_Store
 Thumbs.db
+
+# mentor-only reference solution (repo is public)
+mentor/
