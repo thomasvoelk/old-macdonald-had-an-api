@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 14: Shearing from the Outside In · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 14 shearing from the outside in</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-14-shearing-from-the-outside-in">Lesson 14: Shearing from the Outside In</h1>
+
+<h2 id="story">Story</h2>
+<p>Spring has come and Fiona wants her <em>Shear</em> button. Ilona has drawn it next to every alpaca. "It sends one request and shows the alpaca again, so I can see the fleece is gone," she says. "There is nothing to type, so the request has no body."</p>
+<p>Hasi reads the ticket over your shoulder. "Your <code>Shepherd</code> class already writes a log entry when it shears. Make sure the log really gets written, otherwise Fiona will ask who sheared Triple H and nobody will know."</p>
+<p>Last lesson you made two plans. Today you build the feature <em>outside-in</em>, starting at the controller, and see what the test tells you about the rest.</p>
+
+<div class="concept-corner">
+<h2 id="an-action-on-a-thing">🚜 Barn Briefing: an action on a thing</h2>
+<p>So far every request either looked at a thing (<code>GET</code>), made a new one (<code>POST</code>), replaced one (<code>PUT</code>) or removed one (<code>DELETE</code>). Shearing is none of those: the alpaca stays, it just changes in a way that has a name. For such <em>actions</em> a common choice is a <code>POST</code> to a sub-address named after the action: <code>POST /pens/Ring/alpacas/Lita/shear</code>. It has no body, because the address says everything, and it answers <code>200</code> with the alpaca as it is now. It is not <code>PUT</code> (that would need the new values) and not <code>201</code> (nothing was created). Doing it twice is allowed; the second time there is simply no fleece left to take.</p>
+</div>
+
+<div class="concept-corner">
+<h2 id="stand-ins">🚜 Barn Briefing: a stand-in for a class that does not exist yet</h2>
+<p>A <em>mock</em> is an object that a library (Mockito) builds for you at runtime. It looks like the class you ask for, but it has no real behaviour. You tell it what to answer (<code>given(...).willReturn(...)</code>, or <code>willThrow(...)</code> for an exception), and afterwards you can ask it what happened to it (<code>verify(...)</code>: "was <code>shear</code> called with <code>Ring</code> and <code>Lita</code>?").</p>
+<p>In an outside-in test the mock stands in for a class you have not written. The test says: <em>"when the controller asks the service to shear Lita in Ring, the service answers with this alpaca."</em> The controller test can now go green even though the service does nothing. That is the trick, and also the danger: the test only proves that the controller does its own job (it reads the address, asks, turns the answer into JSON). It cannot prove that the service works. You will write a second test for that.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: services and test stand-ins</h2>
+<p>A controller should only deal with HTTP: read the address and body, turn the answer into a response. The real work belongs in a class of its own, and Spring has a name for it: put <code>@Service</code> on it and, like a controller, Spring finds it, creates one object and hands it to every class that asks for it in its constructor. (<code>@Service</code> does exactly what <code>@Component</code> does; the name only tells the reader what the class is for.)</p>
+<p>In tests there is a catch. <code>@WebMvcTest</code> starts only the web part of your application: controllers, the exception handler, JSON. It does <em>not</em> create services. A controller that needs a service therefore cannot start in that test unless you provide one. <code>@MockitoBean</code> on a field of the test class says: <em>put a mock of this type into the test's Spring context</em>, and the controller receives it. Official docs: <a href="https://docs.spring.io/spring-framework/reference/testing/annotations/integration-spring/annotation-mockitobean.html">@MockitoBean</a>, <a href="https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html">@Service and scanning</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Build <code>POST /pens/{penName}/alpacas/{alpacaName}/shear</code>:</p>
+<ul>
+<li>success: <code>200</code>, body in the shape of <code>AlpacaResponse</code>, <code>fleeceLengthCm</code> is <code>0</code></li>
+<li>the pen's shepherd writes one log entry: <code>Paul Heyman sheared Lita on 2026-11-06</code> (his name, the alpaca, today's date; that is what your <code>Shepherd</code> already does)</li>
+<li>unknown pen or unknown alpaca: <code>404</code>, and nothing is written to the log</li>
+</ul>
+<p>Work outside-in: the first test is a controller test, and the class that does the shearing appears because that test needs it.</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Start a feature at the controller and let the test discover the next class</li>
+<li>Use <code>@MockitoBean</code>, <code>given(...).willReturn(...)</code>, <code>willThrow(...)</code> and <code>verify(...)</code></li>
+<li>Put the work in a <code>@Service</code> and keep the controller to HTTP only</li>
+<li>Test the discovered class on its own with plain JUnit, no Spring and no mock</li>
+<li>Say what a controller test with a mock proves, and what it does not</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Start red, at the edge.</strong> Create <code>ShearingControllerTest</code> in <code>alpacas.web</code>, annotated with <code>@WebMvcTest(ShearingController.class)</code>, with <code>MockMvcTester</code> as always. Add a field <code>@MockitoBean ShearingService shearingService</code>. The test: tell the mock that <code>shear("Ring", "Lita")</code> answers an <code>Alpaca</code> with 0 cm of fleece, then <code>POST /pens/Ring/alpacas/Lita/shear</code> and expect <code>200</code> and <code>$.fleeceLengthCm</code> equal to <code>0</code>. Add a <code>verify</code> that the service was asked exactly that. Do not write any production class first.</li>
+<li><strong>Let the compiler lead.</strong> Your IDE now shows red at two names: <code>ShearingController</code> and <code>ShearingService</code>. You have just invented a class by writing the test. Let the IDE create both in <code>alpacas.web</code>. Mark the controller <code>@RestController</code> and the service <code>@Service</code>. Look at the line with <code>given(shearingService.shear("Ring", "Lita"))</code>: it has already decided that the service has a method <code>shear</code> with two strings that returns an <code>Alpaca</code>. Create that method; its body can throw an <code>UnsupportedOperationException</code> for now. Run the test. It is red because there is no mapping yet: <code>Status = 404</code>.</li>
+<li><strong>Green: the controller.</strong> Give <code>ShearingController</code> a constructor that takes the service, and a method with <code>@PostMapping("/pens/{penName}/alpacas/{alpacaName}/shear")</code> and two <code>@PathVariable</code>s. It asks the service and returns <code>AlpacaResponse.from(...)</code>. Controllers still never return domain objects. Run the test: green. Look at what you did <em>not</em> write: no shepherd, no farm, no fleece. The controller does not know how shearing works.</li>
+<li><strong>Look: what a mock does for the context.</strong> Delete the <code>@MockitoBean</code> line and run the test. The error text starts with <code>UnsatisfiedDependencyException: Error creating bean with name 'shearingController'</code>. Why? (The Spring Sprout says it.) Put the line back. Write the cause in <code>docs/api-notes.md</code>.</li>
+<li><strong>Two more tests, green at once.</strong> Make the mock throw: <code>PenNotFoundException</code> for <code>shear("Nowhere", "Lita")</code>, and <code>AlpacaNotFoundException</code> (from Lesson 07) for <code>shear("Ring", "Nobody")</code>. Expect <code>404</code>; for the second also check that <code>$.detail</code> is <code>No alpaca named Nobody in pen Ring</code>. Both are green without any new code, because your <code>ApiExceptionHandler</code> from Lesson 08 turns the exceptions into <code>404</code>. Careful: you did not test that the <em>service</em> throws these. You told a mock to throw them, and only tested that the controller reacts correctly.</li>
+<li><strong>Move inwards: the service.</strong> The service is still empty, and the next test is its own. Create <code>ShearingServiceTest</code>, plain JUnit like your domain tests: no Spring, no Mockito, real objects. In a <code>@BeforeEach</code> build a <code>Farm</code> with a pen <code>Ring</code> containing Lita and give it to <code>new ShearingService(farm)</code>. Make the constructor take the <code>Farm</code>; the test has just decided that. Write the tests one by one, red-green each:
+<ul>
+<li><code>shear("Ring", "Lita")</code> returns an alpaca called Lita with fleece length 0.</li>
+<li>The shepherd writes a log entry: <code>Paul Heyman sheared Lita on &lt;today&gt;</code>. The test needs a way to read the log, so the service gets a method <code>logOf(String penName)</code>. Use <code>LocalDate.now()</code> in the expected text, and try the call with <code>"ring"</code> and <code>"lita"</code> in lower case.</li>
+<li>An unknown pen throws <code>PenNotFoundException</code>.</li>
+<li>An unknown alpaca throws <code>AlpacaNotFoundException</code> <em>and nothing is logged</em>.</li>
+</ul>
+<strong>The snag:</strong> look at the constructor of your <code>Shepherd</code>. It needs a <code>Pen</code>, so a shepherd belongs to exactly one pen and keeps the log of that pen. The service cannot make a new shepherd for every request, or the log would be empty each time. It must keep one shepherd per pen. (How? A <code>Map</code>. Which key, when <code>Ring</code> and <code>ring</code> are the same pen?)</li>
+<li><strong>Connect the real pieces.</strong> The controller test uses a mock and the service test needs no controller. Nobody has yet checked that they fit. Write one test with the real service in <code>ShearingWithRealServiceTest</code>: <code>@WebMvcTest(ShearingController.class)</code> plus <code>@Import({FarmConfig.class, ShearingService.class})</code>, so the slice is allowed to create the service and the farm. In the test <code>@Autowired Farm farm</code>, build your <em>own</em> pen <code>Barbershop</code> with Triple H (85.5 kg, 9 cm, black) straight in the domain, add it to the farm, and <code>POST</code> the shear. Never shear Lita or Batista in a test: other tests read them. A name with a space does not go well into a hand-written path here; hand the parts to the template form: <code>mvc.post().uri("/pens/{pen}/alpacas/{alpaca}/shear", "Barbershop", "Triple H")</code>. Expect <code>200</code> and, on the herd you built yourself, fleece length <code>0</code>. Then one more: <code>/pens/Ring/alpacas/Nobody/shear</code> answers <code>404</code>.</li>
+<li><strong>Try it for real</strong> (<code>docs/requests.http</code>): shear Lita, then look at <code>GET /pens/Ring/alpacas</code>. Shear her again. Shear <code>Nobody</code>. Restart the app and look at Lita again; where is her fleece, and where is the log?</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> The controller asks the service for the pen and alpaca of the address and answers <code>200</code> with the returned alpaca (<code>verify</code> checks the call)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The controller answers <code>404</code> when the service throws <code>PenNotFoundException</code> or <code>AlpacaNotFoundException</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> Without <code>@MockitoBean</code> the controller test fails to start, and you know why</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>ShearingService.shear</code> returns the alpaca with fleece length 0</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The shepherd of the pen writes one log entry per shearing, and pen names match ignoring case</label></li>
+<li class="task-list-item"><label><input type="checkbox"> An unknown pen or alpaca throws, and the log stays empty</label></li>
+<li class="task-list-item"><label><input type="checkbox"> With the real service, a <code>POST</code> shears an alpaca of your own pen</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The controller signature contains no domain type</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The tests of Lessons 09 to 12 are still green</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The imports for the first test: <code>org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest</code>, <code>org.springframework.test.context.bean.override.mockito.MockitoBean</code>, <code>static org.mockito.BDDMockito.given</code> and <code>static org.mockito.Mockito.verify</code>. The mock set-up reads like a sentence: <code>given(shearingService.shear("Ring", "Lita")).willReturn(new Alpaca("Lita", 70, 0, FleeceColor.WHITE));</code>. For the exceptions use <code>.willThrow(new AlpacaNotFoundException("Nobody", "Ring"))</code> instead of <code>willReturn</code>.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>The controller method: <code>AlpacaResponse shear(@PathVariable String penName, @PathVariable String alpacaName) { return AlpacaResponse.from(shearingService.shear(penName, alpacaName)); }</code>. Service and controller can be package-private classes: they live in the same package as the test, so Mockito can mock the service.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The service: find the pen with <code>farm.findPen(penName)</code> (it throws <code>PenNotFoundException</code> itself), then <code>pen.getHerd().findByName(alpacaName).orElseThrow(() -> new AlpacaNotFoundException(alpacaName, penName))</code>, then let the pen's shepherd shear. Look the shepherd up before shearing, so nothing is logged when an exception was thrown earlier. For the map: <code>Map&lt;String, Shepherd&gt;</code> keyed by the lower-cased pen name, and <code>computeIfAbsent</code> creates the shepherd for a pen the first time you need it.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You sheared an alpaca against the running app</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You compared the feature with your two plans from Lesson 13 and wrote three sentences about the difference in <code>docs/api-notes.md</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No test shears Lita or Batista</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green test</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>The first test forced the names <code>ShearingService</code> and <code>shear(String, String)</code> on you. Is that where your inside-out plan from Lesson 13 put the missing piece? Would you have chosen the same two strings as parameters, or a <code>Pen</code> and an <code>Alpaca</code>?</li>
+<li>The controller test is green while the service is empty. Which test would have caught a service that forgets to write the log entry? Which one would catch a controller that forgets to pass the alpaca name?</li>
+<li>Rename <code>ShearingService.shear</code> to <code>shearOff</code> with the IDE's rename. Which tests change by themselves, which break? What does that say about tests that check <em>who is asked what</em>?</li>
+<li>The service keeps its shepherds in a <code>HashMap</code>, and Spring creates only one service for the whole running app. Two requests for two different pens arrive at the same moment. What could go wrong? (The farm itself has the same problem; both are fixed properly only with a database.)</li>
+<li>The shepherd's name <code>Paul Heyman</code> is written into the service. When Fiona hires a second shepherd, which classes have to change?</li>
+<li>Could the controller have done all of it and skipped the service? What would be harder to test?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 14: Shearing from the Outside In and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the controller, the service or the test for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-13-two-ways-to-start/index.html">Lesson 13: Two Ways to Start</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 15 (coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#an-action-on-a-thing">🚜 An action on a thing</a></li>
+        <li><a class="toc-l2" href="#stand-ins">🚜 A stand-in</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

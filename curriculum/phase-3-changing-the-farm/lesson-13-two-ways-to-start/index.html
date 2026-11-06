@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 13: Two Ways to Start · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 3 changing the farm / lesson 13 two ways to start</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-13-two-ways-to-start">Lesson 13: Two Ways to Start</h1>
+
+<h2 id="story">Story</h2>
+<p>Fiona has a new wish. "In spring every alpaca gets shorn. Right now I would have to look up each fleece and send you a new length. I want a button on Ilona's screen that says <em>Shear</em>, and then the fleece is gone and the farm remembers who did it."</p>
+<p>Before you start, Hasi stops by. He has watched you work for four lessons. "You always begin in the same place," he says. "Domain first, controller last. Did you decide that, or did it just happen? Because there is another way to begin, and the next lesson uses it. Let's look at both before you pick up the keyboard."</p>
+<p>This lesson has no code. It is a map for the next one, and for every feature you build after this course.</p>
+
+<div class="concept-corner">
+<h2 id="two-ways-to-start">🚜 Barn Briefing: Chicago and London</h2>
+<p>Every new feature has the same problem: there is a lot to build, and you have to write <em>one</em> test first. Where do you start? Two answers are famous enough to have names. Both are test-driven. They differ in <em>where the first test goes</em>.</p>
+<p><strong>Inside-out (the "Chicago" style).</strong> Start with the piece that needs nothing else, usually the domain. You test it with real objects and check what is true afterwards: the herd has one alpaca less, the fleece is 0 cm. When that works, you build the next piece around it, and the controller, the piece the outside world touches, comes last. This is what you did in Lessons 09 to 12: <code>Farm.addPen</code> rejected duplicates and <code>Herd.removeByName</code> existed before any controller used them.</p>
+<p><strong>Outside-in (the "London" style).</strong> Start at the edge where the request arrives, with a controller test. The controller needs help from something that does not exist yet, say a class that does the shearing. You do not build it now. You write a <em>stand-in</em> for it (a mock, you meet it in the next lesson), tell the stand-in what to answer, and make the controller test pass. That test has just told you what the missing class must be called, what it takes and what it returns. The missing class becomes your next test, and you work inwards until nothing is a stand-in any more.</p>
+<table>
+<thead><tr><th></th><th>Inside-out (Chicago)</th><th>Outside-in (London)</th></tr></thead>
+<tbody>
+<tr><td>First test</td><td>the piece with no helpers, e.g. <code>Herd</code></td><td>the edge, e.g. the controller</td></tr>
+<tr><td>Helpers in a test</td><td>real objects</td><td>stand-ins (mocks) for what does not exist yet</td></tr>
+<tr><td>A test checks</td><td>the <em>result</em>: what is true afterwards</td><td>the <em>conversation</em>: who is asked what</td></tr>
+<tr><td>Strength</td><td>solid pieces; tests survive refactoring</td><td>you build only what the outside needs; the design of the inner classes comes out of the use</td></tr>
+<tr><td>Risk</td><td>you build a piece that the upper layers then do not need, or need differently</td><td>tests know how classes talk to each other, so changing a method name breaks tests that did nothing wrong</td></tr>
+</tbody>
+</table>
+<p>Neither is "the correct one". Many teams mix them: outside-in when a feature is new and nobody knows what the inner classes should look like, inside-out when the rules are clear and the domain is the interesting part. The names come from where their best-known teachers worked: the London style grew in the London extreme programming scene (the book <em>Growing Object-Oriented Software, Guided by Tests</em> describes it), the Chicago style is the classical way test-driven development was first taught.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>No code today. You will look at your own work through the two styles, and make a prediction that the next lesson checks.</p>
+<ul>
+<li>Find out which style you used in Lessons 09 to 12, and where it paid off or hurt.</li>
+<li>Plan the shear feature both ways on paper, before you see how Lesson 14 does it.</li>
+</ul>
+<p>The feature, so that you have something concrete: <code>POST /pens/{penName}/alpacas/{alpacaName}/shear</code> takes all the fleece off one alpaca (fleece length 0), the shepherd of the pen writes a log entry, and the answer is the alpaca as it looks afterwards. You already own most of the pieces in your domain: <code>Alpaca.shear()</code>, <code>Shepherd.shear(alpaca)</code>, <code>Farm.findPen</code>. What you do <em>not</em> have is a piece that finds the pen, finds the alpaca and hands it to a shepherd. Who should be that piece?</p>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Describe inside-out and outside-in, and say where the first test goes in each</li>
+<li>Recognise that Lessons 09 to 12 were inside-out</li>
+<li>Name one strength and one risk of each style</li>
+<li>Know that an optional, longer course exists on exactly this question</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Read your own history.</strong> Run <code>git log --oneline</code> in your repository and look at the commits of Lessons 09 to 12. For each lesson, write one line in <code>docs/api-notes.md</code>: was the first red test in the domain (<code>HerdTest</code>, <code>FarmTest</code>) or at the edge (<code>PenChangesTest</code>)? Where a lesson had both, which came first?</li>
+<li><strong>Plan the shear feature inside-out.</strong> Write down the first three tests you would write if you started at the domain. Which class do they test? Then write down the place where you get stuck: at some point someone must find the alpaca in the right pen and let a shepherd shear it. Which class does that, and in which package does it live? Write your guess, even if it is a poor one.</li>
+<li><strong>Plan it outside-in.</strong> Write down the first test you would write if you started at the controller: which address, which answer? Then list what that controller would <em>need</em> from somebody else, in one sentence. You do not have to name the class yet.</li>
+<li><strong>Keep your two plans.</strong> Do not tidy them up. In the next lesson you build the feature outside-in; afterwards you compare the result with your plans, and the comparison is the point.</li>
+</ol>
+
+<h2 id="side-quest">🧭 Side Quest (optional)</h2>
+<p>If these two styles caught your interest, there is a much longer course on exactly this: Clean Coders' <a href="https://cleancoders.com/series/comparativeDesign">Comparative Design</a> builds the same application twice, once outside-in and once inside-out, and compares the results. It is 14 episodes of about an hour; the first five show the London style with Sandro Mancuso. Nothing in this course depends on it, and there are no episodes to watch for the next lesson. Look at it when you want to, or never.</p>
+
+<h2 id="your-test-list">📋 No Test List Today</h2>
+<p>There is no code, so there are no scenarios to list. Your plans from steps 2 and 3 are the closest thing to a test list; the next lesson has a real one.</p>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> Your notes say, for each of Lessons 09 to 12, where the first red test was</label></li>
+<li class="task-list-item"><label><input type="checkbox"> You have both plans for the shear feature written down</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Your guess for "which class finds the alpaca and lets the shepherd shear it" is written down</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The notes are committed (<code>docs:</code> prefix)</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Your domain tests in Lessons 09 and 12 never needed a mock. Why not? What did the tests use instead of stand-ins?</li>
+<li>Inside-out, you decide the shape of an inner class (name, parameters, return value) before you know who will call it. Outside-in, the caller decides. Which of the two would you trust more when you do not yet understand the problem?</li>
+<li>A test that checks <em>who was asked what</em> breaks when you rename the method that was asked, even if everything still works. A test that checks <em>the result</em> does not. Which kind would you rather maintain for two years?</li>
+<li>Which style would you use to fix a bug in <code>Herd</code>? Which for a brand-new screen Ilona has just sketched?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 13: Two Ways to Start and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the plans or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-12-change-and-remove/index.html">Lesson 12: Change and Remove</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-14-shearing-from-the-outside-in/index.html">Lesson 14: Shearing from the Outside In</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 3.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#two-ways-to-start">🚜 Chicago and London</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#side-quest">🧭 Side Quest</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 No Test List Today</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>
