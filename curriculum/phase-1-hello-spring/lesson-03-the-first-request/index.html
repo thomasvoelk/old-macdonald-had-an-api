@@ -27,10 +27,39 @@
 <h2 id="story">Story</h2>
 <p>The phone app's first question is the simplest one: <em>"What is this farm?"</em> You already have a <code>Farm</code> object that knows exactly that, and Spring can now hand it to a controller. So the quickest way to answer is to return the farm itself. Let's do the simplest thing that could work, and then take a good look at what comes out.</p>
 
+<h2 id="http-in-two-minutes">HTTP in two minutes</h2>
+<p>Before any Spring: what actually happens when a browser, a phone app or <code>curl</code> talks to a server? It is always the same conversation: <strong>one request, one response</strong>. The server does nothing until a request arrives.</p>
+<ul>
+<li>A <strong>request</strong> says <em>what</em> to do and <em>to which resource</em>: a <strong>method</strong> (<code>GET</code> = "give me") and a <strong>URL path</strong> (<code>/farm</code>). The server looks for the code that is responsible for exactly that pair, <code>GET /farm</code>.</li>
+<li>A <strong>response</strong> says how it went and what came out: a <strong>status code</strong> (<code>200</code> = ok, <code>404</code> = nothing is responsible for this method and path) and usually a <strong>body</strong>, here JSON.</li>
+<li>Both sides also send <strong>headers</strong>: small labelled extras such as <code>Content-Type: application/json</code> ("the body is JSON"). We mostly ignore them for now.</li>
+</ul>
+<p>Here is a real request and response as <code>curl -v http://localhost:8080/farm</code> shows them (lines starting with <code>&gt;</code> were sent, lines starting with <code>&lt;</code> came back):</p>
+<pre><code class="language-text">&gt; GET /farm HTTP/1.1                    request: method + path
+&gt; Host: localhost:8080                  request: headers
+&gt; Accept: */*
+&gt;
+&lt; HTTP/1.1 200                          response: status code
+&lt; Content-Type: application/json        response: headers
+&lt; Content-Length: 44
+&lt;
+{ ...the body: the farm as JSON... }    response: body</code></pre>
+<p>In Lesson 01 you already sent such a request with <code>curl -i</code> and got a <code>404</code>. Today something answers with <code>200</code>.</p>
+<p>The same four parts reappear in your test:</p>
+<table>
+<thead><tr><th>HTTP</th><th>In the test</th></tr></thead>
+<tbody>
+<tr><td>method</td><td><code>mvc.get()</code></td></tr>
+<tr><td>URL path</td><td><code>.uri("/farm")</code></td></tr>
+<tr><td>status code</td><td><code>.hasStatusOk()</code>, <code>.hasStatus(404)</code></td></tr>
+<tr><td>body</td><td><code>.bodyJson()</code>, <code>.bodyText()</code></td></tr>
+</tbody>
+</table>
+<p>Older tutorials call the body the <em>content</em> (<code>content()</code> matchers, <code>getContentAsString()</code>). It is the same thing.</p>
+
 <div class="spring-corner">
 <h2 id="spring-corner">🌱 Spring Corner: controllers, JSON and testing the web layer</h2>
-<p>A <strong>REST API</strong> waits for <strong>HTTP requests</strong> and answers with <strong>HTTP responses</strong>. A request has a method (<code>GET</code> = "give me"), a path (<code>/farm</code>) and sometimes a body. A response has a status code (<code>200</code> = ok, <code>404</code> = not found) and usually a body, almost always <strong>JSON</strong>.</p>
-<p>A <strong>controller</strong> is a bean whose methods answer requests. Two annotations do the work:</p>
+<p>A <strong>REST API</strong> is a program that answers such requests. A <strong>controller</strong> is a bean whose methods answer them. Two annotations do the work:</p>
 <ul>
 <li><code>@RestController</code> on the class: "this is a controller, and what its methods return becomes the response body"</li>
 <li><code>@GetMapping("/farm")</code> on a method: "call this method for <code>GET /farm</code>"</li>
@@ -140,6 +169,7 @@
       <h2>On this page</h2>
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#http-in-two-minutes">HTTP in two minutes</a></li>
         <li><a class="toc-l2" href="#spring-corner">Spring Corner</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>

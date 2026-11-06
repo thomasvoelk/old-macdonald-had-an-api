@@ -93,7 +93,7 @@
 <li>Commit: <code>chore: turn project into a Spring Boot app</code>.</li>
 <li>Now test first. Write the smoke test in <code>src/test/java/alpacas/web/</code>. It fails because there is no application class yet.</li>
 <li>Create the application class in <code>src/main/java/alpacas/web/</code> and make the test pass.</li>
-<li>Run the application (IntelliJ's green arrow next to <code>main</code>, or <code>mvn spring-boot:run</code>). Open <code>http://localhost:8080/</code> in a browser, or run <code>curl -i http://localhost:8080/</code> (on Windows PowerShell, write <code>curl.exe</code>). Read the status line and the body. Stop the app with Ctrl+C.</li>
+<li>Run the application (IntelliJ's green arrow next to <code>main</code>, or <code>mvn spring-boot:run</code>). In a second terminal run <code>curl -i http://localhost:8080/</code> (on Windows PowerShell, write <code>curl.exe</code>; the <code>-i</code> makes curl print the response's status line and headers). That is your first real HTTP request. Read what came back: the status line, the headers, the body. (A browser works too, but it hides the status line.) Stop the app with Ctrl+C.</li>
 </ol>
 
 <h2 id="your-test-list">📋 Your Test List</h2>
@@ -128,7 +128,7 @@
 <h2 id="when-youre-done">When You're Done</h2>
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> <code>mvn test</code> is green: all your old tests plus the smoke test</label></li>
-<li class="task-list-item"><label><input type="checkbox"> The app starts, and you saw the <code>404</code> in your browser or <code>curl</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The app starts, and you saw the <code>404</code> status line with <code>curl -i</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> No class in <code>alpacas</code> (outside <code>alpacas.web</code>) imports anything from <code>org.springframework</code></label></li>
 <li class="task-list-item"><label><input type="checkbox"> Two commits at least: the <code>pom.xml</code> change, and the smoke test with the application class</label></li>
 </ul>
