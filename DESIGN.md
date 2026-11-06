@@ -10,7 +10,7 @@ A first-year apprentice who has done Java + TDD (Old MacDonald) and SQL (Data Ba
 
 - **Fiona**: the customer (owns the alpaca farm). The learner is the contractor.
 - **Ilona** (she/her): real fellow apprentice one year ahead of the learner; plays the frontend developer who builds Fiona's screens and asks for API changes (Lessons 01, 04).
-- **Hasi** (he/him): plays the code reviewer (Lesson 04: wants `getPensCount()` renamed).
+- **Hasi** (he/him): plays the code reviewer; a fan of good names (Lesson 04: wants `getPensCount()` renamed).
 - Names are an in-joke for the learner. The repo and Pages site are **public**: Thomas should check with Ilona and Hasi before pushing, or swap the names.
 
 ## Relationship to the siblings
