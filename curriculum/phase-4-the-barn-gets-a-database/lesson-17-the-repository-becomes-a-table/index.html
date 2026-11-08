@@ -28,7 +28,7 @@
 <div class="concept-corner">
 <h2 id="barn-briefing">Barn Briefing: objects and rows</h2>
 <p>A <code>Pen</code> in memory is an object that holds a <code>Herd</code> that holds <code>Alpaca</code> objects. A database knows none of that. It knows <em>rows</em> in <em>tables</em>: a row in <code>pens</code>, rows in <code>alpacas</code>, and each alpaca row carries the id of its pen (<code>pen_id</code>, a foreign key). Saving means turning the objects into rows. Reading means turning rows back into <em>new</em> objects: copies, not the objects you saved. A change to such a copy is only stored when you call <code>save</code> again.</p>
-<p>The general name for turning objects into rows and rows back into objects is <em>object-relational mapping</em> (ORM). In this lesson you do it by hand, with SQL you write yourself. Tools such as JPA and Hibernate do it for you; you will meet them at work, but not in this course.</p>
+<p>The general name for turning objects into rows and rows back into objects is <em>object-relational mapping</em> (ORM). In this lesson you do it by hand, with SQL you write yourself. Tools such as JPA and Hibernate do it for you; many projects use them, but not this course.</p>
 </div>
 
 <div class="spring-corner">

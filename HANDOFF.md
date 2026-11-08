@@ -359,3 +359,9 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 - **At the very end: delete `CLAUDE.md` and retire `HANDOFF.md`.**
 
 **Next:** phone-width/browser check (needs the extension or Thomas's eyes), then Thomas's decisions on the names, Podman on Windows, the JPA wording and the Angular link; then delete `CLAUDE.md` and retire `HANDOFF.md`.
+
+## Status after Thomas's decisions (2026-11-08)
+- Ilona/Hasi names: **stay** (DESIGN.md updated). Podman on Windows: **accepted as is** (Lesson 18 step 1 asks her to report problems). Lesson 17: "you will meet them at work" -> "many projects use them" (the company does use JPA, but the wording is deliberately general). Angular: **no link**; the Angular curriculum still has to be built, Lesson 21 and the index mention it generically ("the next curriculum").
+- Still open: browser and phone-width check (extension was not connected).
+
+**Next:** browser and phone-width check of the pages (reconnect the Chrome extension or Thomas looks himself); then remind Thomas to delete `CLAUDE.md` and retire `HANDOFF.md`.
