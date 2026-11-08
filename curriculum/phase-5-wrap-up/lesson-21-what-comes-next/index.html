@@ -21,13 +21,13 @@
 <h1 id="lesson-21-what-comes-next">Lesson 21: What Comes Next</h1>
 
 <h2 id="story">Story</h2>
-<p>Friday, four o'clock. The big monitor shows Swagger UI, and Fiona clicks through it herself. She presses <em>Try it out</em> on <code>GET /farm</code>, reads her own farm's name, and grins. "And the screens? Ilona's screens, they just use this?" Ilona nods. "I read the same page. I know every address and every answer."</p>
+<p>Friday, four o'clock. The big monitor shows Ilona's first screen, and Fiona reads her own farm's name on it and grins. "And the screens? Ilona's screens, they just talk to your program?" Ilona nods. "We wrote the agreement together, as a file, before you wrote the code. I know every address and every answer."</p>
 <p>Your part is done. Hasi asks for one more thing: "Leave the farm so that the next person, who is not you, can pick it up without asking. And tell Ilona what the Angular side can rely on, and what it cannot."</p>
 
 <div class="concept-corner">
 <h2 id="barn-briefing">🚜 Barn Briefing: what the frontend sees of your work</h2>
-<p>A browser application knows nothing about Java, Spring, repositories or tables. It sees exactly three things: the <strong>addresses</strong>, the <strong>bodies</strong> that go in and come out, and the <strong>status codes</strong> with their error shape. That is the contract you built in Lessons 02 to 12 and described in Lesson 19. Everything else you learned (the domain, the repository, the database) is the part the frontend is allowed <em>not</em> to know. When you rename a class, Ilona must notice nothing. When you rename a JSON field, she must.</p>
-<p>The OpenAPI description from Lesson 19 is the file to give her. Tools exist that read such a description and write the code that calls the API from TypeScript. They are only as good as the description, which is why you spent a lesson making it true.</p>
+<p>A browser application knows nothing about Java, Spring, repositories or tables. It sees exactly three things: the <strong>addresses</strong>, the <strong>bodies</strong> that go in and come out, and the <strong>status codes</strong> with their error shape. That is the contract you built in Lessons 02 to 12 and wrote down as a file in Lesson 19. Everything else you learned (the domain, the repository, the database) is the part the frontend is allowed <em>not</em> to know. When you rename a class, Ilona must notice nothing. When you rename a JSON field, she must.</p>
+<p>The OpenAPI file from Lesson 19 is the file to give her. Tools exist that read such a file and write the code that calls the API from TypeScript. They are only as good as the file, and your controllers are built from the same file, so the shapes cannot drift apart. What the file cannot promise is behaviour, and that is what your tests are for.</p>
 <p>Some things this course did not cover, because they are the next course or the next project: <strong>who may call what</strong> (login, roles), the rule of browsers that decides which web pages may call your server at all (<strong>CORS</strong>), changing the database tables in a controlled way when the application grows (<strong>migrations</strong>), testing against a real PostgreSQL instead of H2, and watching the application when it runs on a server. You will meet all of them at work. You now know where each one would plug in.</p>
 </div>
 
@@ -51,11 +51,11 @@
 <h2 id="getting-started">Getting Started</h2>
 <ol>
 <li><strong>Test the handover before you write it.</strong> Clone your repository into a new empty folder (or ask a fellow apprentice to), and follow only your <em>current</em> notes. Where do you get stuck? Write every stumbling stone down. Do you need a Java version, Maven, Podman, a command to start the database? That list is the first half of your handover.</li>
-<li><strong>Write <code>docs/handover.md</code>.</strong> Short sections, commands in code blocks that you have actually run. Include the address of Swagger UI and of the description (<code>/v3/api-docs</code>).</li>
-<li><strong>The contract.</strong> A table with the method, the address, and what it does, one line each. You can take it from Swagger UI. Check it against the application: a table you did not verify is the same kind of lie as the description in Lesson 19.</li>
+<li><strong>Write <code>docs/handover.md</code>.</strong> Short sections, commands in code blocks that you have actually run. Include where the contract lives (<code>src/main/resources/api/openapi.yaml</code>) and how the interfaces and records are generated from it (<code>mvn generate-sources</code>).</li>
+<li><strong>The contract.</strong> A table with the method, the address, and what it does, one line each. You can take it from <code>openapi.yaml</code>. Check it against the running application: a table you did not verify can be wrong without anybody noticing.</li>
 <li><strong>The limits and the next steps.</strong> Take your known limits from Lesson 20. Which three would you fix first, and why? You can also think of the big topics from the briefing (login, migrations, a test against real PostgreSQL). Say where in the code each would start.</li>
 <li><strong>Check it with a stranger.</strong> Give the file to somebody who did not follow the course and watch them use it, without helping. What do they ask? Add the answer to the file.</li>
-<li><strong>Prepare the demo.</strong> See "Phase 5 demo" below. You do not need slides. You need the running application, Swagger UI, your tests, and your review.</li>
+<li><strong>Prepare the demo.</strong> See "Phase 5 demo" below. You do not need slides. You need the running application, the contract file, your tests, and your review.</li>
 </ol>
 
 <h2 id="your-test-list">📋 Your Test List</h2>
@@ -64,7 +64,7 @@
 <h3>Acceptance Criteria</h3>
 <ul>
 <li class="task-list-item"><label><input type="checkbox"> Someone who has never seen the project can start the database, the application and the tests with your commands</label></li>
-<li class="task-list-item"><label><input type="checkbox"> The file says where the API is described (Swagger UI and <code>/v3/api-docs</code>)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The file says where the API is described (<code>openapi.yaml</code>) and how the code is generated from it</label></li>
 <li class="task-list-item"><label><input type="checkbox"> There is a table of all endpoints, checked against the running application</label></li>
 <li class="task-list-item"><label><input type="checkbox"> The known limits are written down, and three next steps are ranked with reasons</label></li>
 <li class="task-list-item"><label><input type="checkbox"> It says which parts of the API a client may rely on and which parts are internal</label></li>
@@ -99,7 +99,7 @@
 <h2 id="phase-5-demo">Phase 5 demo</h2>
 <p>Show your mentor, as after every phase:</p>
 <ul>
-<li>Start the database and the application. Open Swagger UI and call three endpoints by hand: one that reads, one that changes, one that fails.</li>
+<li>Start the database and the application. Call three endpoints by hand (<code>docs/requests.http</code> or <code>curl</code>): one that reads, one that changes, one that fails. Show where each one is in <code>openapi.yaml</code>.</li>
 <li>Run the tests and walk through one of them, from the controller down to the database.</li>
 <li>Pick one design decision from the whole course that you are proud of, and one you would make differently. Explain both in your own words.</li>
 <li>Walk through your review and your handover file.</li>

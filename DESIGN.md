@@ -62,7 +62,7 @@ Her existing domain (package `alpacas`: `Alpaca`, `Herd`, `Pen`, `Farm`, `Shephe
 | 2 – Reading the Farm | 05–08 | GET pens/alpacas/ready-to-shear, DTO records, `Optional` to 404, `@RestControllerAdvice` |
 | 3 – Changing the Farm | 09–14 | POST/PUT/DELETE (09–12), validation, exceptions to 400/409, London-vs-Chicago explanation + Side Quest (13, no code), London shear lesson (14). Architecture test dropped. |
 | 4 – The Barn Gets a Database | 15–18 | ids + repository interface (15), controllers use it (16), `JdbcPenRepository` on H2 via the contract (17), Postgres in Podman, restart test (18) |
-| 5 – Wrap-up | 19–21 | Swagger UI / OpenAPI (springdoc), farm-API grand review, one-paragraph bridge to the Angular curriculum |
+| 5 – Wrap-up | 19–21 | Contract first (OpenAPI file, `openapi-generator-maven-plugin` generates interfaces and models; decided 2026-11-08, Thomas: his team works this way, springdoc dropped), farm-API grand review, one-paragraph bridge to the Angular curriculum |
 
 ## Persistence
 
@@ -74,7 +74,7 @@ Her existing domain (package `alpacas`: `Alpaca`, `Herd`, `Pen`, `Farm`, `Shephe
 
 ## Stack (from research, verified 2026-11-06)
 
-Parent `spring-boot-starter-parent` **4.1.2**, `<java.version>25</java.version>`. Compile: `spring-boot-starter-webmvc`, `-validation`, `-jdbc`, `org.postgresql:postgresql` (runtime). Test: `spring-boot-starter-webmvc-test`, `spring-boot-starter-jdbc-test`, `com.h2database:h2`. springdoc is not Boot-managed: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0`. Key imports: `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest`, `...AutoConfigureMockMvc`, `org.springframework.test.context.bean.override.mockito.MockitoBean` (`@MockBean` is gone), `org.springframework.boot.jdbc.test.autoconfigure.JdbcTest`, `org.springframework.jdbc.core.simple.JdbcClient`. `@SpringBootTest` no longer provides MockMvc (add `@AutoConfigureMockMvc`). Jackson 3: `tools.jackson.*`, annotations stay `com.fasterxml.jackson.annotation`.
+Parent `spring-boot-starter-parent` **4.1.2**, `<java.version>25</java.version>`. Compile: `spring-boot-starter-webmvc`, `-validation`, `-jdbc`, `org.postgresql:postgresql` (runtime). Test: `spring-boot-starter-webmvc-test`, `spring-boot-starter-jdbc-test`, `com.h2database:h2`. Not Boot-managed: build plugin `org.openapitools:openapi-generator-maven-plugin:7.27.0` (contract first, generator `spring`, `interfaceOnly`, records, no swagger annotations; see research section 16). springdoc is not used. Key imports: `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest`, `...AutoConfigureMockMvc`, `org.springframework.test.context.bean.override.mockito.MockitoBean` (`@MockBean` is gone), `org.springframework.boot.jdbc.test.autoconfigure.JdbcTest`, `org.springframework.jdbc.core.simple.JdbcClient`. `@SpringBootTest` no longer provides MockMvc (add `@AutoConfigureMockMvc`). Jackson 3: `tools.jackson.*`, annotations stay `com.fasterxml.jackson.annotation`.
 
 ## Build order (process)
 

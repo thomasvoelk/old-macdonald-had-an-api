@@ -55,8 +55,8 @@
 
 <h2 id="getting-started">Getting Started</h2>
 <ol>
-<li><strong>Read it as Ilona.</strong> Close your editor. Start the application and open Swagger UI (Lesson 19). Using <em>only</em> that page, plan the screen "alpacas that are ready to shear, with a Shear button". Write down the calls you would make. Where do you get stuck? That is already your first finding.</li>
-<li><strong>Read it as a caller who makes mistakes.</strong> In Swagger UI or in <code>docs/requests.http</code>: ask for a pen that does not exist, send a body with a missing field, use the wrong method on an address, send a body that is not JSON. Compare the answers. Are they all built the same way?</li>
+<li><strong>Read it as Ilona.</strong> Close your editor. Open only the contract <code>openapi.yaml</code> (Lesson 19). Using <em>only</em> that file, plan the screen "alpacas that are ready to shear, with a Shear button". Write down the calls you would make. Where do you get stuck? That is already your first finding.</li>
+<li><strong>Read it as a caller who makes mistakes.</strong> Start the application and use <code>docs/requests.http</code> (or <code>curl</code>): ask for a pen that does not exist, send a body with a missing field, use the wrong method on an address, send a body that is not JSON. Compare the answers. Are they all built the same way?</li>
 <li><strong>Read the code as a newcomer.</strong> Open the controllers, the advice, <code>ShearingService</code>, <code>JdbcPenRepository</code> and the domain package. For each: what would surprise a person who joins tomorrow? What does a name promise that the code does not keep?</li>
 <li><strong>Write the review.</strong> Create <code>docs/api-review.md</code>. Eight findings or more, each with <em>where</em>, <em>what</em>, <em>why it matters</em>, <em>what I would do</em>. Do not fix anything while you write. If you catch yourself opening a test, write the finding first.</li>
 <li><strong>Rank.</strong> Put the findings in an order: who is hurt most, and how often? Mark your top three.</li>
@@ -109,6 +109,7 @@
 <li>The shepherd's name is written into the code; the map of shepherds in the service is a plain <code>HashMap</code> that many requests use at once.</li>
 <li><code>Farm</code> and its test are not used by the web layer any more.</li>
 <li>An unknown address or a wrong method does not answer in the same shape as your other errors.</li>
+<li>The contract promises a <code>Problem</code> schema with an <code>errors</code> member, but the handlers build a <code>ProblemDetail</code> by hand. Nothing in the build checks that the two fit.</li>
 </ul>
 </details>
 
@@ -138,7 +139,7 @@ protected ResponseEntity&lt;Object&gt; handleHttpMessageNotReadable(HttpMessageN
     return ResponseEntity.badRequest()
             .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request body is not valid JSON."));
 }</code></pre>
-<p>Imports: <code>org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</code>, <code>org.springframework.http.HttpHeaders</code>, <code>org.springframework.http.HttpStatusCode</code>, <code>org.springframework.http.ResponseEntity</code>, <code>org.springframework.web.context.request.WebRequest</code>. Everything is green again, the description from Lesson 19 still lists the errors, and every error the API can produce has one shape.</p>
+<p>Imports: <code>org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</code>, <code>org.springframework.http.HttpHeaders</code>, <code>org.springframework.http.HttpStatusCode</code>, <code>org.springframework.http.ResponseEntity</code>, <code>org.springframework.web.context.request.WebRequest</code>. Everything is green again and every error the API can produce has one shape. (The contract from Lesson 19 does not list the unknown-address answer yet. Should it?)</p>
 </details>
 
 <h2 id="when-youre-done">When You're Done</h2>
@@ -168,7 +169,7 @@ protected ResponseEntity&lt;Object&gt; handleHttpMessageNotReadable(HttpMessageN
       <nav class="lesson-nav" aria-label="Lesson navigation">
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Previous lesson</span>
-          <a class="lesson-nav__link" href="../lesson-19-the-farm-explains-itself/index.html">Lesson 19: The Farm Explains Itself</a>
+          <a class="lesson-nav__link" href="../lesson-19-contract-first/index.html">Lesson 19: Contract First</a>
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 19: Contract First · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 5 wrap-up / lesson 19 contract first</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-19-contract-first">Lesson 19: Contract First</h1>
+
+<h2 id="story">Story</h2>
+<p>Ilona is building Fiona's screens and keeps knocking on your desk. "What does <code>PUT</code> want in the body? Is the fleece length called <code>fleeceLength</code> or <code>fleeceLengthCm</code>? What do I get back when the pen does not exist?" Every answer is in your code, but Ilona does not read Java, and your <code>docs/requests.http</code> file only shows what <em>you</em> tried.</p>
+<p>Hasi shakes his head. "Stop answering by pointing at code. Write the agreement down first, as a file you both can read. Then the code has to follow the file, not the other way round. If you change the file, Ilona sees it. If the code drifts away from the file, the compiler tells you."</p>
+
+<div class="concept-corner">
+<h2 id="barn-briefing">🚜 Barn Briefing: the contract is a file</h2>
+<p><strong>OpenAPI</strong> is a standard format for describing an HTTP API in a file (YAML or JSON): which addresses exist, which methods each one answers, what goes in (parameters, body), what comes out for which status, and the shape of every request and response. It is written for <em>programs</em> first: a tool can read it and write the code that calls the API from TypeScript, or the code that answers it in Java.</p>
+<p>There are two ways to get such a file. <strong>Code first:</strong> you write the controllers, and a library reads them and produces the file. The file is then only as good as what the library can <em>see</em>: it sees annotations and method signatures, but not what a method decides while it runs (that a method calls <code>ResponseEntity.created</code>, or that a handler somewhere else turns an exception into a 404). The file can be wrong, and nobody notices. <strong>Contract first:</strong> you (and the frontend developer) write the file, and the controller code is built <em>from</em> it. The file is the truth, and the code has to fit.</p>
+<p>Many teams work contract first, because the frontend and the backend can start from the same file on the same day. That is what you do today, as a <strong>refactoring</strong>: your API already works and your tests are green. Afterwards the behaviour must be exactly the same, only the source of truth has moved.</p>
+<p>What the file can and cannot do. A generator turns it into <em>shapes</em>: one Java interface per group of endpoints (with the addresses, methods and status codes on it) and one record per schema. It cannot write the behaviour. Whether your code really answers <code>404</code> where the file promises <code>404</code> is still a question for your tests.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: mappings on an interface, and code that is generated at build time</h2>
+<p>You have written <code>@GetMapping</code> and <code>@PostMapping</code> on controller methods. Spring MVC also reads them from an <strong>interface</strong> that the controller implements. So a controller can be a class that implements an interface and has no mapping annotations of its own: the interface says <em>where</em>, the class says <em>what happens</em>. Interface methods are always <code>public</code>, so the methods you write for them are <code>public</code> too. Docs: <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html">Request Mapping</a>.</p>
+<p>The interfaces are written by a Maven plugin, the <strong>openapi-generator-maven-plugin</strong>. Maven builds in phases, and the plugin hooks into the phase <code>generate-sources</code>, before compiling. It reads your YAML file and writes Java files into <code>target/generated-sources/openapi</code>, which Maven compiles together with your own code. Because <code>target</code> is rebuilt at every build, you never edit these files and never commit them. Plugin docs: <a href="https://openapi-generator.tech/docs/generators/spring/">the <code>spring</code> generator</a>. The plugin is not managed by the Boot parent: you write its version into the <code>pom.xml</code> (<code>7.27.0</code>).</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Move the source of truth of the farm API into a file, without changing what the API does.</p>
+<ul>
+<li><code>src/main/resources/api/openapi.yaml</code> describes every endpoint you have built: addresses, methods, bodies, statuses, errors.</li>
+<li>The three controllers implement interfaces generated from that file. They carry no mapping annotations.</li>
+<li>Your hand-written request and response records are gone; the generated records take their place.</li>
+<li><strong>No existing test changes</strong> and all of them stay green. They are your safety net for the whole lesson.</li>
+<li>Then you change the contract <em>first</em> once: the answer for an alpaca gets a new member, <code>readyToShear</code>.</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Tell contract first from code first, and say who holds the truth in each</li>
+<li>Read an OpenAPI file and the Java code generated from it</li>
+<li>Add a Maven plugin that generates sources, and keep generated code out of version control</li>
+<li>Refactor on green tests, one small slice at a time</li>
+<li>Find out where a generated shape is looser or stricter than your hand-written code, with the help of your tests</li>
+<li>Change an API by changing the contract first and letting the compiler lead</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Safe start.</strong> Run all tests: green. Commit anything open. Check that your <code>.gitignore</code> contains <code>target/</code>. From now on, if an existing test turns red, your <em>code or contract</em> is wrong, not the test.</li>
+<li><strong>The plugin and a tiny contract.</strong> Add the plugin to the <code>pom.xml</code> (Hint 1 has the configuration; the options are explained in the comments there) and create <code>src/main/resources/api/openapi.yaml</code> with <em>one</em> endpoint: <code>GET /farm</code> and the schema <code>FarmResponse</code> (<code>name</code>, <code>pens</code>, <code>alpacas</code>). Group it with a <strong>tag</strong> <code>Farm</code>: the plugin makes one interface per tag. Run <code>mvn generate-sources</code> (or reload Maven in your IDE) and then <em>read</em> what appeared in <code>target/generated-sources/openapi</code>: the interface <code>FarmApi</code> and the record <code>FarmResponse</code>. Find the address and the method of <code>/farm</code> in the interface. Find the three components of the record. Write one sentence in <code>docs/api-notes.md</code>: what in the file became what in Java?</li>
+<li><strong>Implement the interface (compile error, then green).</strong> Let <code>FarmController</code> implement <code>FarmApi</code> (package <code>alpacas.web.api</code>). The compiler stops you: the class "does not override abstract method <code>getFarm()</code>". Write that method (public, same signature as in the interface; it returns a <code>ResponseEntity</code>). Delete the mapping annotation on your old method and delete your hand-written <code>FarmResponse</code> record; use the generated one from <code>alpacas.web.model</code> instead. Run <strong>all</strong> tests. <code>FarmControllerTest</code> was not touched and is green: it speaks HTTP, so it does not care who wrote the controller's mapping. Commit.</li>
+<li><strong>Shearing, the second slice.</strong> Add the tag <code>Shearing</code>, the path <code>/pens/{penName}/alpacas/{alpacaName}/shear</code> with <code>POST</code>, and its answers: <code>200</code> with an alpaca (the schema <code>AlpacaResponse</code>) and the errors <code>404</code> and <code>409</code>. Put the two path variables into <code>components/parameters</code> and the errors into <code>components/responses</code>, so you can refer to them later with <code>$ref</code> instead of copying (Hint 2). The error answers use the media type <code>application/problem+json</code> and a schema <code>Problem</code> with <code>status</code>, <code>title</code>, <code>detail</code>, <code>instance</code> and <code>errors</code> (a map from field name to message): that is what <code>ApiExceptionHandler</code> really sends. Regenerate. Your hand-written <code>AlpacaResponse</code> has a method <code>from(Alpaca)</code>, and a generated record cannot have one. Create a small package-private class <code>WebMapping</code> with static methods that do the mapping instead (Hint 2), and let <code>ShearingController</code> implement <code>ShearingApi</code>. Delete the old record. All tests green, commit.</li>
+<li><strong>Pens, the big slice, in two cuts.</strong> Tag <code>Pens</code>: first the <em>reads</em> (<code>GET /pens</code>, <code>GET /pens/{penName}/alpacas</code>, <code>GET /pens/{penName}/alpacas/{alpacaName}</code>, <code>GET /alpacas/ready-to-shear</code>), regenerate, implement them in <code>PenController</code>, delete the records that are now generated (<code>PenSummaryResponse</code>), all tests green, commit. Then the <em>writes</em>: <code>POST /pens</code> (<code>201</code>, <code>400</code>, <code>409</code>), <code>POST</code> on the alpacas (<code>201</code>, <code>400</code>, <code>404</code>, <code>409</code>), <code>PUT</code> (<code>200</code>, <code>400</code>, <code>404</code>), <code>DELETE</code> (<code>204</code>, <code>404</code>). Read your own controller and your earlier tests to get the statuses right; the contract has to say what the code does. Write the three request schemas with the rules you gave them in Lesson 11.
+<p>A note on the names: a schema called <code>Alpaca</code> would produce a generated record <code>Alpaca</code> that clashes with your domain class <code>alpacas.Alpaca</code>. That is why the schemas keep the names of your old records (<code>AlpacaResponse</code>, <code>CreateAlpacaRequest</code>, ...).</p></li>
+<li><strong>Let the tests find the gaps.</strong> For the text rules ("not blank") write the natural thing for a file: <code>minLength: 1</code>. Regenerate, fix the compile errors, and run all tests. A test of Lesson 11 turns red: the one that sends several wrong fields at once and expects an error for each (it expects three and gets two). Open the generated <code>CreatePenRequest</code> (or <code>CreateAlpacaRequest</code>) and look at the annotation on <code>name</code>: <code>@Size(min = 1)</code>. A string with only a space has length 1. Your old <code>@NotBlank</code> rejected it, the contract as you wrote it accepts it. The generated code is faithful to the contract, and the contract is looser than your code. Fix the contract, not the test: describe "at least one character that is not a space" with a <code>pattern</code> (Hint 3). <em>Experiment</em> first with <code>pattern: '\S'</code> (one non-space character) and run the suite: a dozen tests turn red, nearly every request is rejected. Open the generated annotation again (<code>@Pattern(regexp = "\\S")</code>) and think: in an OpenAPI file a pattern is "found somewhere in the text", but Bean Validation's <code>@Pattern</code> must match the <em>whole</em> text. Which pattern is right in both readings? Write both traps in <code>docs/api-notes.md</code>. Green, commit.</li>
+<li><strong>Change the contract first.</strong> Fiona's screen should show a "Shear now" badge without calling another endpoint. So the answer for an alpaca gets a boolean member <code>readyToShear</code>. The order is the point: (a) <strong>test first</strong>: in <code>PenControllerTest</code> assert that <code>$[0].readyToShear</code> is <code>false</code> for the first alpaca of Ring. Red, because the member is missing. (b) <strong>Contract:</strong> add <code>readyToShear</code> (boolean) to <code>AlpacaResponse</code> in the YAML, in the list of required members. Put it <em>last</em> in <code>properties</code>: the order of the properties is the order of the components of the generated record. (c) Regenerate and read the <strong>compiler</strong>: the line in <code>WebMapping</code> that creates an <code>AlpacaResponse</code> no longer fits. The compiler has become your to-do list. Pass the missing value from the domain object (<code>isReadyToShear()</code>). Green, all tests, commit. (Your domain method still prints to the console; you know that wart from Lesson 01.)</li>
+<li><strong>Read it as Ilona.</strong> Open <code>openapi.yaml</code> and imagine you never saw the Java code. Can you answer her three questions from the top of the lesson using only this file? What is missing for her? Write it down in <code>docs/api-notes.md</code>: it is input for Lesson 20.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> The only new test is the one for <code>readyToShear</code>; no existing test was changed or deleted</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Every endpoint of the API appears in <code>openapi.yaml</code> with its real success status and its error statuses</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The three controllers implement a generated interface and have no <code>@GetMapping</code>, <code>@PostMapping</code> or similar of their own</label></li>
+<li class="task-list-item"><label><input type="checkbox"> No hand-written request or response record is left</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A name consisting only of spaces is still answered with <code>400</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>GET /pens/Ring/alpacas</code> answers every alpaca with a boolean <code>readyToShear</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>target/</code> is not in version control</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The plugin, inside <code>&lt;build&gt;&lt;plugins&gt;</code> (next to the Boot plugin). The options in <code>configOptions</code> decide what is generated:</p>
+<pre><code class="language-xml">&lt;plugin&gt;
+    &lt;groupId&gt;org.openapitools&lt;/groupId&gt;
+    &lt;artifactId&gt;openapi-generator-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;7.27.0&lt;/version&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;goals&gt;&lt;goal&gt;generate&lt;/goal&gt;&lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;inputSpec&gt;${project.basedir}/src/main/resources/api/openapi.yaml&lt;/inputSpec&gt;
+                &lt;generatorName&gt;spring&lt;/generatorName&gt;
+                &lt;apiPackage&gt;alpacas.web.api&lt;/apiPackage&gt;
+                &lt;modelPackage&gt;alpacas.web.model&lt;/modelPackage&gt;
+                &lt;configOptions&gt;
+                    &lt;useSpringBoot4&gt;true&lt;/useSpringBoot4&gt;           &lt;!-- generate for Boot 4 --&gt;
+                    &lt;useJackson3&gt;true&lt;/useJackson3&gt;                 &lt;!-- Jackson 3 imports --&gt;
+                    &lt;interfaceOnly&gt;true&lt;/interfaceOnly&gt;             &lt;!-- interfaces and models, no controllers --&gt;
+                    &lt;useTags&gt;true&lt;/useTags&gt;                         &lt;!-- one interface per tag --&gt;
+                    &lt;useRecords&gt;true&lt;/useRecords&gt;                   &lt;!-- models are records --&gt;
+                    &lt;skipDefaultInterface&gt;true&lt;/skipDefaultInterface&gt; &lt;!-- methods are abstract --&gt;
+                    &lt;openApiNullable&gt;false&lt;/openApiNullable&gt;
+                    &lt;annotationLibrary&gt;none&lt;/annotationLibrary&gt;     &lt;!-- no Swagger annotations ... --&gt;
+                    &lt;documentationProvider&gt;none&lt;/documentationProvider&gt; &lt;!-- ... so no extra dependency --&gt;
+                &lt;/configOptions&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+<p>The tiny contract and the controller:</p>
+<pre><code class="language-yaml">openapi: 3.0.3
+info:
+  title: Fiona's Farm API
+  version: "1.0"
+tags:
+  - name: Farm
+paths:
+  /farm:
+    get:
+      tags: [Farm]
+      operationId: getFarm
+      responses:
+        "200":
+          description: The farm in numbers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FarmResponse"
+components:
+  schemas:
+    FarmResponse:
+      type: object
+      required: [name, pens, alpacas]
+      properties:
+        name: {type: string}
+        pens: {type: integer}
+        alpacas: {type: integer}</code></pre>
+<pre><code class="language-java">@RestController
+class FarmController implements FarmApi {
+    ...
+    @Override
+    public ResponseEntity&lt;FarmResponse&gt; getFarm() {
+        int totalAlpacas = pens.findAll().stream().mapToInt(Pen::totalAlpacas).sum();
+        return ResponseEntity.ok(new FarmResponse(FARM_NAME, pens.findAll().size(), totalAlpacas));
+    }
+}</code></pre>
+<p>Imports: <code>alpacas.web.api.FarmApi</code>, <code>alpacas.web.model.FarmResponse</code>. The name of the method comes from <code>operationId</code>. Your IDE may need a Maven reload to see the generated sources.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>Parameters and error answers that are defined once and used with <code>$ref</code>:</p>
+<pre><code class="language-yaml">  /pens/{penName}/alpacas/{alpacaName}/shear:
+    parameters:
+      - $ref: "#/components/parameters/PenName"
+      - $ref: "#/components/parameters/AlpacaName"
+    post:
+      tags: [Shearing]
+      operationId: shearAlpaca
+      responses:
+        "200":
+          description: The alpaca after shearing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlpacaResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+components:
+  parameters:
+    PenName:
+      name: penName
+      in: path
+      required: true
+      schema:
+        type: string
+    AlpacaName:
+      name: alpacaName
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: The pen or the alpaca does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    Problem:
+      type: object
+      properties:
+        status: {type: integer}
+        title: {type: string}
+        detail: {type: string}
+        instance: {type: string}
+        errors:
+          type: object
+          additionalProperties: {type: string}</code></pre>
+<p>(<code>Conflict</code> and <code>BadRequest</code> are built like <code>NotFound</code>, with their own description.) The mapping class and the controller that uses it:</p>
+<pre><code class="language-java">final class WebMapping {
+
+    private WebMapping() {
+    }
+
+    static AlpacaResponse toResponse(Alpaca alpaca) {
+        return new AlpacaResponse(
+                alpaca.getId(),
+                alpaca.getName(),
+                alpaca.getWeight(),
+                alpaca.getFleeceLength(),
+                alpaca.getFleeceColor().name());
+    }
+}</code></pre>
+<pre><code class="language-java">@RestController
+class ShearingController implements ShearingApi {
+    ...
+    @Override
+    public ResponseEntity&lt;AlpacaResponse&gt; shearAlpaca(String penName, String alpacaName) {
+        return ResponseEntity.ok(WebMapping.toResponse(shearingService.shear(penName, alpacaName)));
+    }
+}</code></pre>
+<p>The same class gets <code>toResponse(Pen)</code> and the two <code>toAlpaca</code> methods (they replace <code>from</code> and <code>toAlpaca</code> of your old records). In <code>PenController</code> a method that used to have <code>@PathVariable String penName</code> now simply has <code>String penName</code>; the annotation sits on the interface.</p>
+<p>The <code>201</code> answers with a <code>Location</code> header keep working: <code>ResponseEntity.created(location).body(...)</code> is still what you return.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The request schemas with the rules from Lesson 11. The pattern <code>.*\S.*</code> means "anything, one character that is not a space, anything": right in both readings (found anywhere, and matching the whole text).</p>
+<pre><code class="language-yaml">    CreatePenRequest:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string, pattern: '.*\S.*'}
+    CreateAlpacaRequest:
+      type: object
+      required: [name, weight, fleeceLengthCm, fleeceColor]
+      properties:
+        name: {type: string, pattern: '.*\S.*'}
+        weight: {type: number, format: double, exclusiveMinimum: true, minimum: 0}
+        fleeceLengthCm: {type: integer, minimum: 0, maximum: 10}
+        fleeceColor: {type: string, pattern: '.*\S.*'}</code></pre>
+<p><code>UpdateAlpacaRequest</code> is the same without <code>name</code> (the name comes from the address). The response record with the new member, last in the list:</p>
+<pre><code class="language-yaml">    AlpacaResponse:
+      type: object
+      required: [id, name, weight, fleeceLengthCm, fleeceColor, readyToShear]
+      properties:
+        id: {type: integer, format: int64}
+        name: {type: string}
+        weight: {type: number, format: double}
+        fleeceLengthCm: {type: integer}
+        fleeceColor: {type: string}
+        readyToShear: {type: boolean}</code></pre>
+<pre><code class="language-java">static AlpacaResponse toResponse(Alpaca alpaca) {
+    return new AlpacaResponse(
+            alpaca.getId(),
+            alpaca.getName(),
+            alpaca.getWeight(),
+            alpaca.getFleeceLength(),
+            alpaca.getFleeceColor().name(),
+            alpaca.isReadyToShear());
+}</code></pre>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass, old and new; no old test was changed</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>openapi.yaml</code> describes the whole API and the controllers are built from it</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-notes.md</code> has the two traps (<code>minLength</code>, the pattern) and what Ilona still misses</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green slice</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Which of your tests protected you today, and which one would have noticed that the file says <code>404</code> while the code never answers <code>404</code>? Does anything in the build check that the code does what the file promises?</li>
+<li>The error answers in the file use a schema <code>Problem</code> with an <code>errors</code> member, but your handlers still return Spring's <code>ProblemDetail</code>. Who makes sure the two fit? What would happen if they drifted apart?</li>
+<li>Ilona wants a new member in the answer. In a code-first project and in this one: who changes what, and in which order? Where does the compiler help, and where only a test?</li>
+<li>Generated files live in <code>target/</code> and are not committed. What does a new colleague need to do after cloning the repository, before the code compiles? What would change if they were committed?</li>
+<li>The file calls the schema <code>AlpacaResponse</code> and not <code>Alpaca</code>. What does that say about the connection between names in the contract and names in the domain?</li>
+<li>The contract describes the <em>shape</em> of an answer. Name something about your API that no OpenAPI file can say.</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 19: Contract First and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../../phase-4-the-barn-gets-a-database/lesson-18-moving-into-the-database/index.html">Lesson 18: Moving Into the Database</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-20-a-fresh-pair-of-eyes/index.html">Lesson 20: A Fresh Pair of Eyes</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 5.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#barn-briefing">Barn Briefing</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>
