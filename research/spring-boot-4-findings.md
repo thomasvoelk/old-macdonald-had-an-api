@@ -247,7 +247,7 @@ long id = keys.getKey().longValue();
 
 ## Verified while building the reference solution (2026-11-06, Phase 1 slice)
 
-Built in `mentor/reference/` (git-ignored), Boot 4.1.2, built with JDK 27 and `java.version` 25; all 135 tests green.
+Built in `reference/` (git-ignored), Boot 4.1.2, built with JDK 27 and `java.version` 25; all 135 tests green.
 
 - `MockMvcTester`: `assertThat(mvc.get().uri("/farm")).hasStatusOk().bodyJson().extractingPath("$.name").isEqualTo("...")` compiles and works. For a raw response use `mvc.get().uri(..).exchange().getResponse()` (the request builder itself has no `getResponse()`).
 - Jackson 3 serialises plain records with no annotations (`FarmResponse`).
@@ -271,7 +271,7 @@ All 143 tests green (Phase 1's 135 + 8 in `PenControllerTest`).
 
 ## Verified while drafting Phase 1 lessons (2026-11-06)
 
-- Added `FarmConfigTest` (`@SpringBootTest`, `@Autowired Farm`) to `mentor/reference/`; passes with `FarmControllerTest` and `AlpacasApplicationTests`. Lesson 03's test list rests on it.
+- Added `FarmConfigTest` (`@SpringBootTest`, `@Autowired Farm`) to `reference/`; passes with `FarmControllerTest` and `AlpacasApplicationTests`. Lesson 03's test list rests on it.
 - Running app (`mvn spring-boot:run`, Boot 4.1.2): `GET /farm` returns `{"name":"Fiona's Farm","pens":2,"alpacas":2}`; `GET /` with no mapping returns `404` with a **JSON** body (`{"timestamp":...,"status":404,"error":"Not Found","path":"/"}`), not an HTML Whitelabel page, when called with curl. Lesson 02 only says "a 404".
 
 ## Verified in the review session (2026-11-06, evening)
@@ -327,7 +327,7 @@ Verified by compiling and running (189 tests green; app started and curled).
 - `ShearingServiceTest` uses `new InMemoryPenRepository()` and needs no mock. Test helper: `mvc.get().uri(..).exchange().getResponse().getContentAsString()` (throws `UnsupportedEncodingException`) + `com.jayway.jsonpath.JsonPath` (on the test classpath via the web test starter).
 - `PUT` on lowercase address wart (stores the address spelling) is unchanged.
 
-## 14. Lessons 17-18 reference: JdbcClient, @JdbcTest, Postgres (verified 2026-11-08, `mentor/reference`, 198 tests green)
+## 14. Lessons 17-18 reference: JdbcClient, @JdbcTest, Postgres (verified 2026-11-08, `reference`, 198 tests green)
 
 - **`@JdbcTest` does provide the `JdbcClient` bean** (autowired in `JdbcPenRepositoryTest`; closes the open item from section 7). `schema.sql` from `src/main/resources` runs on the embedded H2 automatically. Embedded H2 is the default replacement; no `MODE=PostgreSQL` needed for this schema.
 - **`update(KeyHolder, "id")` with `GeneratedKeyHolder` works on H2 (tests) and on PostgreSQL 17 (real run)**: `keys.getKey().longValue()` gave the identity value (closes the KeyHolder item). Column list `"id"` lowercase worked on both.
@@ -342,7 +342,7 @@ Verified by compiling and running (189 tests green; app started and curled).
 - **Environment gotcha (this Mac only):** `podman compose` delegated to `/usr/local/bin/docker-compose` and failed with `error getting credentials ... docker-credential-desktop not found`; worked with `DOCKER_CONFIG=<empty dir>`. Not known whether Windows + Podman Desktop behaves; still to confirm with Ilona's/the learner's machine.
 - Not verified: Windows/Podman Desktop; `podman compose down` without `-v` keeping the data (stated in Reflect as a question for the learner, not run); H2-vs-Postgres differences beyond this schema; concurrency claims in Reflect.
 
-## 15. Lesson 19 reference: springdoc 3.2.0 / OpenAPI (verified 2026-11-08, `mentor/reference`, 206 tests green)
+## 15. Lesson 19 reference: springdoc 3.2.0 / OpenAPI (verified 2026-11-08, `reference`, 206 tests green)
 
 - Dependency `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0` (explicit version; not Boot-managed). With it alone, in a `@SpringBootTest @AutoConfigureMockMvc @AutoConfigureTestDatabase` test: `/v3/api-docs` 200, `/v3/api-docs.yaml` works, `/swagger-ui.html` -> `302` `Location: /swagger-ui/index.html`, which is 200. Without the dependency the first test is red with `Status = 404`. Works with package-private controllers and records; Jackson 3 gives no trouble (closes the springdoc/Jackson 3 item in "Could not verify" for this use).
 - Out-of-the-box description (observed): `info.title` "OpenAPI definition", version "v0"; tags `pen-controller`, `shearing-controller`, `farm-controller`; operationIds from method names; request records become schemas with `required` and the Bean Validation rules (`minLength: 1` for `@NotBlank`, `exclusiveMinimum: 0` for `@Positive`, `minimum`/`maximum` for `@Min`/`@Max`); **`POST` answers are documented as `200`** (the `ResponseEntity.created` status is only known at runtime); no error responses at all; response media type `*/*`.
@@ -351,7 +351,7 @@ Verified by compiling and running (189 tests green; app started and curled).
 - **Trap (observed): `spring.mvc.problemdetails.enabled=true`.** In MockMvc, without it an unknown address (404), a wrong method (405) and a wrong media type (415) have no content type/body (the real server shows Boot's default error JSON); with it they are `application/problem+json`. But Boot's own `ProblemDetailsExceptionHandler` then also answers `MethodArgumentNotValidException`/`HttpMessageNotReadableException` and our `@ExceptionHandler`s lose: `detail` becomes "Invalid request content." and the `errors` map disappears (2 red in `PenChangesTest`: `invalidFieldsAreReportedTogether`, `aMissingFieldIsAnError`). Fix that works: `ApiExceptionHandler extends ResponseEntityExceptionHandler` (`org.springframework.web.servlet.mvc.method.annotation`), and **override** `handleMethodArgumentNotValid` / `handleHttpMessageNotReadable` (signature `(Exception, HttpHeaders, HttpStatusCode, WebRequest)` returning `ResponseEntity<Object>`) instead of `@ExceptionHandler` methods for those two exceptions (a second `@ExceptionHandler` for the same exception would clash with the base class). The documentation still shows `400/404/409` afterwards. This is the reference state now (`ErrorShapeTest` + the property in `application.properties`).
 - Not verified: Swagger UI in a real browser against the running app (Postgres container not started this session); "Try it out" calls; springdoc `@Operation`/`@Tag` annotations (not used).
 
-## 16. Contract first: openapi-generator-maven-plugin 7.27.0 on Boot 4.1.2 (verified 2026-11-08, `mentor/reference`, 200 tests green)
+## 16. Contract first: openapi-generator-maven-plugin 7.27.0 on Boot 4.1.2 (verified 2026-11-08, `reference`, 200 tests green)
 
 Replaces section 15 (springdoc is no longer used; Thomas: the team writes the OpenAPI spec first and generates controller interfaces and models with the Maven plugin; springdoc "can go, no use").
 - Plugin `org.openapitools:openapi-generator-maven-plugin:7.27.0` (latest on Central), generator `spring`, spec at `src/main/resources/api/openapi.yaml`, `apiPackage` `alpacas.web.api`, `modelPackage` `alpacas.web.model`. Generated into `target/generated-sources/openapi` and compiled automatically.
@@ -364,7 +364,7 @@ Replaces section 15 (springdoc is no longer used; Thomas: the team writes the Op
 - Behaviour kept: all existing tests green with only `ApiDocsTest` (springdoc) deleted: 206 - 6 = 200. Deleted: `ApiDocsConfig`, hand-written request/response records, springdoc dependency. `ErrorShapeTest`, `spring.mvc.problemdetails.enabled=true` and `ApiExceptionHandler extends ResponseEntityExceptionHandler` stay as in section 15 (the trap there is unchanged).
 - Not verified: the running app against Postgres; a test that compares the contract with real answers; that `Problem` (hand-written schema with `errors`) is actually used anywhere in code (it only documents the answer; handlers still return `ProblemDetail`); Windows/IDE handling of generated sources (IntelliJ needs a Maven reload to see `target/generated-sources`).
 
-Verified for the lesson (2026-11-08, scratch copies of `mentor/reference`, nothing changed in the reference):
+Verified for the lesson (2026-11-08, scratch copies of `reference`, nothing changed in the reference):
 - Contract change first: a test for `$[0].readyToShear` is red (`To match JSON path`), adding `readyToShear: {type: boolean}` to the required list and to `properties` makes `WebMapping` fail to compile (`constructor AlpacaResponse ... cannot be applied to given types`), passing `alpaca.isReadyToShear()` gives 201 green. **The generated record's components follow the order of `properties` in the YAML**: a new property put first becomes the first constructor parameter (`required: Boolean,Long,...`), so the lesson says "put it last".
 - Tiny spec (only `GET /farm`, tag `Farm`): `mvn generate-sources` writes `FarmApi` and `FarmResponse`; `implements FarmApi` without the method gives `FarmController is not abstract and does not override abstract method getFarm() in alpacas.web.api.FarmApi`; with the override and a hand-written `FarmResponse` left in `alpacas.web` there is no clash (different package); the existing `FarmControllerTest` stays green untouched.
 - A leftover `@GetMapping("/farm")` on a second, differently named method next to the overriding `getFarm()` did **not** cause an ambiguous-mapping error in the tests (165 green); the lesson does not claim a trap there, it just says to delete the old mapping.

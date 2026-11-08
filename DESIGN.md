@@ -69,7 +69,7 @@ Her existing domain (package `alpacas`: `Alpaca`, `Herd`, `Pen`, `Farm`, `Shephe
 - `JdbcClient` with plain SQL, not JPA (JPA in one sentence at most). Interface owned by the domain; in-memory implementation first, then JDBC.
 - Her own small schema (`farm`, `pens`, `alpacas`) in a plain `schema.sql` run by Spring at startup. No Flyway.
 - App runs on **Postgres in Podman** (short `compose.yml`; decided 2026-11-08: no separate setup page, it is Step 1 of Lesson 18, where the app first connects. Lesson 17 only needs embedded H2 and tells the learner not to start the app until Lesson 18). Needs `spring.sql.init.mode=always` for Postgres and an idempotent `schema.sql` (`create table if not exists`).
-- Tests use **embedded H2** via `@JdbcTest`, silently: no lesson on H2-vs-Postgres differences, no Testcontainers (one sentence "teams do this later" at most). By default `@JdbcTest` swaps in its own H2 and ignores `MODE=PostgreSQL`; write portable SQL. Mentor-only notes (belong in `mentor/`): the `Replace.NONE` + `MODE=PostgreSQL` combination and H2's PostgreSQL-mode quirks (see research section 7).
+- Tests use **embedded H2** via `@JdbcTest`, silently: no lesson on H2-vs-Postgres differences, no Testcontainers (one sentence "teams do this later" at most). By default `@JdbcTest` swaps in its own H2 and ignores `MODE=PostgreSQL`; write portable SQL. Notes for the mentor only (belong here, not in the lessons): the `Replace.NONE` + `MODE=PostgreSQL` combination and H2's PostgreSQL-mode quirks (see research section 7).
 - Optional low-priority bonus: connect read-only to the SQL curriculum's `farm` DB (`sql-curriculum/db/schema.sql`) to show a different mapping of the same world.
 
 ## Stack (from research, verified 2026-11-06)
@@ -80,7 +80,7 @@ Parent `spring-boot-starter-parent` **4.1.2**, `<java.version>25</java.version>`
 
 1. **Done:** research pass.
 2. **Done (this scaffold):** `DESIGN.md`, `README.md`, `curriculum/` chrome, `index.html`, `setup/index.html`.
-3. Build the reference solution in a scratch dir from a copy of her domain (`old-marina-had-a-farm-main/src`, end of Java Phase 4). Every test, snippet and hint must compile and pass. Verify the open research items on the way (JdbcClient bean inside `@JdbcTest`, KeyHolder on H2 and Postgres, `ProblemDetail` API, `MockMvcTester` JSON helpers, Jackson 3 + records). Final reference goes into `mentor/`, labelled mentor-only.
+3. Build the reference solution in a scratch dir from a copy of her domain (`old-marina-had-a-farm-main/src`, end of Java Phase 4). Every test, snippet and hint must compile and pass. Verify the open research items on the way (JdbcClient bean inside `@JdbcTest`, KeyHolder on H2 and Postgres, `ProblemDetail` API, `MockMvcTester` JSON helpers, Jackson 3 + records). Final reference goes into `reference/` (committed, offered as a last resort).
 4. Write the lesson HTML. **Draft Phase 1 first and show Thomas before writing the rest.**
 5. Write the Spring-adapted `copilot-instructions.md`.
 

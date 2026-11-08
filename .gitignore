@@ -4,5 +4,5 @@
 .DS_Store
 Thumbs.db
 
-# Maven build output (the mentor reference solution is committed, without it)
+# Maven build output (the reference solution is committed, without it)
 target/

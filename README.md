@@ -6,7 +6,7 @@ The curriculum itself is hand-authored HTML (no Markdown source — see `DESIGN.
 
 ## Status
 
-All 21 lessons are written (five phases). The reference solution is in `mentor/reference/`, a last resort for when you are stuck: it is the finished project, so it gives away every lesson. Design decisions are in `DESIGN.md`.
+All 21 lessons are written (five phases). The reference solution is in `reference/`, a last resort for when you are stuck: it is the finished project, so it gives away every lesson. Design decisions are in `DESIGN.md`.
 
 ## Repo layout
 
@@ -19,5 +19,5 @@ curriculum/            what the learner reads — hand-authored HTML
   style.css, colors_and_type.css, app.js   shared chrome (progress bar, TOC, hints, copy buttons, checkbox persistence)
   assets/              sprout mark
   phase-N-slug/lesson-NN-slug/index.html   lessons
-mentor/reference/      finished reference solution (Maven project) — last resort
+reference/             finished reference solution (Maven project) — last resort
 ```
