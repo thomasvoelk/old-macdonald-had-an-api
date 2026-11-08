@@ -303,3 +303,21 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 - Not viewed in a browser, not checked on phone width. Lesson 18 not re-read in this review (only the "shelf" wording was replaced). Ilona/Hasi names still in public text.
 
 **Next:** start Phase 5: build the Lesson 19 reference (Swagger UI / OpenAPI with springdoc 3.2.0) in `mentor/reference/`, then draft Lessons 19-21.
+
+## Status after the Lesson 19 reference and the drafts of Lessons 19-21 (2026-11-08)
+**Reference (`mentor/reference/`, git-ignored, 206 tests green):** springdoc 3.2.0 added; `ApiDocsTest` (6 tests: `/v3/api-docs` lists `/pens`, Swagger UI redirect, own title, `201` on `POST /pens`, `404` on `/pens/{penName}/alpacas`, validation rules in the schema; the first four seen red), `ApiDocsConfig` (`OpenAPI` bean), `@ApiResponse(201)` on the two `POST` methods, `@ResponseStatus` on all `ApiExceptionHandler` methods. For Lesson 20: `ErrorShapeTest` (404/405 as `application/problem+json`, seen red), `spring.mvc.problemdetails.enabled=true`, and `ApiExceptionHandler extends ResponseEntityExceptionHandler` with two overrides. **Trap found:** the property alone turns two `PenChangesTest` tests red (Boot's own handler wins, the `errors` map is lost). Details in `research/spring-boot-4-findings.md` section 15.
+
+**Lessons drafted** in `curriculum/phase-5-wrap-up/` (Draft, not reviewed by Thomas):
+- **19 The Farm Explains Itself:** Barn Briefing "a description you can read, and a page that shows it" (OpenAPI vs. Swagger UI; a generated description only knows what it can see), Spring Sprout springdoc (not Boot-managed, explicit version). Steps follow the reference: red test (404) -> dependency -> look at Swagger UI and `/v3/api-docs`, write down right/wrong in `docs/api-notes.md` -> title via `OpenAPI` bean -> `201` via `@ApiResponse` -> errors via `@ResponseStatus` on the advice -> notice that every endpoint now lists `404/409/400` and that the `ProblemDetail` schema has `properties` where the real answer has `errors`. Reflect: description vs. behaviour, Swagger UI in production.
+- **20 A Fresh Pair of Eyes:** review lesson, no new feature. Barn Briefing with four lenses (contract, the client's day, edges, code behind); `docs/api-review.md` with >= 8 ranked findings, fix two test-first. Hint 2 lists findings found in the reference (ready-to-shear lacks the pen name, ids not usable in addresses, ISE/IAE always 409/400, `GET /farm` calls `findAll` twice, shear log only in memory, `HashMap`, unused `Farm`, error shape of unknown addresses). Hint 3 is the verified optional hard fix (problemdetails property + `ResponseEntityExceptionHandler` overrides).
+- **21 What Comes Next:** Barn Briefing "what the frontend sees of your work" (addresses, bodies, statuses; OpenAPI as the file for Ilona; what the course left out: login/roles, CORS, migrations, real-DB tests, monitoring), task `docs/handover.md` tried by a stranger, Phase 5 demo, final Reflect. No code. Mentions "the Angular curriculum" generically, no link.
+- Index Phase 5 rows 19-21 link the lessons; Lesson 18's next link points to 19; Lesson 21's next is an end note. springdoc.org links checked (HTTP 200). HTML tags balance; not viewed in a browser or at phone width.
+
+**Open**
+- Swagger UI was not opened in a real browser against the running app (Postgres not started this session); the "Try it out" and redirect steps rest on the MockMvc tests and the generated YAML, not on the UI.
+- Lesson 20 claims are checked against the code; "shear log lost on restart" and "`HashMap`" come from the reference design (earlier findings), not re-run.
+- Is there an Angular curriculum to link from Lesson 21? Unknown; the lesson says it generically.
+- Lessons 15-21 not reviewed by Thomas; Ilona/Hasi names still in public text (see DESIGN.md).
+- **At the final wrap-up: remind Thomas to delete `CLAUDE.md` (and any "Working protocol" mention) and to retire `HANDOFF.md`.**
+
+**Next:** incorporate Thomas's feedback on Lessons 15-21 (ask for it if not given); then the final wrap-up: view the pages in a browser and on phone width, resolve the Ilona/Hasi names, settle the Postgres/Podman-on-Windows question, write the Spring-adapted `copilot-instructions.md` (DESIGN.md build step 5), and remind Thomas to delete `CLAUDE.md`.
