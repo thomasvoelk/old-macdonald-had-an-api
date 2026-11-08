@@ -346,3 +346,7 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 - **At the final wrap-up: remind Thomas to delete `CLAUDE.md` (and any "Working protocol" mention) and to retire `HANDOFF.md`.**
 
 **Next:** incorporate Thomas's feedback on Lessons 19-21 (ask again if not given); then the final wrap-up: view the pages in a browser and on phone width, resolve the Ilona/Hasi names, settle Podman on Windows, write the Spring-adapted `copilot-instructions.md`, and remind Thomas to delete `CLAUDE.md`.
+
+### Update: Thomas's feedback on Lesson 19 (2026-11-08)
+- **Feedback:** "how does the apprentice learn OpenAPI notation?" The lesson gave YAML only in hints. **Fixed:** new Barn Briefing "reading an OpenAPI file" (annotated `GET /farm` file, `$ref` explained, Java-to-YAML table, links to learn.openapis.org and the swagger.io basic structure page, both HTTP 200); steps 2, 4, 5 now make her write the YAML herself (hints are for comparing); new learning goal, Reflect question and TOC entry. Table claims (`exclusiveMinimum: true` + `minimum`, `format: int64`, property order = record order) match the reference spec; not re-run as a learner. Tags balance.
+- Still waiting for feedback on the rest of Lesson 19 and on Lessons 20-21. **Next** line above is unchanged.
