@@ -350,3 +350,12 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 ### Update: Thomas's feedback on Lesson 19 (2026-11-08)
 - **Feedback:** "how does the apprentice learn OpenAPI notation?" The lesson gave YAML only in hints. **Fixed:** new Barn Briefing "reading an OpenAPI file" (annotated `GET /farm` file, `$ref` explained, Java-to-YAML table, links to learn.openapis.org and the swagger.io basic structure page, both HTTP 200); steps 2, 4, 5 now make her write the YAML herself (hints are for comparing); new learning goal, Reflect question and TOC entry. Table claims (`exclusiveMinimum: true` + `minimum`, `format: int64`, property order = record order) match the reference spec; not re-run as a learner. Tags balance.
 - Still waiting for feedback on the rest of Lesson 19 and on Lessons 20-21. **Next** line above is unchanged.
+
+## Status after sign-off on Lessons 19-21 (2026-11-08)
+- Thomas: "looks good" for Lessons 19-21 (after the OpenAPI-notation fix). Treated as review done.
+- **Done:** `curriculum/setup/copilot-instructions.md` (Spring-adapted rules to merge into her existing file: keep the tutor rules, never write controller/test/record/repository/SQL/OpenAPI, ask which layer, read the real error, no Boot-3 memory, contract first, commit prefixes; new Project context section). The setup page's "Copilot rules" paragraph links it. DESIGN.md build step 5 is done.
+- **Not done:** browser and phone-width check. The Claude-in-Chrome extension was not connected (`tabs_context_mcp` failed), so no page was viewed. Thomas should open `curriculum/index.html` and Lessons 13, 14, 19 (comparison table, long steps, long XML hint) at phone width himself, or reconnect the extension and rerun.
+- **Needs Thomas's decision:** Ilona/Hasi names in public text (check with them or swap); does `podman compose up` work on her Windows machine (Lesson 18 step 1 tells her to report if not); Lesson 17 "JPA at work" wording; Angular link in Lesson 21.
+- **At the very end: delete `CLAUDE.md` and retire `HANDOFF.md`.**
+
+**Next:** phone-width/browser check (needs the extension or Thomas's eyes), then Thomas's decisions on the names, Podman on Windows, the JPA wording and the Angular link; then delete `CLAUDE.md` and retire `HANDOFF.md`.
