@@ -316,3 +316,13 @@ Domain only, no Spring. Verified by compiling and running (186 tests green).
 - Trap met: `repository()` in the contract returned a new object per call, so tests saw empty repos (6 red). Fix: one `createRepository()` per test instance in a field.
 - Known gap: in-memory returns the very objects it stored, so "changes are only stored on `save`" is NOT in the contract (JDBC returns fresh objects). Could become a Reflect question or a contract test that forces copying.
 - Not done: controllers/`FarmConfig` still use the `Farm` bean; `AlpacaResponse` has no id; saving alpacas of an existing pen in JDBC (upsert by id, delete missing) is Lesson 17 work.
+
+## Phase 4 reference, step 2: `PenRepository` replaces the `Farm` bean (2026-11-08)
+Verified by compiling and running (189 tests green; app started and curled).
+- `FarmConfig` now has `@Bean PenRepository penRepository()` (an `InMemoryPenRepository` seeded via `save`: Ring with Lita and Batista, then Cell). No `Farm` bean. Running app: Ring id 1, Lita 2, Batista 3, Cell 4 (pens and alpacas share one counter). `Farm` class and `FarmTest` stay in `alpacas`, unused by `alpacas.web`.
+- `PenRepository.getByName(String)` is a `default` method (same message as `Farm.findPen`: "The Pen you are looking for X does not exist", `PenNotFoundException`); tested in `PenRepositoryContract`.
+- `AlpacaResponse(Long id, ...)` and `PenSummaryResponse(Long id, ...)` with `PenSummaryResponse.from(Pen)`; `id` is the first JSON member. `FarmResponse` unchanged; farm name is a constant in `FarmController` (no `Farm` object carries it any more).
+- Controllers/`ShearingService` end every change with `pens.save(pen)`. `PUT` keeps the id: `replacement.assignId(existing.getId())` (without it the new alpaca has a fresh id; observed red `expected: 42 but was: 43`). Absolute ids in tests are not stable in the shared cached context: compare ids with each other.
+- Observed red states (scratch copies): FarmConfig without the bean -> `UnsatisfiedDependencyException ... 'farmController' ... No qualifying bean of type 'alpacas.PenRepository' available`; controller asking for `Farm` without a `Farm` bean -> `No qualifying bean of type 'alpacas.Farm' available`; missing `id` member -> `To match JSON path: "$[0].id"`. A `@SpringBootTest` (FarmConfigTest) fails as long as ANY controller asks for a missing bean.
+- `ShearingServiceTest` uses `new InMemoryPenRepository()` and needs no mock. Test helper: `mvc.get().uri(..).exchange().getResponse().getContentAsString()` (throws `UnsupportedEncodingException`) + `com.jayway.jsonpath.JsonPath` (on the test classpath via the web test starter).
+- `PUT` on lowercase address wart (stores the address spelling) is unchanged.
