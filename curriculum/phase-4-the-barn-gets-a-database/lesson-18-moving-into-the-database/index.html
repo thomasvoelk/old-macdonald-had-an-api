@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 18: Moving Into the Database · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 18 18 moving into the database</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-18-moving-into-the-database">Lesson 18: Moving Into the Database</h1>
+
+<h2 id="story">Story</h2>
+<p>The second shelf is ready and proven, but it stands in the workshop: the running application still uses the first one. Ilona is waiting. "Fiona's farm has to survive a restart. Today, please."</p>
+<p>Hasi has one condition. "Your company does not run its data on a toy database that lives inside the test. It runs PostgreSQL. So install one the way you will install one at work: in a container, from a file you can commit. Then tell Spring where it is, swap the bean, and restart the app to see whether the farm remembers."</p>
+<p>Today the controllers still do not change. The only things that change are one configuration class, one properties file and one new file that describes the database.</p>
+
+<div class="concept-corner">
+<h2 id="barn-briefing">Barn Briefing: a database in a container</h2>
+<p>A <em>container</em> is a small, sealed box with a program in it, started from an <em>image</em> (a ready-made package). You do not install PostgreSQL on your laptop; you ask Podman to start the image <code>postgres:17</code>, and you throw the box away when you are done. A file called <code>compose.yml</code> describes the box: which image, which settings, which port. <code>podman compose up</code> reads that file and starts everything in it. Because the file lives in your repository, a colleague gets the same database with one command.</p>
+<p>Three lines in that file deserve a sentence each. <code>environment</code> gives PostgreSQL a database name, a user and a password on its first start. <code>ports: "5432:5432"</code> connects your laptop's port 5432 to the container's, so your application can reach the database at <code>localhost:5432</code>. <code>volumes</code> keeps the data in a storage area <em>outside</em> the box, so the farm survives when the container is stopped and started again (without it, the data would die with the container, which would defeat today's purpose). The password in the file is fine for a throwaway development database on your own machine and never for anything real. Official docs: <a href="https://docs.podman.io/en/latest/markdown/podman-compose.1.html">podman compose</a>.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: connection settings and a start-up job</h2>
+<p>Spring Boot reads <code>src/main/resources/application.properties</code> when it starts. Properties whose names start with <code>spring.datasource.</code> tell it how to connect (<code>url</code>, <code>username</code>, <code>password</code>); from them Boot builds the <code>DataSource</code>, and from the <code>DataSource</code> the <code>JdbcClient</code> you used in Lesson 17. The database driver (the <code>postgresql</code> dependency) is found from the URL, <code>jdbc:postgresql://...</code>. One more property: Boot runs <code>schema.sql</code> automatically only for embedded databases, so for PostgreSQL you must ask for it with <code>spring.sql.init.mode=always</code>. That is why you wrote the script with <code>if not exists</code>.</p>
+<p>A bean of type <code>ApplicationRunner</code> is a job that Spring runs once, right after the application has started. Use it for "if the database is empty, stock the farm". Official docs: <a href="https://docs.spring.io/spring-boot/how-to/data-access.html">data access</a>, <a href="https://docs.spring.io/spring-boot/reference/features/spring-application.html#features.spring-application.command-line-runner">ApplicationRunner</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Run the whole API on PostgreSQL, and keep the web tests independent of any database.</p>
+<ul>
+<li>A <code>compose.yml</code> in the project root starts PostgreSQL 17 with a database <code>farm</code> (user <code>farm</code>, password <code>farm</code>) on port 5432, with a volume.</li>
+<li><code>application.properties</code> connects the application to it and runs <code>schema.sql</code> at start-up.</li>
+<li>The application's <code>PenRepository</code> bean is a <code>JdbcPenRepository</code>. When the database is empty, the application stores Ring (Lita, Batista) and Cell at start-up; when it is not, it leaves the data alone.</li>
+<li>The farm survives a restart: pens, alpacas, new alpacas, changed fleece lengths and ids.</li>
+<li>The web tests (<code>@WebMvcTest</code>) still use the fast in-memory repository, and <code>mvn test</code> works with the database <strong>stopped</strong>.</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Start a development database from a file you commit</li>
+<li>Configure a Spring Boot application to use it</li>
+<li>Replace an implementation by changing one configuration class</li>
+<li>Keep tests independent of the development database</li>
+<li>Check by hand that data survives a restart</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>The database.</strong> Create <code>compose.yml</code> in the project root (hint 1). Start Podman Desktop if it is not running, then in the project folder: <code>podman compose up -d</code> (<code>-d</code>: in the background). The first run downloads the image, which takes a moment. Check it: <code>podman ps</code> shows a container with <code>postgres:17</code> and <code>Up</code>. To look inside, <code>podman exec -it &lt;container-name&gt; psql -U farm -d farm</code> opens PostgreSQL's command line (you know the SQL from the SQL course; <code>\q</code> leaves it). The name of the container is in the <code>NAMES</code> column of <code>podman ps</code>. <em>If it does not start on your machine, stop here and tell Thomas: that is a finding for this course.</em></li>
+<li><strong>The connection.</strong> Create <code>src/main/resources/application.properties</code> with the four properties from the Sprout (hint 2). Do not start the application yet.</li>
+<li><strong>Two repositories (red).</strong> Write the new bean first, in a new class <code>DatabaseConfig</code> in package <code>alpacas</code> (annotated <code>@Configuration</code>): a method <code>@Bean PenRepository penRepository(JdbcClient jdbcClient)</code> that returns <code>new JdbcPenRepository(jdbcClient)</code>. Spring passes the <code>JdbcClient</code> in as a method parameter, the same way a constructor gets its beans. Run <code>FarmConfigTest</code> (it starts the whole application): <code>BeanDefinitionOverrideException: Invalid bean definition with name 'penRepository'</code>. There are now two <code>@Bean</code> methods called <code>penRepository</code>, the old one in <code>FarmConfig</code> and the new one. (Boot refuses silently replacing one by the other, on purpose. Had you named the new method differently, you would have two beans of the same type, and every constructor that asks for a <code>PenRepository</code> would not know which one you mean.)</li>
+<li><strong>The in-memory shelf becomes a test fixture.</strong> The web tests still want the fast in-memory repository, and the application does not. Move <code>FarmConfig</code> from <code>src/main/java/alpacas/web</code> to <code>src/test/java/alpacas/web</code> (IDE refactoring: Move) and rename it <code>InMemoryFarmConfig</code>. Remove its <code>@Configuration</code> annotation: a test class with that annotation in a scanned package would be found by the application's component scan and bring the second bean back. Without the annotation it is only used where a test asks for it with <code>@Import</code>. Change the four <code>@Import(FarmConfig.class)</code> in the web tests (<code>FarmControllerTest</code>, <code>PenControllerTest</code>, <code>PenChangesTest</code>, <code>ShearingWithRealServiceTest</code>) to <code>InMemoryFarmConfig.class</code>. Run the suite: the web tests are green again. Now only the two tests that start the <em>whole</em> application are interesting: <code>FarmConfigTest</code> and <code>AlpacasApplicationTests</code>.</li>
+<li><strong>The silent trap.</strong> Those two tests now connect to what <code>application.properties</code> says: the real PostgreSQL. Run them with the container <strong>running</strong>: they might pass (and <code>FarmConfigTest</code> might even find "Ring" and "Cell" in your development data). A test that passes because your development database happens to be in the right state is a bad test. Stop the container (<code>podman compose stop</code>) and run them again: red, <code>Failed to execute database script</code> ... the connection is refused. Tests must not depend on a service that is up. Put <code>@AutoConfigureTestDatabase</code> (<code>org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase</code>) on both classes: it replaces the real data source by an embedded H2 in this test, and Boot still runs <code>schema.sql</code> on it. Both are green now, with the container stopped.</li>
+<li><strong>Stock the farm (test first).</strong> <code>FarmConfigTest.farmComesWithTwoPens</code> (Ring, Cell, in that order) is red: nothing creates the pens, since the old <code>FarmConfig</code> that did is gone from the application. Add a second bean to <code>DatabaseConfig</code>: an <code>ApplicationRunner</code> that takes the <code>PenRepository</code> and, if <code>findAll()</code> is empty, saves Ring with Lita and Batista and an empty Cell (hint 3). The test is green. It ran against the embedded database, which starts empty every time, so it proves the stocking; the "only when empty" half you check by hand in the last step.</li>
+<li><strong>Run the real thing.</strong> Start the container if it is stopped (<code>podman compose up -d</code>), start the application. In the log you should <em>not</em> see an error. Use your <code>docs/requests.http</code>: <code>GET /farm</code> shows 2 pens and 2 alpacas, <code>GET /pens/ring/alpacas/lita</code> has <code>"id":1</code>. Look at the tables with <code>psql</code>: <code>select * from alpacas;</code>.</li>
+<li><strong>The test that matters.</strong> <code>POST</code> a new alpaca into Cell ("Triple H": the space is <code>%20</code> in the URL, as in Lesson 14). <code>POST</code> the shear request for Lita. Stop the application and start it again. <code>GET /farm</code> now says 3 alpacas, Lita's fleece is 0, Triple H has his id and is still in Cell, Batista and Lita did not get new ids, and nothing was stocked twice. Fiona's farm remembers. Look at <code>select id, pen_id, name, fleece_length from alpacas order by id;</code> once more. Commit, including <code>compose.yml</code>; but think about the Reflect question about the password first.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>podman compose up -d</code> starts PostgreSQL, and <code>psql</code> can connect to the database <code>farm</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> The application starts against it, creates the tables from <code>schema.sql</code> and stocks Ring and Cell exactly once</label></li>
+<li class="task-list-item"><label><input type="checkbox"> After <code>POST</code>, <code>PUT</code>, <code>DELETE</code> and <code>shear</code> and a restart, the changes are still there and ids are unchanged</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>mvn test</code> is green with the container stopped</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The whole-application tests use the embedded database (<code>@AutoConfigureTestDatabase</code>); the web tests use <code>InMemoryFarmConfig</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No controller, no service and no domain class changed in this lesson</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p><code>compose.yml</code>:</p>
+<pre><code class="language-yaml">services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: farm
+      POSTGRES_USER: farm
+      POSTGRES_PASSWORD: farm
+    ports:
+      - "5432:5432"
+    volumes:
+      - farm-data:/var/lib/postgresql/data
+
+volumes:
+  farm-data:</code></pre>
+<p>Indentation is part of YAML: use spaces, two per level, never tabs. To throw the data away and start fresh: <code>podman compose down -v</code> (<code>-v</code> deletes the volume too).</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p><code>application.properties</code>:</p>
+<pre><code class="language-properties">spring.datasource.url=jdbc:postgresql://localhost:5432/farm
+spring.datasource.username=farm
+spring.datasource.password=farm
+spring.sql.init.mode=always</code></pre>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p><code>DatabaseConfig</code>:</p>
+<pre><code class="language-java">@Configuration
+class DatabaseConfig {
+
+    @Bean
+    PenRepository penRepository(JdbcClient jdbcClient) {
+        return new JdbcPenRepository(jdbcClient);
+    }
+
+    @Bean
+    ApplicationRunner stockTheFarm(PenRepository pens) {
+        return args -&gt; {
+            if (pens.findAll().isEmpty()) {
+                Herd ringHerd = new Herd();
+                ringHerd.addAlpaca(new Alpaca("Lita", 70, 4, FleeceColor.WHITE));
+                ringHerd.addAlpaca(new Alpaca("Batista", 80, 10, FleeceColor.BROWN));
+                pens.save(new Pen("Ring", ringHerd));
+                pens.save(new Pen("Cell", new Herd()));
+            }
+        };
+    }
+}</code></pre>
+<p>The imports are <code>org.springframework.boot.ApplicationRunner</code> and <code>org.springframework.jdbc.core.simple.JdbcClient</code>. The two test classes:</p>
+<pre><code class="language-java">@SpringBootTest
+@AutoConfigureTestDatabase
+class FarmConfigTest { ... }</code></pre>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass with the container stopped</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The farm survives a restart of the application</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>compose.yml</code> and <code>application.properties</code> are committed; <code>docs/api-notes.md</code> has your answer from Lesson 15 about changes that are not saved</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green step</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Which files did you <em>change</em> to move from memory to PostgreSQL, and which did you only <em>add</em>? What does that say about the interface you built in Lesson 15?</li>
+<li>The password <code>farm</code> is in a file in your repository. Why is that acceptable here and not for the company's database? Where would the real password come from? (Hint: Spring can read <code>spring.datasource.password</code> from an environment variable.)</li>
+<li>The "stock the farm when empty" job lives in the application. What would happen if two copies of the application started at the same moment on an empty database? Is a seed job the right place for data Fiona cares about?</li>
+<li>Your tests run on H2 and the application on PostgreSQL. Name a bug that H2 could hide from you. What would a team do about that? (One sentence is enough: teams often run the database tests against the real thing in a container, which is a topic for later.)</li>
+<li>Delete the container with <code>podman compose down</code> (no <code>-v</code>) and start it again. Is the farm still there? Now do it with <code>-v</code>. What is the volume for?</li>
+<li>Today <code>DatabaseConfig</code> is the only place that says "database". Imagine Fiona wants a second farm on a different server. What would you change?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 18: Moving Into the Database and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-17-the-shelf-becomes-a-table/index.html">Lesson 17: The Shelf Becomes a Table</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">Lesson 19 (coming soon)</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 4.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#barn-briefing">Barn Briefing</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 17: The Shelf Becomes a Table · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 17 17 the shelf becomes a table</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-17-the-shelf-becomes-a-table">Lesson 17: The Shelf Becomes a Table</h1>
+
+<h2 id="story">Story</h2>
+<p>Fiona restarted the server yesterday, to install an update. "My new alpaca Triple H is gone," she says. "And Lita's fleece is long again. Does your program forget everything when it sleeps?"</p>
+<p>It does. The shelf from Lesson 15 is a list inside the running program, and a list in memory disappears with the program. Hasi smiles. "You made the shelf an interface for exactly this day. Write a second shelf that keeps its alpacas in tables, like you did in the SQL course. The interface stays, the contract test stays, and the controllers never find out."</p>
+<p>Today you write that second shelf, <code>JdbcPenRepository</code>, and you prove it with the <em>same</em> contract test that already proves the in-memory one. The running application does not use it yet. That is Lesson 18.</p>
+
+<div class="concept-corner">
+<h2 id="barn-briefing">Barn Briefing: objects and rows</h2>
+<p>A <code>Pen</code> in memory is an object that holds a <code>Herd</code> that holds <code>Alpaca</code> objects. A database knows none of that. It knows <em>rows</em> in <em>tables</em>: a row in <code>pens</code>, rows in <code>alpacas</code>, and each alpaca row carries the number of its pen (<code>pen_id</code>, a foreign key). Saving means turning the objects into rows. Reading means turning rows back into <em>new</em> objects.</p>
+<p>That last word matters. Lesson 15 ended with a question: if you change an alpaca after saving it and do not save again, the in-memory shelf shows the change anyway, because it holds your very object. A database holds a <em>copy</em>. What you get back from <code>findByName</code> is a fresh <code>Pen</code> that has never met the one you saved. Your id is what connects the two: a row with this id is "the same alpaca". This is why Lesson 16 made a rule of "every change ends with <code>save</code>", and why <code>save</code> has to tell new from old: an alpaca <em>without</em> an id is inserted, an alpaca <em>with</em> an id is updated.</p>
+</div>
+
+<div class="spring-corner">
+<h2 id="spring-sprout">🌱 Spring Sprout: JdbcClient and @JdbcTest</h2>
+<p><code>JdbcClient</code> is Spring's small helper for plain SQL over JDBC. You hand it a SQL text with named parameters (<code>:name</code>), you fill them with <code>.param("name", value)</code>, and you end with <code>.update()</code> for <code>insert</code>/<code>update</code>/<code>delete</code>, or with <code>.query(...)</code> for <code>select</code>. Spring Boot creates one <code>JdbcClient</code> bean for you as soon as a database connection (a <code>DataSource</code>) exists, so a class can ask for it in its constructor like for any other bean. It keeps you close to the SQL you already know; it is not an ORM that writes the SQL for you. Official docs: <a href="https://docs.spring.io/spring-framework/reference/data-access/jdbc/core.html#jdbc-JdbcClient">JdbcClient</a>.</p>
+<p><code>@JdbcTest</code> is the test annotation for this layer. Like <code>@WebMvcTest</code> for the web, it starts only a small slice of the application: a database, a <code>JdbcClient</code>, and nothing else. By default it replaces your database with an <em>embedded</em> one (H2, a small database that lives inside the test's own process and needs no installation), it runs a file named <code>schema.sql</code> from <code>src/main/resources</code> on it to create the tables, and it wraps every test in a transaction that is rolled back at the end. Official docs: <a href="https://docs.spring.io/spring-boot/appendix/test-auto-configuration/slices.html">test slices</a>.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Write <code>JdbcPenRepository implements PenRepository</code> in package <code>alpacas</code>, backed by two tables, and prove it with <code>PenRepositoryContract</code>.</p>
+<ul>
+<li>The class takes a <code>JdbcClient</code> in its constructor. It is <em>not</em> a Spring bean yet.</li>
+<li>A file <code>src/main/resources/schema.sql</code> creates the tables <code>pens</code> and <code>alpacas</code> (with <code>create table if not exists</code>) in SQL that H2 <em>and</em> PostgreSQL both understand.</li>
+<li><code>JdbcPenRepositoryTest</code> is a <code>@JdbcTest</code> that extends the contract. Every contract test passes for it. The contract test itself is not changed, except for how it creates its repository (step 3).</li>
+<li>The ids come from the database (an identity column), not from a counter in your code.</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Write plain SQL from Java with <code>JdbcClient</code> (named parameters, <code>update</code>, <code>query</code>)</li>
+<li>Map objects to rows and rows back to new objects</li>
+<li>Let the database generate ids and read them back</li>
+<li>Test an adapter with a slice test and an embedded database</li>
+<li>Prove two implementations with one contract</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Dependencies.</strong> Add to your <code>pom.xml</code>: <code>spring-boot-starter-jdbc</code> (compile), <code>org.postgresql:postgresql</code> (scope <code>runtime</code>: the program needs it to talk to PostgreSQL, your code never mentions it), and for tests <code>spring-boot-starter-jdbc-test</code> and <code>com.h2database:h2</code> (scope <code>test</code>). No versions: the Boot parent manages them. Reload Maven. <strong>One warning:</strong> from now on the application itself cannot start, because the JDBC starter wants a database connection and you have not told it where the database is. That is the job of Lesson 18. Until then, run tests only. (The web tests do not need a database and stay green. The one <code>@SpringBootTest</code> still passes, because H2 is on its classpath and Boot falls back to it.)</li>
+<li><strong>The test class (red).</strong> Create <code>JdbcPenRepositoryTest</code> in <code>src/test/java/alpacas</code>: annotate it with <code>@JdbcTest</code> (<code>org.springframework.boot.jdbc.test.autoconfigure.JdbcTest</code>), let it extend <code>PenRepositoryContract</code>, and add a field <code>@Autowired JdbcClient jdbcClient</code>. In <code>createRepository()</code> first empty both tables, <code>jdbcClient.sql("delete from alpacas").update();</code> and the same for <code>pens</code> (<code>alpacas</code> first: it points at <code>pens</code>), then return <code>new JdbcPenRepository(jdbcClient)</code>. Why the deleting? All contract tests save a pen called "Ring" into the <em>same</em> embedded database. <code>@JdbcTest</code> promises to roll every test back, but in this setup the tests you inherit from the contract do <strong>not</strong> run inside that rolled-back transaction (only tests written in <code>JdbcPenRepositoryTest</code> itself do). Without the two lines, tests that have nothing to do with each other fail with <code>There is already a pen named Ring</code>: "passes alone, fails in the suite". The code does not compile yet: <code>cannot find symbol ... class JdbcPenRepository</code>. Let the IDE create the class with its constructor, make it implement <code>PenRepository</code>, and let every method throw <code>new UnsupportedOperationException()</code> for now.</li>
+<li><strong>The trap in your own contract (red).</strong> Run <code>JdbcPenRepositoryTest</code>. All nine tests are red with a <code>NullPointerException</code>: <code>Cannot invoke "...JdbcClient.sql(String)" because "this.jdbcClient" is null</code>. Look at the contract: <code>private final PenRepository repository = createRepository();</code>. A field initialiser runs when the test object is <em>constructed</em>. Spring fills <code>@Autowired</code> fields only <em>after</em> construction. At that moment <code>jdbcClient</code> is still <code>null</code>. Fix it in the contract: make the field non-final without initialiser and create the repository in a method annotated <code>@BeforeEach</code>, which JUnit runs after Spring has injected. The in-memory test is unaffected, and you have just learned why a test base class should not create things in field initialisers.</li>
+<li><strong>The tables (red).</strong> Run again: <code>Table "ALPACAS" not found</code> (H2 reports the name in capitals). Nobody has created the tables. Write <code>src/main/resources/schema.sql</code>:
+<ul>
+<li><code>pens</code>: an <code>id</code> (<code>bigint generated by default as identity primary key</code>: the database counts for you) and a <code>name</code> (<code>varchar(100) not null unique</code>).</li>
+<li><code>alpacas</code>: an <code>id</code> the same way, <code>pen_id</code> (<code>bigint not null references pens (id)</code>, the foreign key you know from the SQL course), <code>name</code>, <code>weight</code> (<code>double precision</code>), <code>fleece_length</code> (<code>integer</code>) and <code>fleece_color</code> (<code>varchar(20)</code>: the enum's name as text).</li>
+<li>Both statements start with <code>create table if not exists</code>. Lesson 18 runs this file against a real database every time the application starts, and it must not fail the second time.</li>
+</ul>
+Run again: the tables exist, and the tests are red for the right reason (<code>UnsupportedOperationException</code>).</li>
+<li><strong>Insert a pen (green).</strong> Start with <code>savingGivesThePenAndItsAlpacasIds</code>. In <code>save</code>: if the pen has no id, <code>insert into pens (name) values (:name)</code>. To learn the id the database chose, give <code>update</code> a <code>GeneratedKeyHolder</code> (<code>org.springframework.jdbc.support</code>) and the name of the key column: <code>.update(keyHolder, "id")</code>; then <code>keyHolder.getKey().longValue()</code> is your id: call <code>pen.assignId(...)</code> with it. Do the same for every alpaca without an id (<code>insert into alpacas (pen_id, ...)</code>). Mind the column names: <code>fleece_color</code> gets <code>alpaca.getFleeceColor().name()</code>.</li>
+<li><strong>Read pens (green).</strong> <code>findByName</code> and <code>findAll</code>. A select with a row mapper turns every row into a new object: <code>.query((row, rowNumber) -&gt; ...)</code>, then <code>.list()</code> for many or <code>.optional()</code> for zero or one. Build the <code>Pen</code> from its row, load its alpacas with a second select (<code>where pen_id = :penId</code>), recreate each <code>Alpaca</code> with the constructor, then <code>assignId(row.getLong("id"))</code>, and put them into a new <code>Herd</code>. Do not forget <code>order by id</code> (a select without <code>order by</code> promises no order, and <code>findAllReturnsEveryPenInTheOrderItWasSaved</code> needs one). For the case-insensitive name: <code>where lower(name) = lower(:name)</code>. Watch the tests turn green one after the other.</li>
+<li><strong>Reject a duplicate (green).</strong> <code>aSecondNewPenWithTheSameNameIsRejected</code> expects the same <code>IllegalStateException</code> as the in-memory shelf. Your <code>unique</code> column would reject it too, but with a database exception of its own, and only for the exact same spelling ("ring" and "Ring" are different texts to it). Check in Java first (<code>findByName</code>) and throw the same exception with the same message. Why does the web layer care? Because <code>PenController</code> maps <em>that</em> exception to 409 and knows nothing else.</li>
+<li><strong>Save again (green).</strong> The last two tests: <code>savingAgainKeepsOldIdsAndGivesNewAlpacasTheirs</code> and <code>anAlpacaRemovedFromTheHerdIsGoneAfterSaving</code>. For an alpaca that already has an id, run an <code>update ... where id = :id</code>; for one without, an insert. Then delete what is no longer in the herd: <code>delete from alpacas where pen_id = :penId and id not in (:keptIds)</code> with the list of ids you just handled (a <code>List</code> as a parameter fills the brackets). Careful with the empty list: <code>not in ()</code> is not valid SQL, so for an empty herd delete all alpacas of the pen.</li>
+<li><strong>Run everything.</strong> All earlier tests are green, the contract runs twice now (nine tests for each shelf), and the application is not touched. Commit.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your test list (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>JdbcPenRepositoryTest</code> extends <code>PenRepositoryContract</code>, and all nine contract tests pass for it</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The contract creates its repository in <code>@BeforeEach</code>, and the in-memory test still passes</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>schema.sql</code> creates <code>pens</code> and <code>alpacas</code> with <code>if not exists</code>, in SQL both H2 and PostgreSQL accept</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Pen and alpaca ids come from the database</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Saving a changed pen keeps the old ids and removes alpacas that left the herd</label></li>
+<li class="task-list-item"><label><input type="checkbox"> A second new pen with the same name (any spelling) throws <code>IllegalStateException</code></label></li>
+<li class="task-list-item"><label><input type="checkbox"> No class outside <code>JdbcPenRepository</code> imports anything from <code>org.springframework.jdbc</code></label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>The test class and the schema:</p>
+<pre><code class="language-java">@JdbcTest
+class JdbcPenRepositoryTest extends PenRepositoryContract {
+
+    @Autowired
+    JdbcClient jdbcClient;
+
+    @Override
+    PenRepository createRepository() {
+        jdbcClient.sql("delete from alpacas").update();
+        jdbcClient.sql("delete from pens").update();
+        return new JdbcPenRepository(jdbcClient);
+    }
+}</code></pre>
+<pre><code class="language-sql">create table if not exists pens (
+    id   bigint generated by default as identity primary key,
+    name varchar(100) not null unique
+);
+
+create table if not exists alpacas (
+    id            bigint generated by default as identity primary key,
+    pen_id        bigint not null references pens (id),
+    name          varchar(100) not null,
+    weight        double precision not null,
+    fleece_length integer not null,
+    fleece_color  varchar(20) not null
+);</code></pre>
+<p>In the contract: <code>private PenRepository repository;</code> and <code>@BeforeEach void createTheRepository() { repository = createRepository(); }</code>.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>Saving, with generated ids:</p>
+<pre><code class="language-java">private void insertPen(Pen pen) {
+    if (findByName(pen.getName()).isPresent()) {
+        throw new IllegalStateException("There is already a pen named " + pen.getName());
+    }
+    KeyHolder keys = new GeneratedKeyHolder();
+    jdbc.sql("insert into pens (name) values (:name)")
+            .param("name", pen.getName())
+            .update(keys, "id");
+    pen.assignId(keys.getKey().longValue());
+}
+
+private void insertAlpaca(Pen pen, Alpaca alpaca) {
+    KeyHolder keys = new GeneratedKeyHolder();
+    jdbc.sql("""
+                    insert into alpacas (pen_id, name, weight, fleece_length, fleece_color)
+                    values (:penId, :name, :weight, :fleeceLength, :fleeceColor)""")
+            .param("penId", pen.getId())
+            .param("name", alpaca.getName())
+            .param("weight", alpaca.getWeight())
+            .param("fleeceLength", alpaca.getFleeceLength())
+            .param("fleeceColor", alpaca.getFleeceColor().name())
+            .update(keys, "id");
+    alpaca.assignId(keys.getKey().longValue());
+}</code></pre>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>The <code>save</code> itself, the update, the delete, and reading:</p>
+<pre><code class="language-java">@Override
+public Pen save(Pen pen) {
+    if (pen.getId() == null) {
+        insertPen(pen);
+    }
+    List&lt;Long&gt; keptIds = new ArrayList&lt;&gt;();
+    for (Alpaca alpaca : pen.getHerd().getAlpacas()) {
+        if (alpaca.getId() == null) {
+            insertAlpaca(pen, alpaca);
+        } else {
+            updateAlpaca(alpaca);
+        }
+        keptIds.add(alpaca.getId());
+    }
+    deleteAlpacasOfPenExcept(pen, keptIds);
+    return pen;
+}
+
+private void deleteAlpacasOfPenExcept(Pen pen, List&lt;Long&gt; keptIds) {
+    if (keptIds.isEmpty()) {
+        jdbc.sql("delete from alpacas where pen_id = :penId")
+                .param("penId", pen.getId())
+                .update();
+    } else {
+        jdbc.sql("delete from alpacas where pen_id = :penId and id not in (:keptIds)")
+                .param("penId", pen.getId())
+                .param("keptIds", keptIds)
+                .update();
+    }
+}
+
+@Override
+public Optional&lt;Pen&gt; findByName(String name) {
+    return jdbc.sql("select id, name from pens where lower(name) = lower(:name)")
+            .param("name", name)
+            .query(this::toPen)
+            .optional();
+}
+
+private Pen toPen(ResultSet row, int rowNumber) throws SQLException {
+    long id = row.getLong("id");
+    Herd herd = new Herd();
+    for (Alpaca alpaca : alpacasOfPen(id)) {
+        herd.addAlpaca(alpaca);
+    }
+    Pen pen = new Pen(row.getString("name"), herd);
+    pen.assignId(id);
+    return pen;
+}</code></pre>
+<p>Still to write by yourself, in the same style: <code>updateAlpaca</code> (<code>update alpacas set name = :name, ... where id = :id</code>), <code>findAll</code> (<code>select id, name from pens order by id</code>) and <code>alpacasOfPen</code> (a select with <code>.query((row, n) -&gt; ...)</code> that builds an <code>Alpaca</code> from the constructor with <code>FleeceColor.valueOf(row.getString("fleece_color"))</code> and calls <code>assignId</code>).</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass (the contract runs for both shelves)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> <code>schema.sql</code> has no H2-only or PostgreSQL-only syntax</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Only <code>JdbcPenRepository</code> knows about SQL</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per green step</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>You wrote <code>JdbcPenRepository</code> without starting the application once. What did the contract test give you that clicking through the API would not?</li>
+<li><code>findByName</code> builds a fresh <code>Pen</code> from the rows every time. Write down what happens if two requests load the same pen, both add an alpaca, and both save. Which alpaca survives? (Think about the <code>delete ... not in</code>.) Would the in-memory shelf behave the same?</li>
+<li><code>findAll</code> runs one select for the pens and one more for <em>each</em> pen. With 3 pens that is 4 selects; with 3000, 3001. Do you have to care today? How would you load everything with one select instead?</li>
+<li>The tests run on H2, the application will run on PostgreSQL. Which of your SQL statements are you sure behave the same on both, and how could you find out for the others?</li>
+<li>The uniqueness check runs in Java <em>and</em> the column is <code>unique</code>. Why both? Which one catches a race between two requests?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 17: The Shelf Becomes a Table and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-16-swapping-the-shelf/index.html">Lesson 16: Swapping the Shelf</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-18-moving-into-the-database/index.html">Lesson 18: Moving Into the Database</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 4.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#barn-briefing">Barn Briefing</a></li>
+        <li><a class="toc-l2" href="#spring-sprout">🌱 Spring Sprout</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

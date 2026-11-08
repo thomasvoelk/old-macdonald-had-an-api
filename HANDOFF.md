@@ -263,3 +263,22 @@ Drafted in `curriculum/phase-3-changing-the-farm/` against `mentor/reference/` (
 - Lesson 17 reference not built: JDBC adapter `JdbcPenRepository` against the same `PenRepositoryContract` (H2 via `@JdbcTest`); needs upsert by id, deleting missing alpacas on save, fresh objects (the "changes only stored on save" gap).
 
 **Next:** incorporate Thomas's feedback on Lessons 15-16 and decide where the Postgres/Podman setup goes; then build the Lesson 17 reference (`JdbcPenRepository` with `JdbcClient`, `schema.sql`, `@JdbcTest` extending `PenRepositoryContract`) and draft Lessons 17-18.
+
+## Status after the Lesson 17-18 reference and drafts (2026-11-08)
+**Feedback on Lessons 15-16:** none was available. The session prompt asked to incorporate it but contained no text; Thomas asked mid-session and was told to paste it. Lessons 15-16 are unchanged. **Open until Thomas sends it.**
+
+**Decision: Postgres/Podman setup** is Step 1 of Lesson 18 (with a Barn Briefing "a database in a container"), not a separate page. Lesson 17 adds the JDBC dependencies but runs tests only (the app cannot start without a datasource until 18); this is stated in Lesson 17 step 1.
+
+**Reference (`mentor/reference/`, git-ignored, 198 tests green with the DB stopped):**
+- Lesson 17: `JdbcPenRepository` (`JdbcClient`, `GeneratedKeyHolder`, insert/update by id, delete missing alpacas, fresh objects on read), `schema.sql`, `JdbcPenRepositoryTest` (`@JdbcTest` extends `PenRepositoryContract`), contract now creates the repository in `@BeforeEach`. Two traps observed and put into the lesson (NPE from field initialiser; inherited tests not rolled back, so tables are emptied in `createRepository()`).
+- Lesson 18: `compose.yml` (postgres:17), `application.properties`, `DatabaseConfig` (JDBC bean + `ApplicationRunner` seed), old `FarmConfig` moved to `src/test` as `InMemoryFarmConfig` (no `@Configuration`), `@AutoConfigureTestDatabase` on the two `@SpringBootTest` classes. Real run on Postgres with restart persistence verified (details in findings section 14).
+
+**Lessons drafted:** `curriculum/phase-4-the-barn-gets-a-database/lesson-17-the-shelf-becomes-a-table/` and `lesson-18-moving-into-the-database/`; index rows 17, 18 added (Draft); Lesson 16's next link points to 17; Lesson 18's next is a placeholder for 19. Links checked (HTTP 200); tags balance; not viewed in a browser or at phone width.
+
+**Open**
+- Does `podman compose up` work on the learner's Windows machine? Here it needed `DOCKER_CONFIG=<empty dir>` because of a missing `docker-credential-desktop`. Lesson 18 step 1 tells her to report if it fails. Not tested: the Lesson 18 claim that a stopped container makes `@SpringBootTest` fail was observed; `down` without `-v` keeping data was not run.
+- Lesson 18's step 4 is long (move + rename + remove annotation + 4 imports); check with Thomas if it should be split.
+- Lesson 17 `findAll` is N+1 (named in Reflect); the reference keeps it.
+- Ilona/Hasi names still in public text. Lessons 15-18 not reviewed by Thomas.
+
+**Next:** incorporate Thomas's feedback on Lessons 15-18 (ask for it if not given), then start Phase 5: Lesson 19 (Swagger UI / OpenAPI with springdoc 3.2.0) reference first, then draft Lessons 19-21.

@@ -61,14 +61,14 @@ Her existing domain (package `alpacas`: `Alpaca`, `Herd`, `Pen`, `Farm`, `Shephe
 | 1 – Hello Spring | 01–04 | Spring Boot setup (pom to Boot 4.1.x, Java 25), Farm as a bean (DI), first `GET /farm` that leaks the domain, then response records and separation of concerns |
 | 2 – Reading the Farm | 05–08 | GET pens/alpacas/ready-to-shear, DTO records, `Optional` to 404, `@RestControllerAdvice` |
 | 3 – Changing the Farm | 09–14 | POST/PUT/DELETE (09–12), validation, exceptions to 400/409, London-vs-Chicago explanation + Side Quest (13, no code), London shear lesson (14). Architecture test dropped. |
-| 4 – The Barn Gets a Database | 15–18 | ids, repository interface (domain-owned), in-memory then `JdbcClient` implementation, run against Postgres |
+| 4 – The Barn Gets a Database | 15–18 | ids + repository interface (15), controllers use it (16), `JdbcPenRepository` on H2 via the contract (17), Postgres in Podman, restart test (18) |
 | 5 – Wrap-up | 19–21 | Swagger UI / OpenAPI (springdoc), farm-API grand review, one-paragraph bridge to the Angular curriculum |
 
 ## Persistence
 
 - `JdbcClient` with plain SQL, not JPA (JPA in one sentence at most). Interface owned by the domain; in-memory implementation first, then JDBC.
 - Her own small schema (`farm`, `pens`, `alpacas`) in a plain `schema.sql` run by Spring at startup. No Flyway.
-- App runs on **Postgres in Podman** (short `compose.yml`; setup page at the start of Phase 4, i.e. Lesson 15). Needs `spring.sql.init.mode=always` for Postgres and an idempotent `schema.sql` (`create table if not exists`).
+- App runs on **Postgres in Podman** (short `compose.yml`; decided 2026-11-08: no separate setup page, it is Step 1 of Lesson 18, where the app first connects. Lesson 17 only needs embedded H2 and tells the learner not to start the app until Lesson 18). Needs `spring.sql.init.mode=always` for Postgres and an idempotent `schema.sql` (`create table if not exists`).
 - Tests use **embedded H2** via `@JdbcTest`, silently: no lesson on H2-vs-Postgres differences, no Testcontainers (one sentence "teams do this later" at most). By default `@JdbcTest` swaps in its own H2 and ignores `MODE=PostgreSQL`; write portable SQL. Mentor-only notes (belong in `mentor/`): the `Replace.NONE` + `MODE=PostgreSQL` combination and H2's PostgreSQL-mode quirks (see research section 7).
 - Optional low-priority bonus: connect read-only to the SQL curriculum's `farm` DB (`sql-curriculum/db/schema.sql`) to show a different mapping of the same world.
 
