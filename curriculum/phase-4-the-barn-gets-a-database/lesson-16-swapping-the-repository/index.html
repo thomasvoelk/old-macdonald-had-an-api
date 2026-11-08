@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 16: Swapping the Shelf · Old MacDonald Had an API</title>
+  <title>Lesson 16: Swapping the Repository · Old MacDonald Had an API</title>
   <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../colors_and_type.css">
   <link rel="stylesheet" href="../../style.css">
@@ -14,15 +14,15 @@
     <main class="content">
       <div class="topbar">
         <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
-        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 16 16 swapping the shelf</span>
+        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 16 swapping the repository</span>
         <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
       </div>
       <article class="markdown">
-<h1 id="lesson-16-swapping-the-shelf">Lesson 16: Swapping the Shelf</h1>
+<h1 id="lesson-16-swapping-the-repository">Lesson 16: Swapping the Repository</h1>
 
 <h2 id="story">Story</h2>
-<p>Ilona is happy about the numbers from Lesson 15, but so far she cannot see them. "My list screen needs the id of every pen and every alpaca in the JSON. Then I stop using names as keys."</p>
-<p>Hasi looks at your controllers. "You built a nice shelf last time, and nobody uses it. <code>PenController</code> still asks Spring for a <code>Farm</code>, and a <code>Farm</code> has no ids and cannot be stored in a database. Swap the shelf. And keep an eye on your tests: they are what tells you that you did not break anything."</p>
+<p>Ilona is happy about the ids from Lesson 15, but so far she cannot see them. "My list screen needs the id of every pen and every alpaca in the JSON. Then I stop using names as keys."</p>
+<p>Hasi looks at your controllers. "You built a nice repository last time, and nobody uses it. <code>PenController</code> still asks Spring for a <code>Farm</code>, and a <code>Farm</code> has no ids and cannot be stored in a database. Swap the repository. And keep an eye on your tests: they are what tells you that you did not break anything."</p>
 <p>Today you move the web layer from <code>Farm</code> to <code>PenRepository</code>, and the JSON gets ids. When you finish, the API behaves exactly as before, plus the <code>id</code> fields. That is the point: the existing tests are your safety net, and the red tests along the way are your to-do list.</p>
 
 <div class="spring-corner">
@@ -33,7 +33,7 @@
 <h2 id="your-task">Your Task</h2>
 <p>Replace the <code>Farm</code> bean by a <code>PenRepository</code> bean everywhere in <code>alpacas.web</code>.</p>
 <ul>
-<li>The JSON of pens (<code>GET /pens</code>, and the response of <code>POST /pens</code>) and of alpacas (every endpoint that returns an alpaca) has a new member <code>id</code>, a number, listed first.</li>
+<li>The JSON of pens (<code>GET /pens</code>, and the response of <code>POST /pens</code>) and of alpacas (every endpoint that returns an alpaca) has a new member <code>id</code>, listed first.</li>
 <li>All existing behaviour stays: the same status codes, the same error messages, the same <code>Location</code> headers. <code>PUT</code> keeps the alpaca's id.</li>
 <li>The configuration creates the repository and stores the two start pens in it (Ring with Lita and Batista, and an empty Cell).</li>
 <li>No class in <code>alpacas.web</code> uses <code>Farm</code> any more.</li>
@@ -49,7 +49,7 @@
 
 <h2 id="getting-started">Getting Started</h2>
 <ol>
-<li><strong>Make the ids visible (red).</strong> In <code>PenControllerTest</code> write a test that calls <code>GET /pens</code>, <code>GET /pens/Ring/alpacas</code> and <code>GET /pens/Ring/alpacas/Lita</code> and checks that <code>$[0].id</code> (for the single alpaca: <code>$.id</code>) is not null (<code>.extractingPath("$[0].id").isNotNull()</code>). Do not check for a particular number yet. Add <code>Long id</code> as the <em>first</em> component of <code>AlpacaResponse</code> and of <code>PenSummaryResponse</code> and fix what the compiler complains about (<code>from(...)</code> in <code>AlpacaResponse</code>; give <code>PenSummaryResponse</code> a <code>static from(Pen pen)</code> too, because you build it in two places). The test still fails: the member is there, but its value is <code>null</code>, because the <code>Farm</code> never gave anybody an id. (Jackson writes <code>null</code> as <code>null</code>, as you saw in Lesson 05.) Only the repository hands out ids.</li>
+<li><strong>Make the ids visible (red).</strong> In <code>PenControllerTest</code> write a test that calls <code>GET /pens</code>, <code>GET /pens/Ring/alpacas</code> and <code>GET /pens/Ring/alpacas/Lita</code> and checks that <code>$[0].id</code> (for the single alpaca: <code>$.id</code>) is not null (<code>.extractingPath("$[0].id").isNotNull()</code>). Do not check for a particular id value yet. Add <code>Long id</code> as the <em>first</em> component of <code>AlpacaResponse</code> and of <code>PenSummaryResponse</code> and fix what the compiler complains about (<code>from(...)</code> in <code>AlpacaResponse</code>; give <code>PenSummaryResponse</code> a <code>static from(Pen pen)</code> too, because you build it in two places). The test still fails: the member is there, but its value is <code>null</code>, because the <code>Farm</code> never gave anybody an id. (Jackson writes <code>null</code> as <code>null</code>, as you saw in Lesson 05.) Only the repository hands out ids.</li>
 <li><strong>The bean you want (red).</strong> Open <code>FarmConfigTest</code>. It injects a <code>Farm</code>. Change it to inject a <code>PenRepository pens</code> and rewrite the two tests: the repository exists, and <code>pens.findAll()</code> contains Ring and Cell in that order (<code>assertThat(pens.findAll()).extracting(pen -&gt; pen.getName()).containsExactly("Ring", "Cell")</code>). Run it. The application context does not start: <code>No qualifying bean of type 'alpacas.PenRepository' available</code>. That is the Sprout from above: nothing is registered under that type.</li>
 <li><strong>Register the repository (and watch the avalanche).</strong> In <code>FarmConfig</code> replace the method that builds the <code>Farm</code> by a <code>@Bean PenRepository penRepository()</code> that creates an <code>InMemoryPenRepository</code> and calls <code>save</code> for Ring (with its two alpacas) and Cell. Return the repository. Delete the <code>Farm</code> bean. Now the opposite problem: nearly every web test is red, <code>FarmConfigTest</code> included (it starts the whole application): <code>No qualifying bean of type 'alpacas.Farm' available</code>, because your controllers and the shearing service still ask for the <code>Farm</code>. Run the whole suite and look at the list. Now you know the size of the change before you start it. Work through the list class by class; keep running the tests.</li>
 <li><strong>FarmController.</strong> Change the constructor to ask for <code>PenRepository</code>. The pens are <code>pens.findAll()</code>, the number of alpacas is the sum of <code>Pen::totalAlpacas</code> over them (<code>mapToInt(...).sum()</code>). The farm's <em>name</em> has no home any more, since the <code>Farm</code> object carried it. For now put it in a <code>private static final String FARM_NAME</code> in the controller and think about it in Reflect. <code>FarmControllerTest</code> is green again (<code>FarmConfigTest</code> stays red until the last controller is done).</li>
@@ -60,10 +60,10 @@
 <li><code>POST /pens</code>: <code>Pen pen = pens.save(new Pen(request.name(), new Herd()))</code>. The 409 for a duplicate name now comes out of the repository (the same <code>IllegalStateException</code> and the same handler as before); the response uses <code>PenSummaryResponse.from(pen)</code>, with the id.</li>
 <li><code>POST .../alpacas</code>: add the alpaca to the herd as before, then <code>pens.save(pen)</code>. That is the moment the new alpaca gets its id.</li>
 <li><code>DELETE</code>: after a successful <code>removeByName</code>, <code>pens.save(pen)</code>.</li>
-<li><code>PUT</code>: <em>test first</em>. In <code>PenChangesTest</code>, in a pen of your own, create Triple H, read his <code>id</code> from the response, <code>PUT</code> new values and check that the answer has the <strong>same</strong> id. (Never assert a number like <code>5</code>: which numbers are taken depends on the tests that ran before in the same shared context, the same sharing you met in Lesson 09. Compare ids with each other.) The test is red: the replacement is a brand new <code>Alpaca</code> without id. Make it green: find the existing alpaca first (<code>findByName(...)</code>, 404 if it is missing, as in Lesson 12), build the replacement, give it the old id with <code>assignId</code>, swap it in with <code>herd.replace(...)</code> and <code>pens.save(pen)</code>.</li>
+<li><code>PUT</code>: <em>test first</em>. In <code>PenChangesTest</code>, in a pen of your own, create Triple H, read his <code>id</code> from the response, <code>PUT</code> new values and check that the answer has the <strong>same</strong> id. (Never assert an id like <code>5</code>: which ids are taken depends on the tests that ran before in the same shared context, the same sharing you met in Lesson 09. Compare ids with each other.) The test is red: the replacement is a brand new <code>Alpaca</code> without id. Make it green: find the existing alpaca first (<code>findByName(...)</code>, 404 if it is missing, as in Lesson 12), build the replacement, give it the old id with <code>assignId</code>, swap it in with <code>herd.replace(...)</code> and <code>pens.save(pen)</code>.</li>
 </ul></li>
 <li><strong>ShearingService.</strong> <code>ShearingServiceTest</code> builds a <code>Farm</code> and passes it to the service. Change the test first: create an <code>InMemoryPenRepository</code>, <code>save</code> the Ring pen into it, pass that to <code>new ShearingService(...)</code>. Red (the constructor takes a <code>Farm</code>). Change the service: ask for the repository, <code>pens.getByName(penName)</code>, and call <code>pens.save(pen)</code> after the shepherd has sheared. In <code>ShearingWithRealServiceTest</code> the injected <code>Farm</code> becomes an injected <code>PenRepository</code>, and <code>farm.addPen(...)</code> becomes <code>pens.save(...)</code>. Notice that the service test needed no mock: the in-memory repository is a real, fast implementation, and that is one more reason to have one.</li>
-<li><strong>Last checks.</strong> Search the project for <code>Farm</code>: nothing in <code>alpacas.web</code> uses it. The class itself and its <code>FarmTest</code> are still in <code>alpacas</code> and still green; decide in Reflect what to do with them. Run all tests. Then start the app and look at the ids with your <code>docs/requests.http</code>: <code>GET /pens</code> starts with <code>{"id":1,"name":"Ring",...</code>, <code>GET /pens/Ring/alpacas</code> shows Lita as 2 and Batista as 3, Cell is 4 (the pens and alpacas share one counter, so the numbers are not "1, 2, 3 per kind"). Post a new pen and see what it gets. Restart the app and look again.</li>
+<li><strong>Last checks.</strong> Search the project for <code>Farm</code>: nothing in <code>alpacas.web</code> uses it. The class itself and its <code>FarmTest</code> are still in <code>alpacas</code> and still green; decide in Reflect what to do with them. Run all tests. Then start the app and look at the ids with your <code>docs/requests.http</code>: <code>GET /pens</code> starts with <code>{"id":1,"name":"Ring",...</code>, <code>GET /pens/Ring/alpacas</code> shows Lita as 2 and Batista as 3, Cell is 4 (the pens and alpacas share one counter, so the ids are not "1, 2, 3 per kind"). Post a new pen and see what it gets. Restart the app and look again.</li>
 </ol>
 
 <h2 id="your-test-list">📋 Your Test List</h2>
@@ -151,17 +151,17 @@ return AlpacaResponse.from(replacement);</code></pre>
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
 <p>Open GitHub Copilot Chat and start with this message:</p>
 <blockquote>
-<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 16: Swapping the Shelf and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 16: Swapping the Repository and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
 </blockquote>
       </article>
       <nav class="lesson-nav" aria-label="Lesson navigation">
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Previous lesson</span>
-          <a class="lesson-nav__link" href="../lesson-15-everyone-gets-a-number/index.html">Lesson 15: Everyone Gets a Number</a>
+          <a class="lesson-nav__link" href="../lesson-15-identity-and-the-repository/index.html">Lesson 15: Identity and the Repository</a>
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>
-          <a class="lesson-nav__link" href="../lesson-17-the-shelf-becomes-a-table/index.html">Lesson 17: The Shelf Becomes a Table</a>
+          <a class="lesson-nav__link" href="../lesson-17-the-repository-becomes-a-table/index.html">Lesson 17: The Repository Becomes a Table</a>
         </div>
       </nav>
       <p class="footer-note">Old MacDonald Had an API curriculum — Phase 4.</p>

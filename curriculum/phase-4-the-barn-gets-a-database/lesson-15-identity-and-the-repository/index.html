@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 15: Everyone Gets a Number · Old MacDonald Had an API</title>
+  <title>Lesson 15: Identity and the Repository · Old MacDonald Had an API</title>
   <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../colors_and_type.css">
   <link rel="stylesheet" href="../../style.css">
@@ -14,33 +14,34 @@
     <main class="content">
       <div class="topbar">
         <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
-        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 15 15 everyone gets a number</span>
+        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 15 identity and the repository</span>
         <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
       </div>
       <article class="markdown">
-<h1 id="lesson-15-everyone-gets-a-number">Lesson 15: Everyone Gets a Number</h1>
+<h1 id="lesson-15-identity-and-the-repository">Lesson 15: Identity and the Repository</h1>
 
 <h2 id="story">Story</h2>
-<p>Ilona is stuck on her list screen. "I show the alpacas of a pen as a list, and I need something that tells one row from another. I use the name, but names are not safe. Delete 'Triple H', add another 'Triple H' tomorrow, and my screen thinks it is the same alpaca. And when Fiona fixes a typo in a name, the address <code>/pens/Cell/alpacas/Triple%20H</code> stops working. Can every alpaca and every pen just get a number?"</p>
-<p>Hasi has a second reason. "Soon the farm will live in a database. You know from the SQL course that every row has a primary key. Your objects need that number too. And all the code that loads and stores things must not be mixed into <code>Farm</code> and <code>Herd</code>, or you will rewrite your rules the day you change where the data lives."</p>
+<p>Ilona is stuck on her list screen. "I show the alpacas of a pen as a list, and I need something that tells one row from another. I use the name, but names are not safe. Delete 'Triple H', add another 'Triple H' tomorrow, and my screen thinks it is the same alpaca. And when Fiona fixes a typo in a name, the address <code>/pens/Cell/alpacas/Triple%20H</code> stops working. Can every alpaca and every pen just get an id?"</p>
+<p>Hasi has a second reason. "Soon the farm will live in a database. You know from the SQL course that every row has a primary key. Your objects need an id too. And <code>Farm</code> and <code>Herd</code> hold your rules, such as 30 alpacas per herd. Do not put the code that saves and loads pens into them. If you do, moving the data from a list to a database means editing the very classes that hold your rules, and you may break them by accident. Give saving and loading its own place."</p>
 <p>This lesson changes only the domain. There is no Spring in it and the app does not start any differently. Lesson 16 plugs the result into your controllers.</p>
 
 <div class="concept-corner">
 <h2 id="identity">🚜 Barn Briefing: a name is not an identity</h2>
-<p>A name is something an alpaca <em>has</em>; it can be misspelled, changed, or given to the next alpaca. An <em>id</em> is what the alpaca <em>is</em>: a number given once, never changed, never given to anybody else. Two alpacas called Lita are two alpacas with two ids.</p>
-<p>Who hands out the number? Not the alpaca itself, and not the person who creates it: when you write <code>new Alpaca("Lita", ...)</code> you cannot know which numbers are taken. The number is given when the alpaca is <em>stored</em>, by whatever does the storing (later: the database). So a new alpaca has <strong>no id yet</strong>. In Java that is <code>null</code>, which is why the field is a <code>Long</code> (the boxed type, like <code>Double</code> in Lesson 11) and not a <code>long</code>, where "nothing" would look like <code>0</code>.</p>
+<p>A name does not tell alpacas apart. Names are unique only inside a pen, so Ring and Cell can each have a "Lita". And names change: Fiona fixes a typo, and everything that pointed at the old name (the address <code>/pens/Cell/alpacas/Triple%20H</code>, a row on Ilona's screen, later the database) points at nothing.</p>
+<p>What the program needs is a way to point at exactly one alpaca, and to keep pointing at the same one while its details change. That is <em>identity</em>. In real life Fiona recognizes an alpaca by looking at it: the one she sheared today is the one she weighed last month, although weight, fleece and maybe the name have changed. A program cannot look, so it carries identity in an <em>id</em>, a number that no person edits (the primary key from the SQL course). A number is not better than a name in itself. It is better at <strong>staying put</strong>, and only because we enforce rules: it is given once, never changed, never reused (your <code>assignId</code> will guard that).</p>
+<p>Who hands out the id? Either the object makes it up when it is created (a <code>UUID</code>, a long random value that is practically never repeated), or whatever does the <em>storing</em> hands it out, as a database counter does. This course takes the second way, to match the SQL course. The price: a new alpaca has <strong>no id yet</strong>, because <code>new Alpaca("Lita", ...)</code> cannot know which ids are taken. In Java that is <code>null</code>, so the field is a <code>Long</code> (boxed, like <code>Double</code> in Lesson 11) and not a <code>long</code>, where "nothing" would look like <code>0</code>.</p>
 </div>
 
 <div class="concept-corner">
-<h2 id="repository">🚜 Barn Briefing: a shelf the domain owns</h2>
-<p>Somewhere your pens must be put away and taken out again. Today that place is the <code>Farm</code> object with its list. In Lesson 17 it will be a database. Your rules (a herd holds 30 alpacas, a name is unique) should not care which.</p>
-<p>The usual answer is a <em>repository</em>: an <code>interface</code> that lists what the domain needs from "the shelf" (<em>save this pen</em>, <em>find the pen with this name</em>, <em>give me all pens</em>) and says nothing about how. It lives next to your domain classes, in the package <code>alpacas</code>, because the domain decides what it needs; the implementations come later. Today you write the first one, which keeps pens in a list in memory. Everything that uses the shelf talks to the interface, so swapping the implementation does not touch the user.</p>
-<p>One decision is made for you: there is a <code>PenRepository</code> and <strong>no</strong> <code>AlpacaRepository</code>. An alpaca lives in a pen, so you reach alpacas through their pen, and saving a pen saves its alpacas with it. (The name for "a pen and what belongs to it, stored as one unit" is an <em>aggregate</em>. You do not need the word, but you will meet it. See <a href="https://www.martinfowler.com/bliki/DDD_Aggregate.html">Martin Fowler on aggregates</a> and on the <a href="https://martinfowler.com/eaaCatalog/repository.html">repository pattern</a>.)</p>
-<p>How do you know that a second implementation behaves like the first? You write the tests <em>once</em>, against the interface, in an <code>abstract</code> test class. JUnit does not run an abstract class by itself. A small subclass says only <em>which repository</em> to test, and inherits all the tests. In Lesson 17 the database version gets its own tiny subclass and has to pass the very same tests. This is called a <em>contract test</em>.</p>
+<h2 id="repository">🚜 Barn Briefing: a repository the domain owns</h2>
+<p><code>Farm</code> does two jobs today: it enforces a rule (a pen name is unique) and it keeps the pens in a list. In Lesson 17 the second job becomes SQL. If that code sat inside <code>Farm</code>, your rule tests would need a database. So saving and loading pens moves into a class of its own, called a <em>repository</em>.</p>
+<p>You write it first as an <code>interface</code> that says <em>what</em> the domain needs (<em>save this pen</em>, <em>find the pen with this name</em>, <em>give me all pens</em>) and nothing about how. It lives in the package <code>alpacas</code>, because the domain decides what it needs. Today's implementation keeps pens in a list in memory; the code that uses the repository talks only to the interface, so a database version can replace it later.</p>
+<p>There is a <code>PenRepository</code> and <strong>no</strong> <code>AlpacaRepository</code>: an alpaca lives in a pen, so you reach it through its pen, and saving a pen saves its alpacas. (The name for this is an <em>aggregate</em>; see <a href="https://www.martinfowler.com/bliki/DDD_Aggregate.html">Martin Fowler on aggregates</a> and on the <a href="https://martinfowler.com/eaaCatalog/repository.html">repository pattern</a>.)</p>
+<p>How do you know that a second implementation behaves like the first? Write the tests <em>once</em>, against the interface, in an <code>abstract</code> test class. A small subclass only says <em>which repository</em> to test and inherits all the tests. In Lesson 17 the database version gets its own tiny subclass and must pass the very same tests. This is a <em>contract test</em>.</p>
 </div>
 
 <h2 id="your-task">Your Task</h2>
-<p>Add identities and a shelf to the domain, test-first, all in the package <code>alpacas</code>.</p>
+<p>Add identities and a repository to the domain, test-first, all in the package <code>alpacas</code>.</p>
 <ul>
 <li><code>Alpaca</code> and <code>Pen</code> get <code>Long getId()</code> (<code>null</code> until stored) and <code>void assignId(long id)</code>. An id can be assigned <strong>once</strong>; a second <code>assignId</code> throws <code>IllegalStateException</code>. Existing constructors stay as they are.</li>
 <li>An interface <code>PenRepository</code> with <code>Pen save(Pen pen)</code>, <code>Optional&lt;Pen&gt; findByName(String name)</code> and <code>List&lt;Pen&gt; findAll()</code>.</li>
@@ -59,7 +60,7 @@
 <h2 id="getting-started">Getting Started</h2>
 <ol>
 <li><strong>Identity, red first.</strong> Create <code>IdentityTest</code>. Write one test: a new <code>Alpaca</code> has no id (<code>assertNull(alpaca.getId())</code>). It does not compile: <code>cannot find symbol</code>. Let the IDE create <code>getId()</code>, then make it pass. Then, one test and one commit each: <code>assignId(7)</code> makes <code>getId()</code> return <code>7</code>; a second <code>assignId</code> throws <code>IllegalStateException</code>. Repeat all three for <code>Pen</code>. Why "once"? An id that can change is not an identity, and a bug that gives the same alpaca two numbers is better stopped with an exception than found three weeks later in a database. (The parameter is a plain <code>long</code> on purpose: you cannot assign "nothing".)</li>
-<li><strong>Write your test list for the shelf.</strong> Do not touch the interface yet. On paper, list what you expect from a repository. Questions to start from: what does <code>save</code> do to a pen that has no id, and to the alpacas inside it? Do two pens get the same id? Is a saved pen found by <code>findByName("rInG")</code>? What does an unknown name give back? In which order does <code>findAll</code> return the pens? What happens when you save the same pen again after adding an alpaca? After removing one? What if a second <em>new</em> pen has a name that is taken (ignoring case)? Then compare with the list in the details below.</li>
+<li><strong>Write your test list for the repository.</strong> Do not touch the interface yet. On paper, list what you expect from a repository. Questions to start from: what does <code>save</code> do to a pen that has no id, and to the alpacas inside it? Do two pens get the same id? Is a saved pen found by <code>findByName("rInG")</code>? What does an unknown name give back? In which order does <code>findAll</code> return the pens? What happens when you save the same pen again after adding an alpaca? After removing one? What if a second <em>new</em> pen has a name that is taken (ignoring case)? Then compare with the list in the details below.</li>
 <li><strong>The contract class.</strong> Create <code>abstract class PenRepositoryContract</code> in <code>src/test/java/alpacas</code> with an abstract method <code>abstract PenRepository createRepository();</code> and a field <code>private final PenRepository repository = createRepository();</code>. (A field, not a method call inside each test: every test gets one fresh repository, and the test body can use <code>repository</code> directly. If you create a new repository on every call instead, your tests save into one repository and look into another.) Add a helper that builds a pen with one alpaca. Write the first test, "saving gives the pen and its alpacas ids". It does not compile because <code>PenRepository</code> and <code>save</code> do not exist.</li>
 <li><strong>The subclass.</strong> Create <code>InMemoryPenRepositoryTest extends PenRepositoryContract</code> and implement <code>createRepository()</code> to return <code>new InMemoryPenRepository()</code>. Again red because the class does not exist. Let the IDE create the interface <code>PenRepository</code> (its methods will appear as you need them) and the class, and make the first test pass in the simplest way. Then add the other tests from your list <strong>to the contract class, one at a time</strong>, each red then green. The subclass never changes again.</li>
 <li><strong>Look: what comes back?</strong> Before you move on, predict. You save a pen with <code>save</code>, then add an alpaca to its herd <em>without</em> calling <code>save</code> again, then call <code>findByName</code>. Is the new alpaca there? Write a throw-away test and see. Now think about a database: it keeps rows, not your Java objects. Will the new alpaca be there then? Note both answers in <code>docs/api-notes.md</code>. We come back to this in Lesson 17.</li>
@@ -124,6 +125,7 @@
 <li>Why is the interface in the domain package and not next to the SQL code that comes later? Who is allowed to know about whom?</li>
 <li>Your in-memory repository now checks that a new pen's name is free, and <code>Farm.addPen</code> still does the same check. Two places for one rule. Which one will survive when the farm lives in a database, and what happens to the other?</li>
 <li>Anybody can call <code>assignId</code> on an alpaca, not only the repository. Is that a problem? How could you make it harder (think about the packages), and what would it cost?</li>
+<li>Suppose the alpaca created a <code>UUID</code> for itself in its constructor. What would you no longer need (think of <code>null</code> and <code>assignId</code>)? What would you lose, compared with ids from a counter?</li>
 <li>The ids 1, 2, 3 restart from 1 each time the app starts. What does that mean for a client that remembered "alpaca 3" yesterday?</li>
 <li>With no <code>AlpacaRepository</code>, how would you load a single alpaca by its id? Is that a good reason to add one, or a sign that the URL should carry the pen as well?</li>
 </ul>
@@ -131,7 +133,7 @@
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
 <p>Open GitHub Copilot Chat and start with this message:</p>
 <blockquote>
-<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 15: Everyone Gets a Number and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 15: Identity and the Repository and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
 </blockquote>
       </article>
       <nav class="lesson-nav" aria-label="Lesson navigation">
@@ -141,7 +143,7 @@
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>
-          <a class="lesson-nav__link" href="../lesson-16-swapping-the-shelf/index.html">Lesson 16: Swapping the Shelf</a>
+          <a class="lesson-nav__link" href="../lesson-16-swapping-the-repository/index.html">Lesson 16: Swapping the Repository</a>
         </div>
       </nav>
       <p class="footer-note">Old MacDonald Had an API curriculum — Phase 4.</p>
@@ -151,7 +153,7 @@
       <ol class="toc-list">
         <li><a class="toc-l2" href="#story">Story</a></li>
         <li><a class="toc-l2" href="#identity">🚜 A name is not an identity</a></li>
-        <li><a class="toc-l2" href="#repository">🚜 A shelf the domain owns</a></li>
+        <li><a class="toc-l2" href="#repository">🚜 A repository the domain owns</a></li>
         <li><a class="toc-l2" href="#your-task">Your Task</a></li>
         <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
         <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>

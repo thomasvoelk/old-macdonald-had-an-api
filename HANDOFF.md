@@ -282,3 +282,24 @@ Drafted in `curriculum/phase-3-changing-the-farm/` against `mentor/reference/` (
 - Ilona/Hasi names still in public text. Lessons 15-18 not reviewed by Thomas.
 
 **Next:** incorporate Thomas's feedback on Lessons 15-18 (ask for it if not given), then start Phase 5: Lesson 19 (Swagger UI / OpenAPI with springdoc 3.2.0) reference first, then draft Lessons 19-21.
+
+## Status after Thomas's review of Lessons 15-18 (2026-11-08)
+Review feedback incorporated; **Phase 5 was NOT started** (the session was used up by the review).
+
+**Renamed (folders, titles, links, index, Copilot prompts):** 15 *Identity and the Repository* (was "Everyone Gets a Number"), 16 *Swapping the Repository*, 17 *The Repository Becomes a Table*. The "shelf" metaphor is gone from the whole curriculum; the real term "repository" is used (Thomas: a metaphor she must translate gives her nothing to look up). Earlier HANDOFF sections still use the old names (history).
+
+**Lesson 15**
+- Briefing "a name is not an identity" rewritten and compressed (3 paragraphs): a name does not tell alpacas apart (unique only inside a pen, changes); identity = pointing at exactly one alpaca and keeping pointing at it while details change; the id carries it, is better only at staying put, and only because of enforced rules (`assignId` once). Who hands out the id is presented as a **choice** (UUID in the constructor vs. storage counter); the course takes the counter, price = `null` until stored. New Reflect question on `UUID`.
+- Briefing "a repository the domain owns" compressed (4 short paragraphs): `Farm` does two jobs (rule + keeping the list), SQL inside it would make rule tests need a database; so storage moves into a repository; no `AlpacaRepository`; contract test.
+- Story: Hasi's line now says "Your objects need an id too" and explains why `Farm`/`Herd` should not contain save/load code. "number" became "id" where the identifier is meant (also Lessons 16, 17).
+
+**Lesson 17:** briefing "objects and rows" now has two paragraphs: objects vs. rows incl. "copies, not the objects you saved; a change is only stored when you call `save` again", and a closing paragraph naming **object-relational mapping (ORM)**, JPA/Hibernate in one sentence; the Spring Sprout's "not an ORM" points back to it.
+
+**Decisions / discussed, not changed**
+- `Long` stays the id type. A value-object `Id` (or `AlpacaId`/`PenId`) was discussed and judged **not worth the change** (reference, 4 lessons, mappings); it could be an optional exercise after Lesson 18. Only the UUID Reflect question was added.
+
+**Open**
+- Lesson 17 says JPA/Hibernate "you will meet at work"; the company project's use of JPA is unknown (change to "in many projects" if it does not use it).
+- Not viewed in a browser, not checked on phone width. Lesson 18 not re-read in this review (only the "shelf" wording was replaced). Ilona/Hasi names still in public text.
+
+**Next:** start Phase 5: build the Lesson 19 reference (Swagger UI / OpenAPI with springdoc 3.2.0) in `mentor/reference/`, then draft Lessons 19-21.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 17: The Shelf Becomes a Table · Old MacDonald Had an API</title>
+  <title>Lesson 17: The Repository Becomes a Table · Old MacDonald Had an API</title>
   <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../colors_and_type.css">
   <link rel="stylesheet" href="../../style.css">
@@ -14,26 +14,26 @@
     <main class="content">
       <div class="topbar">
         <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
-        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 17 17 the shelf becomes a table</span>
+        <span class="breadcrumbs">phase 4 the barn gets a database / lesson 17 the repository becomes a table</span>
         <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
       </div>
       <article class="markdown">
-<h1 id="lesson-17-the-shelf-becomes-a-table">Lesson 17: The Shelf Becomes a Table</h1>
+<h1 id="lesson-17-the-repository-becomes-a-table">Lesson 17: The Repository Becomes a Table</h1>
 
 <h2 id="story">Story</h2>
 <p>Fiona restarted the server yesterday, to install an update. "My new alpaca Triple H is gone," she says. "And Lita's fleece is long again. Does your program forget everything when it sleeps?"</p>
-<p>It does. The shelf from Lesson 15 is a list inside the running program, and a list in memory disappears with the program. Hasi smiles. "You made the shelf an interface for exactly this day. Write a second shelf that keeps its alpacas in tables, like you did in the SQL course. The interface stays, the contract test stays, and the controllers never find out."</p>
-<p>Today you write that second shelf, <code>JdbcPenRepository</code>, and you prove it with the <em>same</em> contract test that already proves the in-memory one. The running application does not use it yet. That is Lesson 18.</p>
+<p>It does. The repository from Lesson 15 is a list inside the running program, and a list in memory disappears with the program. Hasi smiles. "You made the repository an interface for exactly this day. Write a second repository that keeps its alpacas in tables, like you did in the SQL course. The interface stays, the contract test stays, and the controllers never find out."</p>
+<p>Today you write that second repository, <code>JdbcPenRepository</code>, and you prove it with the <em>same</em> contract test that already proves the in-memory one. The running application does not use it yet. That is Lesson 18.</p>
 
 <div class="concept-corner">
 <h2 id="barn-briefing">Barn Briefing: objects and rows</h2>
-<p>A <code>Pen</code> in memory is an object that holds a <code>Herd</code> that holds <code>Alpaca</code> objects. A database knows none of that. It knows <em>rows</em> in <em>tables</em>: a row in <code>pens</code>, rows in <code>alpacas</code>, and each alpaca row carries the number of its pen (<code>pen_id</code>, a foreign key). Saving means turning the objects into rows. Reading means turning rows back into <em>new</em> objects.</p>
-<p>That last word matters. Lesson 15 ended with a question: if you change an alpaca after saving it and do not save again, the in-memory shelf shows the change anyway, because it holds your very object. A database holds a <em>copy</em>. What you get back from <code>findByName</code> is a fresh <code>Pen</code> that has never met the one you saved. Your id is what connects the two: a row with this id is "the same alpaca". This is why Lesson 16 made a rule of "every change ends with <code>save</code>", and why <code>save</code> has to tell new from old: an alpaca <em>without</em> an id is inserted, an alpaca <em>with</em> an id is updated.</p>
+<p>A <code>Pen</code> in memory is an object that holds a <code>Herd</code> that holds <code>Alpaca</code> objects. A database knows none of that. It knows <em>rows</em> in <em>tables</em>: a row in <code>pens</code>, rows in <code>alpacas</code>, and each alpaca row carries the id of its pen (<code>pen_id</code>, a foreign key). Saving means turning the objects into rows. Reading means turning rows back into <em>new</em> objects: copies, not the objects you saved. A change to such a copy is only stored when you call <code>save</code> again.</p>
+<p>The general name for turning objects into rows and rows back into objects is <em>object-relational mapping</em> (ORM). In this lesson you do it by hand, with SQL you write yourself. Tools such as JPA and Hibernate do it for you; you will meet them at work, but not in this course.</p>
 </div>
 
 <div class="spring-corner">
 <h2 id="spring-sprout">🌱 Spring Sprout: JdbcClient and @JdbcTest</h2>
-<p><code>JdbcClient</code> is Spring's small helper for plain SQL over JDBC. You hand it a SQL text with named parameters (<code>:name</code>), you fill them with <code>.param("name", value)</code>, and you end with <code>.update()</code> for <code>insert</code>/<code>update</code>/<code>delete</code>, or with <code>.query(...)</code> for <code>select</code>. Spring Boot creates one <code>JdbcClient</code> bean for you as soon as a database connection (a <code>DataSource</code>) exists, so a class can ask for it in its constructor like for any other bean. It keeps you close to the SQL you already know; it is not an ORM that writes the SQL for you. Official docs: <a href="https://docs.spring.io/spring-framework/reference/data-access/jdbc/core.html#jdbc-JdbcClient">JdbcClient</a>.</p>
+<p><code>JdbcClient</code> is Spring's small helper for plain SQL over JDBC. You hand it a SQL text with named parameters (<code>:name</code>), you fill them with <code>.param("name", value)</code>, and you end with <code>.update()</code> for <code>insert</code>/<code>update</code>/<code>delete</code>, or with <code>.query(...)</code> for <code>select</code>. Spring Boot creates one <code>JdbcClient</code> bean for you as soon as a database connection (a <code>DataSource</code>) exists, so a class can ask for it in its constructor like for any other bean. It keeps you close to the SQL you already know; it is not an ORM (see the briefing above) that writes the SQL for you. Official docs: <a href="https://docs.spring.io/spring-framework/reference/data-access/jdbc/core.html#jdbc-JdbcClient">JdbcClient</a>.</p>
 <p><code>@JdbcTest</code> is the test annotation for this layer. Like <code>@WebMvcTest</code> for the web, it starts only a small slice of the application: a database, a <code>JdbcClient</code>, and nothing else. By default it replaces your database with an <em>embedded</em> one (H2, a small database that lives inside the test's own process and needs no installation), it runs a file named <code>schema.sql</code> from <code>src/main/resources</code> on it to create the tables, and it wraps every test in a transaction that is rolled back at the end. Official docs: <a href="https://docs.spring.io/spring-boot/appendix/test-auto-configuration/slices.html">test slices</a>.</p>
 </div>
 
@@ -69,9 +69,9 @@
 Run again: the tables exist, and the tests are red for the right reason (<code>UnsupportedOperationException</code>).</li>
 <li><strong>Insert a pen (green).</strong> Start with <code>savingGivesThePenAndItsAlpacasIds</code>. In <code>save</code>: if the pen has no id, <code>insert into pens (name) values (:name)</code>. To learn the id the database chose, give <code>update</code> a <code>GeneratedKeyHolder</code> (<code>org.springframework.jdbc.support</code>) and the name of the key column: <code>.update(keyHolder, "id")</code>; then <code>keyHolder.getKey().longValue()</code> is your id: call <code>pen.assignId(...)</code> with it. Do the same for every alpaca without an id (<code>insert into alpacas (pen_id, ...)</code>). Mind the column names: <code>fleece_color</code> gets <code>alpaca.getFleeceColor().name()</code>.</li>
 <li><strong>Read pens (green).</strong> <code>findByName</code> and <code>findAll</code>. A select with a row mapper turns every row into a new object: <code>.query((row, rowNumber) -&gt; ...)</code>, then <code>.list()</code> for many or <code>.optional()</code> for zero or one. Build the <code>Pen</code> from its row, load its alpacas with a second select (<code>where pen_id = :penId</code>), recreate each <code>Alpaca</code> with the constructor, then <code>assignId(row.getLong("id"))</code>, and put them into a new <code>Herd</code>. Do not forget <code>order by id</code> (a select without <code>order by</code> promises no order, and <code>findAllReturnsEveryPenInTheOrderItWasSaved</code> needs one). For the case-insensitive name: <code>where lower(name) = lower(:name)</code>. Watch the tests turn green one after the other.</li>
-<li><strong>Reject a duplicate (green).</strong> <code>aSecondNewPenWithTheSameNameIsRejected</code> expects the same <code>IllegalStateException</code> as the in-memory shelf. Your <code>unique</code> column would reject it too, but with a database exception of its own, and only for the exact same spelling ("ring" and "Ring" are different texts to it). Check in Java first (<code>findByName</code>) and throw the same exception with the same message. Why does the web layer care? Because <code>PenController</code> maps <em>that</em> exception to 409 and knows nothing else.</li>
+<li><strong>Reject a duplicate (green).</strong> <code>aSecondNewPenWithTheSameNameIsRejected</code> expects the same <code>IllegalStateException</code> as the in-memory repository. Your <code>unique</code> column would reject it too, but with a database exception of its own, and only for the exact same spelling ("ring" and "Ring" are different texts to it). Check in Java first (<code>findByName</code>) and throw the same exception with the same message. Why does the web layer care? Because <code>PenController</code> maps <em>that</em> exception to 409 and knows nothing else.</li>
 <li><strong>Save again (green).</strong> The last two tests: <code>savingAgainKeepsOldIdsAndGivesNewAlpacasTheirs</code> and <code>anAlpacaRemovedFromTheHerdIsGoneAfterSaving</code>. For an alpaca that already has an id, run an <code>update ... where id = :id</code>; for one without, an insert. Then delete what is no longer in the herd: <code>delete from alpacas where pen_id = :penId and id not in (:keptIds)</code> with the list of ids you just handled (a <code>List</code> as a parameter fills the brackets). Careful with the empty list: <code>not in ()</code> is not valid SQL, so for an empty herd delete all alpacas of the pen.</li>
-<li><strong>Run everything.</strong> All earlier tests are green, the contract runs twice now (nine tests for each shelf), and the application is not touched. Commit.</li>
+<li><strong>Run everything.</strong> All earlier tests are green, the contract runs twice now (nine tests for each repository), and the application is not touched. Commit.</li>
 </ol>
 
 <h2 id="your-test-list">📋 Your Test List</h2>
@@ -208,7 +208,7 @@ private Pen toPen(ResultSet row, int rowNumber) throws SQLException {
 
 <h2 id="when-youre-done">When You're Done</h2>
 <ul>
-<li class="task-list-item"><label><input type="checkbox"> All tests pass (the contract runs for both shelves)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass (the contract runs for both repositories)</label></li>
 <li class="task-list-item"><label><input type="checkbox"> <code>schema.sql</code> has no H2-only or PostgreSQL-only syntax</label></li>
 <li class="task-list-item"><label><input type="checkbox"> Only <code>JdbcPenRepository</code> knows about SQL</label></li>
 <li class="task-list-item"><label><input type="checkbox"> One commit per green step</label></li>
@@ -217,7 +217,7 @@ private Pen toPen(ResultSet row, int rowNumber) throws SQLException {
 <h2 id="reflect">Reflect</h2>
 <ul>
 <li>You wrote <code>JdbcPenRepository</code> without starting the application once. What did the contract test give you that clicking through the API would not?</li>
-<li><code>findByName</code> builds a fresh <code>Pen</code> from the rows every time. Write down what happens if two requests load the same pen, both add an alpaca, and both save. Which alpaca survives? (Think about the <code>delete ... not in</code>.) Would the in-memory shelf behave the same?</li>
+<li><code>findByName</code> builds a fresh <code>Pen</code> from the rows every time. Write down what happens if two requests load the same pen, both add an alpaca, and both save. Which alpaca survives? (Think about the <code>delete ... not in</code>.) Would the in-memory repository behave the same?</li>
 <li><code>findAll</code> runs one select for the pens and one more for <em>each</em> pen. With 3 pens that is 4 selects; with 3000, 3001. Do you have to care today? How would you load everything with one select instead?</li>
 <li>The tests run on H2, the application will run on PostgreSQL. Which of your SQL statements are you sure behave the same on both, and how could you find out for the others?</li>
 <li>The uniqueness check runs in Java <em>and</em> the column is <code>unique</code>. Why both? Which one catches a race between two requests?</li>
@@ -226,13 +226,13 @@ private Pen toPen(ResultSet row, int rowNumber) throws SQLException {
 <h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
 <p>Open GitHub Copilot Chat and start with this message:</p>
 <blockquote>
-<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 17: The Shelf Becomes a Table and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 17: The Repository Becomes a Table and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
 </blockquote>
       </article>
       <nav class="lesson-nav" aria-label="Lesson navigation">
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Previous lesson</span>
-          <a class="lesson-nav__link" href="../lesson-16-swapping-the-shelf/index.html">Lesson 16: Swapping the Shelf</a>
+          <a class="lesson-nav__link" href="../lesson-16-swapping-the-repository/index.html">Lesson 16: Swapping the Repository</a>
         </div>
         <div class="lesson-nav__item">
           <span class="lesson-nav__label">Next lesson</span>
