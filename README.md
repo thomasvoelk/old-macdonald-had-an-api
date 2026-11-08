@@ -12,7 +12,6 @@ Scaffold only. Research is done (`research/spring-boot-4-findings.md`); the shar
 
 ```
 DESIGN.md              design decisions and syllabus (mentor-facing, not for the learner)
-HANDOFF.md             the design-interview handoff this repo was started from
 research/              sourced Spring Boot 4.1.x findings
 curriculum/            what the learner reads — hand-authored HTML
   index.html           curriculum home / map

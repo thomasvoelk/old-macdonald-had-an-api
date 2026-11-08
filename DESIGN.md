@@ -1,6 +1,6 @@
 # Design doc — Old MacDonald Had an API (Spring curriculum)
 
-Mentor-facing planning notes. Not learner-facing (that is `curriculum/`). All decisions here were confirmed by Thomas in the design interview recorded in `HANDOFF.md`. Version facts live in `research/spring-boot-4-findings.md`; check its "Could not verify" list before relying on a detail.
+Mentor-facing planning notes. Not learner-facing (that is `curriculum/`). All decisions here were confirmed by Thomas in the design interview (the handoff file was deleted when the curriculum was finished; it is in the git history). Version facts live in `research/spring-boot-4-findings.md`; check its "Could not verify" list before relying on a detail.
 
 ## Who this is for
 
@@ -81,7 +81,7 @@ Parent `spring-boot-starter-parent` **4.1.2**, `<java.version>25</java.version>`
 1. **Done:** research pass.
 2. **Done (this scaffold):** `DESIGN.md`, `README.md`, `curriculum/` chrome, `index.html`, `setup/index.html`.
 3. Build the reference solution in a scratch dir from a copy of her domain (`old-marina-had-a-farm-main/src`, end of Java Phase 4). Every test, snippet and hint must compile and pass. Verify the open research items on the way (JdbcClient bean inside `@JdbcTest`, KeyHolder on H2 and Postgres, `ProblemDetail` API, `MockMvcTester` JSON helpers, Jackson 3 + records). Final reference goes into `mentor/`, labelled mentor-only.
-4. Write the lesson HTML. **Draft Phase 1 first and show Thomas before writing the rest.** (HANDOFF says "Phase 6", a leftover from an earlier numbering; there is no Phase 6.)
+4. Write the lesson HTML. **Draft Phase 1 first and show Thomas before writing the rest.**
 5. Write the Spring-adapted `copilot-instructions.md`.
 
 ## Open / to confirm with Thomas
