@@ -365,3 +365,5 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 - Still open: browser and phone-width check (extension was not connected).
 
 **Next:** browser and phone-width check of the pages (reconnect the Chrome extension or Thomas looks himself); then remind Thomas to delete `CLAUDE.md` and retire `HANDOFF.md`.
+
+- Index: the status column ("Draft" pills) was removed from all phase tables (Thomas: no status needed). The pill CSS in `style.css` is now unused.

@@ -98,12 +98,12 @@
 <p>Core concepts: Spring Boot setup, beans and dependency injection, a first <code>GET</code> with MockMvc, and what happens when the domain leaks into the API</p>
 </blockquote>
 <table>
-<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<thead><tr><th>#</th><th>What you'll do</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-1-hello-spring/lesson-01-planting-spring/index.html">01</a></td><td>Planting Spring: turn the project into a Spring Boot app</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-02-the-farm-becomes-a-bean/index.html">02</a></td><td>The Farm Becomes a Bean: dependency injection</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-03-the-first-request/index.html">03</a></td><td>The First Request: <code>GET /farm</code>, returning the domain object as it is</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-1-hello-spring/lesson-04-keeping-the-model-private/index.html">04</a></td><td>Keeping the Model Private: response records and the line between domain and API</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-01-planting-spring/index.html">01</a></td><td>Planting Spring: turn the project into a Spring Boot app</td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-02-the-farm-becomes-a-bean/index.html">02</a></td><td>The Farm Becomes a Bean: dependency injection</td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-03-the-first-request/index.html">03</a></td><td>The First Request: <code>GET /farm</code>, returning the domain object as it is</td></tr>
+<tr><td><a href="phase-1-hello-spring/lesson-04-keeping-the-model-private/index.html">04</a></td><td>Keeping the Model Private: response records and the line between domain and API</td></tr>
 </tbody>
 </table>
 
@@ -112,12 +112,12 @@
 <p>Needs Java Lessons 21 (records) and 22 (<code>Optional</code>). Core concepts: <code>GET</code> endpoints, response records and mapping, <code>Optional</code> to 404, <code>@RestControllerAdvice</code></p>
 </blockquote>
 <table>
-<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<thead><tr><th>#</th><th>What you'll do</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-2-reading-the-farm/lesson-05-the-pens/index.html">05</a></td><td>The Pens: <code>GET /pens</code>, a list of response records</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-2-reading-the-farm/lesson-06-the-alpacas-of-a-pen/index.html">06</a></td><td>The Alpacas of a Pen: <code>@PathVariable</code>, <code>AlpacaResponse</code>, ready to shear</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-2-reading-the-farm/lesson-07-who-is-that-alpaca/index.html">07</a></td><td>Who Is That Alpaca?: <code>findByName</code> returns <code>Optional</code>, 404 with <code>@ExceptionHandler</code></td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-2-reading-the-farm/lesson-08-one-place-for-bad-news/index.html">08</a></td><td>One Place for Bad News: <code>@RestControllerAdvice</code> and <code>ProblemDetail</code></td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-2-reading-the-farm/lesson-05-the-pens/index.html">05</a></td><td>The Pens: <code>GET /pens</code>, a list of response records</td></tr>
+<tr><td><a href="phase-2-reading-the-farm/lesson-06-the-alpacas-of-a-pen/index.html">06</a></td><td>The Alpacas of a Pen: <code>@PathVariable</code>, <code>AlpacaResponse</code>, ready to shear</td></tr>
+<tr><td><a href="phase-2-reading-the-farm/lesson-07-who-is-that-alpaca/index.html">07</a></td><td>Who Is That Alpaca?: <code>findByName</code> returns <code>Optional</code>, 404 with <code>@ExceptionHandler</code></td></tr>
+<tr><td><a href="phase-2-reading-the-farm/lesson-08-one-place-for-bad-news/index.html">08</a></td><td>One Place for Bad News: <code>@RestControllerAdvice</code> and <code>ProblemDetail</code></td></tr>
 </tbody>
 </table>
 
@@ -126,14 +126,14 @@
 <p>Core concepts: <code>POST</code>/<code>PUT</code>/<code>DELETE</code>, validation, exceptions to 400/409, London vs. Chicago, services and mocks</p>
 </blockquote>
 <table>
-<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<thead><tr><th>#</th><th>What you'll do</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-3-changing-the-farm/lesson-09-a-new-pen/index.html">09</a></td><td>A New Pen: <code>POST /pens</code>, <code>@RequestBody</code>, <code>201</code> and <code>Location</code></td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-3-changing-the-farm/lesson-10-a-new-alpaca/index.html">10</a></td><td>A New Alpaca: request records, mapping, spaces in addresses, <code>409</code></td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-3-changing-the-farm/lesson-11-say-no-politely/index.html">11</a></td><td>Say No Politely: bean validation, <code>400</code> vs <code>404</code> vs <code>409</code></td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-3-changing-the-farm/lesson-12-change-and-remove/index.html">12</a></td><td>Change and Remove: <code>PUT</code>, <code>DELETE</code>, <code>204</code>, identity from the address</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-3-changing-the-farm/lesson-13-two-ways-to-start/index.html">13</a></td><td>Two Ways to Start: inside-out (Chicago) vs. outside-in (London), no code</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-3-changing-the-farm/lesson-14-shearing-from-the-outside-in/index.html">14</a></td><td>Shearing from the Outside In: the shear endpoint, <code>@Service</code> and your first mock</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-09-a-new-pen/index.html">09</a></td><td>A New Pen: <code>POST /pens</code>, <code>@RequestBody</code>, <code>201</code> and <code>Location</code></td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-10-a-new-alpaca/index.html">10</a></td><td>A New Alpaca: request records, mapping, spaces in addresses, <code>409</code></td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-11-say-no-politely/index.html">11</a></td><td>Say No Politely: bean validation, <code>400</code> vs <code>404</code> vs <code>409</code></td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-12-change-and-remove/index.html">12</a></td><td>Change and Remove: <code>PUT</code>, <code>DELETE</code>, <code>204</code>, identity from the address</td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-13-two-ways-to-start/index.html">13</a></td><td>Two Ways to Start: inside-out (Chicago) vs. outside-in (London), no code</td></tr>
+<tr><td><a href="phase-3-changing-the-farm/lesson-14-shearing-from-the-outside-in/index.html">14</a></td><td>Shearing from the Outside In: the shear endpoint, <code>@Service</code> and your first mock</td></tr>
 </tbody>
 </table>
 <p><strong>Side Quest (optional):</strong> the Clean Coders series <a href="https://cleancoders.com/series/comparativeDesign">Comparative Design</a> compares outside-in and inside-out designs of the same app. It is long and entirely optional.</p>
@@ -143,12 +143,12 @@
 <p>Core concepts: ids, a repository interface owned by the domain, an in-memory implementation, then <code>JdbcClient</code> with plain SQL against PostgreSQL</p>
 </blockquote>
 <table>
-<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<thead><tr><th>#</th><th>What you'll do</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-15-identity-and-the-repository/index.html">15</a></td><td>Identity and the Repository: ids and a repository interface owned by the domain, with an in-memory version</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-16-swapping-the-repository/index.html">16</a></td><td>Swapping the Repository: controllers use the repository, the JSON shows ids</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-17-the-repository-becomes-a-table/index.html">17</a></td><td>The Repository Becomes a Table: <code>JdbcPenRepository</code> with <code>JdbcClient</code>, proven by the same contract test on H2</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-18-moving-into-the-database/index.html">18</a></td><td>Moving Into the Database: PostgreSQL in Podman, <code>application.properties</code>, the farm survives a restart</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-15-identity-and-the-repository/index.html">15</a></td><td>Identity and the Repository: ids and a repository interface owned by the domain, with an in-memory version</td></tr>
+<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-16-swapping-the-repository/index.html">16</a></td><td>Swapping the Repository: controllers use the repository, the JSON shows ids</td></tr>
+<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-17-the-repository-becomes-a-table/index.html">17</a></td><td>The Repository Becomes a Table: <code>JdbcPenRepository</code> with <code>JdbcClient</code>, proven by the same contract test on H2</td></tr>
+<tr><td><a href="phase-4-the-barn-gets-a-database/lesson-18-moving-into-the-database/index.html">18</a></td><td>Moving Into the Database: PostgreSQL in Podman, <code>application.properties</code>, the farm survives a restart</td></tr>
 </tbody>
 </table>
 
@@ -157,11 +157,11 @@
 <p>Core concepts: contract first with OpenAPI, a review of the whole API, what comes next</p>
 </blockquote>
 <table>
-<thead><tr><th>#</th><th>What you'll do</th><th>Status</th></tr></thead>
+<thead><tr><th>#</th><th>What you'll do</th></tr></thead>
 <tbody>
-<tr><td><a href="phase-5-wrap-up/lesson-19-contract-first/index.html">19</a></td><td>Contract First: write the OpenAPI file, generate the interfaces, let your tests find the gaps</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-5-wrap-up/lesson-20-a-fresh-pair-of-eyes/index.html">20</a></td><td>A Fresh Pair of Eyes: review your own API, rank the findings, fix two</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
-<tr><td><a href="phase-5-wrap-up/lesson-21-what-comes-next/index.html">21</a></td><td>What Comes Next: handover file, what the frontend sees, the Phase 5 demo</td><td><span class="status-pill status-pill--built">Draft</span></td></tr>
+<tr><td><a href="phase-5-wrap-up/lesson-19-contract-first/index.html">19</a></td><td>Contract First: write the OpenAPI file, generate the interfaces, let your tests find the gaps</td></tr>
+<tr><td><a href="phase-5-wrap-up/lesson-20-a-fresh-pair-of-eyes/index.html">20</a></td><td>A Fresh Pair of Eyes: review your own API, rank the findings, fix two</td></tr>
+<tr><td><a href="phase-5-wrap-up/lesson-21-what-comes-next/index.html">21</a></td><td>What Comes Next: handover file, what the frontend sees, the Phase 5 demo</td></tr>
 </tbody>
 </table>
 <hr>
