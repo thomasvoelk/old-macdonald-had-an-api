@@ -6,7 +6,7 @@ The curriculum itself is hand-authored HTML (no Markdown source — see `DESIGN.
 
 ## Status
 
-All 21 lessons are written (five phases). The reference solution is in `reference/`, a last resort for when you are stuck: it is the finished project, so it gives away every lesson. Design decisions are in `DESIGN.md`.
+All 21 lessons are written (five phases). The reference solution is in [`reference/`](reference/README.md), a last resort for when you are stuck: it is the finished project, so it gives away every lesson. Design decisions are in `DESIGN.md`.
 
 ## Repo layout
 
@@ -16,6 +16,7 @@ research/              sourced Spring Boot 4.1.x findings
 curriculum/            what the learner reads — hand-authored HTML
   index.html           curriculum home / map
   setup/index.html     one-time environment check
+  setup/copilot-instructions.md   rules to merge into the learner's Copilot instructions
   style.css, colors_and_type.css, app.js   shared chrome (progress bar, TOC, hints, copy buttons, checkbox persistence)
   assets/              sprout mark
   phase-N-slug/lesson-NN-slug/index.html   lessons
