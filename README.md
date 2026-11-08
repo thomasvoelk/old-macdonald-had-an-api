@@ -2,7 +2,7 @@
 
 A hands-on Spring Boot REST backend curriculum, third sibling of the Java/TDD curriculum (*Old MacDonald Had a Farm*, purple) and the SQL curriculum (*The Data Barn*, denim). Same world, same Farmer Fiona — now the alpacas get an HTTP API. You build it around the domain code you already wrote in the Java course.
 
-The curriculum itself is hand-authored HTML (no Markdown source — see `DESIGN.md`). **Start here:** open [`curriculum/index.html`](curriculum/index.html) in a browser.
+The curriculum itself is hand-authored HTML (no Markdown source — see `DESIGN.md`). **Start here:** open [`curriculum/index.html`](curriculum/index.html) in a browser. Or, without cloning, read it online at <https://thomasvoelk.github.io/old-macdonald-had-an-api/>.
 
 ## Status
 
