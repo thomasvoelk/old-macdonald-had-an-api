@@ -6,7 +6,7 @@ The curriculum itself is hand-authored HTML (no Markdown source — see `DESIGN.
 
 ## Status
 
-Scaffold only. Research is done (`research/spring-boot-4-findings.md`); the shared chrome, index, and setup page exist. Lessons and the reference solution are not written yet — see "Build order" in `DESIGN.md`.
+All 21 lessons are written (five phases). The reference solution is kept privately in `mentor/` and is not part of this repo. Design decisions are in `DESIGN.md`.
 
 ## Repo layout
 
@@ -18,6 +18,6 @@ curriculum/            what the learner reads — hand-authored HTML
   setup/index.html     one-time environment check
   style.css, colors_and_type.css, app.js   shared chrome (progress bar, TOC, hints, copy buttons, checkbox persistence)
   assets/              sprout mark
-  phase-N-slug/lesson-NN-slug/index.html   lessons (to come)
-mentor/                (to come) reference solution + mentor notes — mentor only, not copied by the learner
+  phase-N-slug/lesson-NN-slug/index.html   lessons
+mentor/                reference solution (git-ignored, mentor only)
 ```
