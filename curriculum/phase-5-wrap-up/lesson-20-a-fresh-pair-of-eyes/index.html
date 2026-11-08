@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 20: A Fresh Pair of Eyes · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 5 wrap-up / lesson 20 a fresh pair of eyes</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-20-a-fresh-pair-of-eyes">Lesson 20: A Fresh Pair of Eyes</h1>
+
+<h2 id="story">Story</h2>
+<p>The Angular team starts on Monday. Ilona has been waiting for this API for weeks, and Fiona will watch the first screen on the big monitor. Hasi stops by on Friday afternoon. "Before somebody builds on your API, let somebody who did not write it read it. You cannot do that, you wrote it. But you can come close: read it as if Ilona had written it and you had to use it."</p>
+<p>Today you write no feature. You <em>review</em> the farm API, write down what you find, and fix two things.</p>
+
+<div class="concept-corner">
+<h2 id="barn-briefing">🚜 Barn Briefing: how to review an API</h2>
+<p>A review is reading with a question in your head. Reading "does this work?" finds little, because you know that it works: you have tests. Better questions look from <em>outside</em>:</p>
+<ul>
+<li><strong>The contract.</strong> Are things called the same everywhere? Does the same situation always get the same status and the same error shape? Can a client guess an address it has never seen?</li>
+<li><strong>The client's day.</strong> Think of a real screen: the list of alpacas ready to shear with a <em>Shear</em> button. Which calls does it need? Is every piece of information it needs in an answer, or does it have to guess?</li>
+<li><strong>The edges.</strong> What happens with nothing, with too much, with the wrong method, with two requests at the same time, after a restart?</li>
+<li><strong>The code behind.</strong> Which part would you be afraid to change on a Friday? Which names lie? What is left over that nothing uses?</li>
+</ul>
+<p>Write every finding down in the same short form: <em>where</em>, <em>what</em>, <em>why it matters to somebody</em>, <em>what you would do</em>. A finding without "why it matters" is a taste, and a review full of taste is hard to act on. Then <em>rank</em>: not everything is worth fixing today.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Review your own farm API and fix two of the findings, test-first.</p>
+<ul>
+<li>A file <code>docs/api-review.md</code> with at least <strong>eight</strong> findings in the form above, from at least <strong>three</strong> of the four lenses.</li>
+<li>The findings are ranked. The top three have a sentence on what you would do about each.</li>
+<li>Two findings are fixed, test-first, one commit each. At least one of them changes the behaviour of the API, not only a name.</li>
+<li>The findings you did not fix stay in the file as a list of known limits (Lesson 21 uses them).</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Read your own work from the outside, as its user</li>
+<li>Write a finding that somebody else can act on</li>
+<li>Rank findings by who is hurt, not by how easy they are to fix</li>
+<li>Fix a small thing test-first and keep the rest of the suite green</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Read it as Ilona.</strong> Close your editor. Start the application and open Swagger UI (Lesson 19). Using <em>only</em> that page, plan the screen "alpacas that are ready to shear, with a Shear button". Write down the calls you would make. Where do you get stuck? That is already your first finding.</li>
+<li><strong>Read it as a caller who makes mistakes.</strong> In Swagger UI or in <code>docs/requests.http</code>: ask for a pen that does not exist, send a body with a missing field, use the wrong method on an address, send a body that is not JSON. Compare the answers. Are they all built the same way?</li>
+<li><strong>Read the code as a newcomer.</strong> Open the controllers, the advice, <code>ShearingService</code>, <code>JdbcPenRepository</code> and the domain package. For each: what would surprise a person who joins tomorrow? What does a name promise that the code does not keep?</li>
+<li><strong>Write the review.</strong> Create <code>docs/api-review.md</code>. Eight findings or more, each with <em>where</em>, <em>what</em>, <em>why it matters</em>, <em>what I would do</em>. Do not fix anything while you write. If you catch yourself opening a test, write the finding first.</li>
+<li><strong>Rank.</strong> Put the findings in an order: who is hurt most, and how often? Mark your top three.</li>
+<li><strong>Fix two.</strong> Pick one small and one that changes behaviour. For each: write the failing test first, watch it fail for the right reason, make it green, run the whole suite, commit. If a fix turns out bigger than an hour, stop, write down why, and pick another one. That is also a finding.</li>
+<li><strong>Update the file.</strong> Mark fixed findings as fixed (with the commit), and collect the rest under "Known limits".</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your review (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> At least eight findings, each with where, what, why it matters, what I would do</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Findings come from at least three of the four lenses (contract, the client's day, the edges, the code behind)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The findings are ranked and the top three are marked</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Two findings are fixed with a failing test first, one commit each</label></li>
+<li class="task-list-item"><label><input type="checkbox"> At least one fix changes what the API answers</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The whole suite is green after each fix</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The remaining findings are listed as known limits</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1: places to look</summary>
+<p>Not findings, just doors to open:</p>
+<ul>
+<li>The answer of <code>GET /alpacas/ready-to-shear</code>. Then the address of the shear endpoint. Put them next to each other.</li>
+<li>The addresses: names in the path, ids in the answers. What can a client do with an id?</li>
+<li>What <code>PUT</code> does when the address is written in lower case (Lesson 12).</li>
+<li>Which exception becomes which status (<code>ApiExceptionHandler</code>). What if a bug somewhere else throws one of them?</li>
+<li>The answer for an address that does not exist, and for a wrong method, compared with your other errors.</li>
+<li>What <code>GET /farm</code> loads from the database to produce three numbers.</li>
+<li>What <code>ShearingService</code> keeps in memory, and what happens to it when the application restarts.</li>
+<li>Two requests that change the same pen at the same moment (Lesson 17, Reflect).</li>
+<li>Classes and methods nothing calls any more.</li>
+<li>What is in <code>application.properties</code>, and what the seed job in <code>DatabaseConfig</code> does on a database that is not empty.</li>
+</ul>
+</details>
+
+<details>
+<summary>Hint 2: some findings other reviewers made</summary>
+<p>Compare with your list after you wrote it, not before.</p>
+<ul>
+<li>The ready-to-shear list does not say which pen an alpaca lives in, but the shear endpoint needs the pen name. A client cannot build the button from one call.</li>
+<li>Ids appear in every answer, but no address accepts one. Names are in the addresses, and a name can be reused in another pen.</li>
+<li><code>IllegalStateException</code> always becomes <code>409</code> and <code>IllegalArgumentException</code> always <code>400</code>, wherever they come from. A programming error in a library call would look like the caller's mistake.</li>
+<li><code>GET /farm</code> loads every pen with all its alpacas (and does it twice) to count them.</li>
+<li>The shear log lives only in memory; after a restart the fleece is 0 but nobody remembers who did it.</li>
+<li>The shepherd's name is written into the code; the map of shepherds in the service is a plain <code>HashMap</code> that many requests use at once.</li>
+<li><code>Farm</code> and its test are not used by the web layer any more.</li>
+<li>An unknown address or a wrong method does not answer in the same shape as your other errors.</li>
+</ul>
+</details>
+
+<details>
+<summary>Hint 3: an optional hard fix, one error shape for everything</summary>
+<p>If you picked "an unknown address or a wrong method does not answer like the other errors", here is the path I have walked; try the first steps by yourself.</p>
+<ol>
+<li>Test first: <code>GET /nothing</code> answers <code>404</code> with the content type <code>application/problem+json</code> (<code>MediaType.APPLICATION_PROBLEM_JSON</code>); the same for a <code>GET</code> on a <code>POST</code> address (<code>405</code>). Red: in a test the content type is <code>null</code>.</li>
+<li>Spring can answer these standard errors as problems too. Switch it on in <code>application.properties</code>: <code>spring.mvc.problemdetails.enabled=true</code>. The two new tests are green.</li>
+<li>Run the whole suite. <strong>Two older tests are red:</strong> the ones that expect the <code>errors</code> member for an invalid alpaca and for a missing field. The body now says <code>Invalid request content.</code> and has no <code>errors</code>. Spring's own handler for these two exceptions now answers before yours. Read the failure, then think: two handlers for the same exception.</li>
+<li>The way out: let your advice <em>be</em> Spring's handler. Make <code>ApiExceptionHandler</code> extend <code>ResponseEntityExceptionHandler</code> and turn your two <code>@ExceptionHandler</code> methods for <code>MethodArgumentNotValidException</code> and <code>HttpMessageNotReadableException</code> into overrides of the methods the base class offers for them. (A second <code>@ExceptionHandler</code> for the same exception in the same class would clash with the base class.)</li>
+</ol>
+<pre><code class="language-java">@Override
+protected ResponseEntity&lt;Object&gt; handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers,
+                                                              HttpStatusCode status, WebRequest request) {
+    Map&lt;String, String&gt; errors = new LinkedHashMap&lt;&gt;();
+    e.getBindingResult().getFieldErrors()
+            .forEach(error -&gt; errors.put(error.getField(), error.getDefaultMessage()));
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request body is invalid.");
+    problem.setProperty("errors", errors);
+    return ResponseEntity.badRequest().body(problem);
+}
+
+@Override
+protected ResponseEntity&lt;Object&gt; handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers,
+                                                              HttpStatusCode status, WebRequest request) {
+    return ResponseEntity.badRequest()
+            .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request body is not valid JSON."));
+}</code></pre>
+<p>Imports: <code>org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</code>, <code>org.springframework.http.HttpHeaders</code>, <code>org.springframework.http.HttpStatusCode</code>, <code>org.springframework.http.ResponseEntity</code>, <code>org.springframework.web.context.request.WebRequest</code>. Everything is green again, the description from Lesson 19 still lists the errors, and every error the API can produce has one shape.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/api-review.md</code> exists, is ranked, and ends with a list of known limits</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Two fixes, each with its failing test first</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The whole suite is green</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per step</label></li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Which finding would you never have made while you were writing the code? What changed in how you looked?</li>
+<li>Which of your top three findings was the cheapest to fix, and which the most expensive? Did you rank by that, or by who is hurt? Why is that the right order?</li>
+<li>One finding came from the screen "ready to shear with a Shear button". Which other screen would you plan to find more gaps?</li>
+<li>If a colleague wrote the same review about <em>your</em> code on Monday, how would you want the findings to be written?</li>
+<li>Some of the findings are about things that work. Is "works" the same as "good to use"?</li>
+<li>Your review touches code from Lessons 02 to 19. Which lesson's decision would you take back today, and which would you keep?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 20: A Fresh Pair of Eyes and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-19-the-farm-explains-itself/index.html">Lesson 19: The Farm Explains Itself</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <a class="lesson-nav__link" href="../lesson-21-what-comes-next/index.html">Lesson 21: What Comes Next</a>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 5.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#barn-briefing">Barn Briefing</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>

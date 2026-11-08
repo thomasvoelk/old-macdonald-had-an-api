@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 21: What Comes Next · Old MacDonald Had an API</title>
+  <link rel="icon" href="../../assets/sprout-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="df-progress" aria-hidden="true"></div>
+  <div class="layout">
+    <main class="content">
+      <div class="topbar">
+        <a class="brand-pill" href="../../index.html"><img src="../../assets/sprout-mark.svg" alt="Old MacDonald Had an API mark"> Old MacDonald Had an API</a>
+        <span class="breadcrumbs">phase 5 wrap-up / lesson 21 what comes next</span>
+        <div class="controls"><button id="toggle-details" class="df-btn" type="button">Expand hints</button></div>
+      </div>
+      <article class="markdown">
+<h1 id="lesson-21-what-comes-next">Lesson 21: What Comes Next</h1>
+
+<h2 id="story">Story</h2>
+<p>Friday, four o'clock. The big monitor shows Swagger UI, and Fiona clicks through it herself. She presses <em>Try it out</em> on <code>GET /farm</code>, reads her own farm's name, and grins. "And the screens? Ilona's screens, they just use this?" Ilona nods. "I read the same page. I know every address and every answer."</p>
+<p>Your part is done. Hasi asks for one more thing: "Leave the farm so that the next person, who is not you, can pick it up without asking. And tell Ilona what the Angular side can rely on, and what it cannot."</p>
+
+<div class="concept-corner">
+<h2 id="barn-briefing">🚜 Barn Briefing: what the frontend sees of your work</h2>
+<p>A browser application knows nothing about Java, Spring, repositories or tables. It sees exactly three things: the <strong>addresses</strong>, the <strong>bodies</strong> that go in and come out, and the <strong>status codes</strong> with their error shape. That is the contract you built in Lessons 02 to 12 and described in Lesson 19. Everything else you learned (the domain, the repository, the database) is the part the frontend is allowed <em>not</em> to know. When you rename a class, Ilona must notice nothing. When you rename a JSON field, she must.</p>
+<p>The OpenAPI description from Lesson 19 is the file to give her. Tools exist that read such a description and write the code that calls the API from TypeScript. They are only as good as the description, which is why you spent a lesson making it true.</p>
+<p>Some things this course did not cover, because they are the next course or the next project: <strong>who may call what</strong> (login, roles), the rule of browsers that decides which web pages may call your server at all (<strong>CORS</strong>), changing the database tables in a controlled way when the application grows (<strong>migrations</strong>), testing against a real PostgreSQL instead of H2, and watching the application when it runs on a server. You will meet all of them at work. You now know where each one would plug in.</p>
+</div>
+
+<h2 id="your-task">Your Task</h2>
+<p>Hand the farm over: write <code>docs/handover.md</code> and present the whole course result.</p>
+<ul>
+<li><code>docs/handover.md</code> is one page for a person who has never seen the project. It answers: how do I start the database and the application, how do I run the tests, where is the API described, what can the API do (one line per endpoint), and what should I know before I change something.</li>
+<li>The known limits from <code>docs/api-review.md</code> are in the file, in your own words.</li>
+<li>Your last section is a short list of "what I would do next, in this order", with a sentence of reasons for each.</li>
+<li>You present the farm to your mentor (the Phase 5 demo, see below).</li>
+</ul>
+
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Write documentation for a reader who cannot ask you</li>
+<li>Separate what a client may rely on (the contract) from what is yours to change</li>
+<li>Name what the project still lacks and decide what comes first</li>
+<li>Explain the whole architecture in your own words</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li><strong>Test the handover before you write it.</strong> Clone your repository into a new empty folder (or ask a fellow apprentice to), and follow only your <em>current</em> notes. Where do you get stuck? Write every stumbling stone down. Do you need a Java version, Maven, Podman, a command to start the database? That list is the first half of your handover.</li>
+<li><strong>Write <code>docs/handover.md</code>.</strong> Short sections, commands in code blocks that you have actually run. Include the address of Swagger UI and of the description (<code>/v3/api-docs</code>).</li>
+<li><strong>The contract.</strong> A table with the method, the address, and what it does, one line each. You can take it from Swagger UI. Check it against the application: a table you did not verify is the same kind of lie as the description in Lesson 19.</li>
+<li><strong>The limits and the next steps.</strong> Take your known limits from Lesson 20. Which three would you fix first, and why? You can also think of the big topics from the briefing (login, migrations, a test against real PostgreSQL). Say where in the code each would start.</li>
+<li><strong>Check it with a stranger.</strong> Give the file to somebody who did not follow the course and watch them use it, without helping. What do they ask? Add the answer to the file.</li>
+<li><strong>Prepare the demo.</strong> See "Phase 5 demo" below. You do not need slides. You need the running application, Swagger UI, your tests, and your review.</li>
+</ol>
+
+<h2 id="your-test-list">📋 Your Test List</h2>
+<details>
+<summary>📋 Check your handover (open only after writing your own)</summary>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> Someone who has never seen the project can start the database, the application and the tests with your commands</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The file says where the API is described (Swagger UI and <code>/v3/api-docs</code>)</label></li>
+<li class="task-list-item"><label><input type="checkbox"> There is a table of all endpoints, checked against the running application</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The known limits are written down, and three next steps are ranked with reasons</label></li>
+<li class="task-list-item"><label><input type="checkbox"> It says which parts of the API a client may rely on and which parts are internal</label></li>
+<li class="task-list-item"><label><input type="checkbox"> Somebody who is not you has tried it, and the file contains what they asked</label></li>
+</ul>
+</details>
+
+<h2 id="hints">Hints</h2>
+<details>
+<summary>Hint 1</summary>
+<p>Sections that most handover files need: <em>What this is</em> (two sentences), <em>Run it</em> (database, application, tests), <em>The API</em> (where it is described, the table), <em>How it is built</em> (the packages <code>alpacas</code> and <code>alpacas.web</code>, the repository interface and its two implementations), <em>Limits</em>, <em>Next</em>.</p>
+</details>
+
+<details>
+<summary>Hint 2</summary>
+<p>"How it is built" is easier with a picture in words. Draw, in a few lines, the path of one request, for example <code>POST /pens/Ring/alpacas</code>: controller, request record, domain, repository, database. Then do the same for the answer. One path is enough; every other path looks similar.</p>
+</details>
+
+<details>
+<summary>Hint 3</summary>
+<p>For "what a client may rely on", ask for each name in a JSON answer: if I rename this, who notices? A field name in an answer: Ilona. A class name: nobody. An error message in <code>detail</code>: perhaps somebody who copied it into a test. Write down what is a promise and what is only today's wording.</p>
+</details>
+
+<h2 id="when-youre-done">When You're Done</h2>
+<ul>
+<li class="task-list-item"><label><input type="checkbox"> <code>docs/handover.md</code> is in the repository and has been tried by somebody else</label></li>
+<li class="task-list-item"><label><input type="checkbox"> All tests pass and the application starts from a clean clone with your commands</label></li>
+<li class="task-list-item"><label><input type="checkbox"> The Phase 5 demo is done</label></li>
+<li class="task-list-item"><label><input type="checkbox"> One commit per step</label></li>
+</ul>
+
+<h2 id="phase-5-demo">Phase 5 demo</h2>
+<p>Show your mentor, as after every phase:</p>
+<ul>
+<li>Start the database and the application. Open Swagger UI and call three endpoints by hand: one that reads, one that changes, one that fails.</li>
+<li>Run the tests and walk through one of them, from the controller down to the database.</li>
+<li>Pick one design decision from the whole course that you are proud of, and one you would make differently. Explain both in your own words.</li>
+<li>Walk through your review and your handover file.</li>
+<li>Answer the Reflect questions below.</li>
+</ul>
+
+<h2 id="reflect">Reflect</h2>
+<ul>
+<li>Explain to a friend who knows only Java what the difference is between the domain, the repository and the controller, and why they are separate. Use the farm.</li>
+<li>Which part of the course would you want to do again? Which one changed how you write code?</li>
+<li>The frontend now depends on your field names. What would you do to rename one safely?</li>
+<li>Which of the big topics from the briefing (login, CORS, migrations, real-database tests, monitoring) will your company project need first? How would you find out?</li>
+<li>What would you tell the next apprentice who starts this course on Monday?</li>
+</ul>
+
+<h2 id="stuck-after-all-hints">🤖 Stuck after all hints?</h2>
+<p>Open GitHub Copilot Chat and start with this message:</p>
+<blockquote>
+<p>"I'm learning to build a Spring Boot 4 REST API with TDD. I'm on Lesson 21: What Comes Next and trying to [describe your problem]. I've already tried [what you tried]. Please don't write the code or the tests for me — guide me with questions so I can figure it out myself."</p>
+</blockquote>
+      </article>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Previous lesson</span>
+          <a class="lesson-nav__link" href="../lesson-20-a-fresh-pair-of-eyes/index.html">Lesson 20: A Fresh Pair of Eyes</a>
+        </div>
+        <div class="lesson-nav__item">
+          <span class="lesson-nav__label">Next lesson</span>
+          <span class="lesson-nav__link">You reached the end of the course 🌱</span>
+        </div>
+      </nav>
+      <p class="footer-note">Old MacDonald Had an API curriculum — Phase 5.</p>
+    </main>
+    <aside class="toc" aria-label="Table of contents">
+      <h2>On this page</h2>
+      <ol class="toc-list">
+        <li><a class="toc-l2" href="#story">Story</a></li>
+        <li><a class="toc-l2" href="#barn-briefing">Barn Briefing</a></li>
+        <li><a class="toc-l2" href="#your-task">Your Task</a></li>
+        <li><a class="toc-l2" href="#learning-goals">Learning Goals</a></li>
+        <li><a class="toc-l2" href="#getting-started">Getting Started</a></li>
+        <li><a class="toc-l2" href="#your-test-list">📋 Your Test List</a></li>
+        <li><a class="toc-l2" href="#hints">Hints</a></li>
+        <li><a class="toc-l2" href="#when-youre-done">When You're Done</a></li>
+        <li><a class="toc-l2" href="#phase-5-demo">Phase 5 demo</a></li>
+        <li><a class="toc-l2" href="#reflect">Reflect</a></li>
+        <li><a class="toc-l2" href="#stuck-after-all-hints">🤖 Stuck after all hints?</a></li>
+      </ol>
+    </aside>
+  </div>
+  <script src="../../app.js"></script>
+</body>
+</html>
