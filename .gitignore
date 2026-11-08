@@ -4,5 +4,5 @@
 .DS_Store
 Thumbs.db
 
-# mentor-only reference solution (repo is public)
-mentor/
+# Maven build output (the mentor reference solution is committed, without it)
+target/

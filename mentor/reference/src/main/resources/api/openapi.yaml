@@ -1,0 +1,254 @@
+openapi: 3.0.3
+info:
+  title: Fiona's Farm API
+  version: "1.0"
+tags:
+  - name: Farm
+  - name: Pens
+  - name: Shearing
+paths:
+  /farm:
+    get:
+      tags: [Farm]
+      operationId: getFarm
+      responses:
+        "200":
+          description: The farm in numbers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FarmResponse"
+  /pens:
+    get:
+      tags: [Pens]
+      operationId: getPens
+      responses:
+        "200":
+          description: All pens.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PenSummaryResponse"
+    post:
+      tags: [Pens]
+      operationId: createPen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePenRequest"
+      responses:
+        "201":
+          description: The pen was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PenSummaryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pens/{penName}/alpacas:
+    parameters:
+      - $ref: "#/components/parameters/PenName"
+    get:
+      tags: [Pens]
+      operationId: getAlpacasOfPen
+      responses:
+        "200":
+          description: The alpacas of the pen.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlpacaResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [Pens]
+      operationId: createAlpaca
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAlpacaRequest"
+      responses:
+        "201":
+          description: The alpaca was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlpacaResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pens/{penName}/alpacas/{alpacaName}:
+    parameters:
+      - $ref: "#/components/parameters/PenName"
+      - $ref: "#/components/parameters/AlpacaName"
+    get:
+      tags: [Pens]
+      operationId: getAlpaca
+      responses:
+        "200":
+          description: The alpaca.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlpacaResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Pens]
+      operationId: replaceAlpaca
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAlpacaRequest"
+      responses:
+        "200":
+          description: The alpaca after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlpacaResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Pens]
+      operationId: deleteAlpaca
+      responses:
+        "204":
+          description: The alpaca is gone.
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /pens/{penName}/alpacas/{alpacaName}/shear:
+    parameters:
+      - $ref: "#/components/parameters/PenName"
+      - $ref: "#/components/parameters/AlpacaName"
+    post:
+      tags: [Shearing]
+      operationId: shearAlpaca
+      responses:
+        "200":
+          description: The alpaca after shearing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlpacaResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /alpacas/ready-to-shear:
+    get:
+      tags: [Pens]
+      operationId: getAlpacasReadyToShear
+      responses:
+        "200":
+          description: Every alpaca that can be sheared now.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlpacaResponse"
+components:
+  parameters:
+    PenName:
+      name: penName
+      in: path
+      required: true
+      schema:
+        type: string
+    AlpacaName:
+      name: alpacaName
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: The request is not valid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: The pen or the alpaca does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: The request clashes with the state of the farm.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    FarmResponse:
+      type: object
+      required: [name, pens, alpacas]
+      properties:
+        name: {type: string}
+        pens: {type: integer}
+        alpacas: {type: integer}
+    PenSummaryResponse:
+      type: object
+      required: [id, name, alpacas]
+      properties:
+        id: {type: integer, format: int64}
+        name: {type: string}
+        alpacas: {type: integer}
+    AlpacaResponse:
+      type: object
+      required: [id, name, weight, fleeceLengthCm, fleeceColor]
+      properties:
+        id: {type: integer, format: int64}
+        name: {type: string}
+        weight: {type: number, format: double}
+        fleeceLengthCm: {type: integer}
+        fleeceColor: {type: string}
+    CreatePenRequest:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string, pattern: '.*\S.*'}
+    CreateAlpacaRequest:
+      type: object
+      required: [name, weight, fleeceLengthCm, fleeceColor]
+      properties:
+        name: {type: string, pattern: '.*\S.*'}
+        weight: {type: number, format: double, exclusiveMinimum: true, minimum: 0}
+        fleeceLengthCm: {type: integer, minimum: 0, maximum: 10}
+        fleeceColor: {type: string, pattern: '.*\S.*'}
+    UpdateAlpacaRequest:
+      type: object
+      required: [weight, fleeceLengthCm, fleeceColor]
+      properties:
+        weight: {type: number, format: double, exclusiveMinimum: true, minimum: 0}
+        fleeceLengthCm: {type: integer, minimum: 0, maximum: 10}
+        fleeceColor: {type: string, pattern: '.*\S.*'}
+    Problem:
+      type: object
+      properties:
+        status: {type: integer}
+        title: {type: string}
+        detail: {type: string}
+        instance: {type: string}
+        errors:
+          type: object
+          additionalProperties: {type: string}
