@@ -239,3 +239,11 @@ Drafted in `curriculum/phase-3-changing-the-farm/` against `mentor/reference/` (
 - Ilona/Hasi names still in public text (see DESIGN.md).
 
 **Next:** incorporate Thomas's feedback on Lessons 13-14; then start Phase 4 (Lessons 15-18: ids, repository interface owned by the domain, in-memory implementation, `JdbcClient` against Postgres), beginning with the reference solution for Lesson 15 (ids).
+
+## Status after the Lesson 15 reference (2026-11-08)
+- Thomas had no feedback on Lessons 13-14 at session start; nothing changed in them. **Phase 4 started.**
+- Built in `mentor/reference/` test-first (186 tests green): ids on `Alpaca`/`Pen` (`getId`, `assignId` once), `PenRepository` interface owned by the domain (aggregate: `save`, `findByName`, `findAll`), `InMemoryPenRepository`, abstract `PenRepositoryContract` + `InMemoryPenRepositoryTest`. Details, the red states and a trap in `research/spring-boot-4-findings.md`.
+- Design choices (mine, tell Thomas if he disagrees): one aggregate repository `PenRepository` (no `AlpacaRepository`); set-once `assignId` instead of copy constructors (matches her mutable style); contract test reused later by the JDBC adapter.
+- Not yet: wiring the repository into controllers/`FarmConfig` (replacing the `Farm` bean) and exposing ids in `AlpacaResponse`; both belong to Lesson 16 reference. Lesson 15 HTML not drafted. Setup page for Postgres/Podman is still due at Lesson 15.
+
+**Next:** build the Lesson 16 reference: replace the `Farm` bean with `PenRepository` in controllers/services (test-first, existing web tests stay green), expose `id` where useful; then draft Lessons 15-16.

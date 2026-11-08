@@ -306,3 +306,13 @@ Reference now 173 tests green (164 + 9 new). Built outside-in: controller test f
 - Service tests are plain JUnit (no Spring, no Mockito): `new ShearingService(farm)`; log entry text `Paul Heyman sheared Lita on <today>`; an unknown alpaca logs nothing.
 - Real service in `@WebMvcTest`: `@Import({FarmConfig.class, ShearingService.class})` and `@Autowired Farm` works (`ShearingWithRealServiceTest`, own pen `Barbershop`).
 - `MockMvcTester`: `uri("/pens/Barbershop/alpacas/Triple%20H/shear")` returned 404 (the `%20` string did not match; observed, not analysed further). `uri("/pens/{pen}/alpacas/{alpaca}/shear", "Barbershop", "Triple H")` works. Lessons should use the template form when a name contains a space.
+
+## Phase 4 reference, step 1: ids and `PenRepository` (2026-11-08)
+Domain only, no Spring. Verified by compiling and running (186 tests green).
+- `Alpaca` and `Pen` have `Long id` (null until saved), `getId()`, `assignId(long)` (throws `IllegalStateException` if already set). Existing constructors unchanged.
+- `PenRepository` (interface in `alpacas`, owned by the domain): `save(Pen)` (aggregate: pen plus its alpacas; whatever has no id gets one; returns the same object), `findByName` (ignores case, `Optional`), `findAll` (in save order). Pen is the aggregate root; no `AlpacaRepository`.
+- `InMemoryPenRepository` (counter shared by pens and alpacas, stores the saved objects themselves).
+- Test-first: `IdentityTest` (red = `cannot find symbol`), `PenRepositoryContract` (abstract, 8 tests: ids, unique ids, find ignoring case, unknown -> empty, order, re-save keeps ids, removed alpaca gone after save, duplicate new pen name -> `IllegalStateException`), `InMemoryPenRepositoryTest extends` it. The JDBC adapter test can extend the same contract.
+- Trap met: `repository()` in the contract returned a new object per call, so tests saw empty repos (6 red). Fix: one `createRepository()` per test instance in a field.
+- Known gap: in-memory returns the very objects it stored, so "changes are only stored on `save`" is NOT in the contract (JDBC returns fresh objects). Could become a Reflect question or a contract test that forces copying.
+- Not done: controllers/`FarmConfig` still use the `Farm` bean; `AlpacaResponse` has no id; saving alpacas of an existing pen in JDBC (upsert by id, delete missing) is Lesson 17 work.
