@@ -320,4 +320,4 @@ Review feedback incorporated; **Phase 5 was NOT started** (the session was used 
 - Lessons 15-21 not reviewed by Thomas; Ilona/Hasi names still in public text (see DESIGN.md).
 - **At the final wrap-up: remind Thomas to delete `CLAUDE.md` (and any "Working protocol" mention) and to retire `HANDOFF.md`.**
 
-**Next:** incorporate Thomas's feedback on Lessons 15-21 (ask for it if not given); then the final wrap-up: view the pages in a browser and on phone width, resolve the Ilona/Hasi names, settle the Postgres/Podman-on-Windows question, write the Spring-adapted `copilot-instructions.md` (DESIGN.md build step 5), and remind Thomas to delete `CLAUDE.md`.
+**Next:** first ask Thomas for his feedback on Lessons 15-21 and wait for the answer, then incorporate it; after that the final wrap-up: view the pages in a browser and on phone width, resolve the Ilona/Hasi names, settle the Postgres/Podman-on-Windows question, write the Spring-adapted `copilot-instructions.md` (DESIGN.md build step 5), and remind Thomas to delete `CLAUDE.md`.
